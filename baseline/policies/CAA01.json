@@ -13,8 +13,8 @@
   },
   "exclude": {
     "groups": [
-      "AC_ExcludedFromCA",
-      "AC_ExcludedAgents"
+      "CA_ExcludedFromCA",
+      "CA_ExcludedAgents"
     ]
   },
   "applications": {

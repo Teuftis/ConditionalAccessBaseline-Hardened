@@ -6,7 +6,7 @@
     "summary": "reference/CA_Baseline_Summary_-_Mirage.xlsx",
     "runbook": "reference/CA_Baseline_-_Runbook.xlsx"
   },
-  "deployState": "disabled",
+  "deployState": "enabledForReportingButNotEnforced",
   "order": [
     "groups",
     "namedLocations",
@@ -14,15 +14,15 @@
   ],
   "groups": [
     "BG_BreakGlass.json",
-    "AC_ExcludedFromCA.json",
-    "AC_ServiceAccount.json",
-    "AC_ServiceAccount_Interactive.json",
-    "AC_ServiceAccount_NonInteractive.json",
-    "AC_TravelException.json",
-    "AC_DeviceCodeApproved.json",
-    "AC_TokenProtection_Pilot.json",
-    "AC_ExcludedAgents.json",
-    "AC_MSP_PartnerUsers.json",
+    "CA_ExcludedFromCA.json",
+    "CA_ServiceAccount.json",
+    "CA_ServiceAccount_Interactive.json",
+    "CA_ServiceAccount_NonInteractive.json",
+    "CA_TravelException.json",
+    "CA_DeviceCodeApproved.json",
+    "CA_TokenProtection_Pilot.json",
+    "CA_ExcludedAgents.json",
+    "CA_MSP_PartnerUsers.json",
     "AUTOPILOT_DevicePrep.json"
   ],
   "namedLocations": [

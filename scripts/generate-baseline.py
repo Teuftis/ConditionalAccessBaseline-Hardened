@@ -70,10 +70,10 @@ POLICIES: list[dict] = [
     {
         "id": "CA101",
         "displayName": "Require MFA",
-        "description": "Foundation control for workforce users: requires multifactor authentication on every interactive sign-in to cloud applications. Applies broadly (all users) with exclusions for break-glass, CA-wide exclusions, service principals in AC_ServiceAccount, and external/guest identities (covered by guest policies).",
+        "description": "Foundation control for workforce users: requires multifactor authentication on every interactive sign-in to cloud applications. Applies broadly (all users) with exclusions for break-glass, CA-wide exclusions, service principals in CA_ServiceAccount, and external/guest identities (covered by guest policies).",
         "metadata": {"criticality": "Critical", "v2Status": "Updated", "persona": "All users", "j0eyvEquivalent": "CA000 / CA200"},
         "include": {"users": "all"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount"], "guestsAndExternals": True},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"], "guestsAndExternals": True},
         "applications": {"include": "all"},
         "conditions": {"clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "builtInControls": ["mfa"]},
@@ -84,7 +84,7 @@ POLICIES: list[dict] = [
         "description": "Identity Protection remediation for elevated user risk (medium or high): requires MFA and a secure password change during the session. Depends on Entra ID P2 (user risk evaluations). Honors standard exclusions including guests and externals disabled for this persona.",
         "metadata": {"criticality": "Critical", "v2Status": "Updated", "persona": "All users", "j0eyvEquivalent": "CA201"},
         "include": {"users": "all"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount"], "guestsAndExternals": True},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"], "guestsAndExternals": True},
         "applications": {"include": "all"},
         "conditions": {"userRiskLevels": ["medium", "high"], "clientAppTypes": ["all"]},
         "grant": {"operator": "AND", "builtInControls": ["mfa", "passwordChange"]},
@@ -95,7 +95,7 @@ POLICIES: list[dict] = [
         "description": "Identity Protection challenge for risky sign-ins (medium or high): requires MFA to continue the session when Entra evaluates elevated sign-in risk. Requires Entra ID P2. Excludes universal exclusions and separates guest traffic via policy construction.",
         "metadata": {"criticality": "Critical", "v2Status": "Updated", "persona": "All users"},
         "include": {"users": "all"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount"], "guestsAndExternals": True},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"], "guestsAndExternals": True},
         "applications": {"include": "all"},
         "conditions": {"signInRiskLevels": ["medium", "high"], "clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "builtInControls": ["mfa"]},
@@ -106,7 +106,7 @@ POLICIES: list[dict] = [
         "description": "Tenant-wide legacy authentication hardening: blocks basic authentication and legacy client protocols (for example POP, IMAP, SMTP AUTH, authenticated SMTP, and broader legacy client application types aligned with Microsoft guidance). Enables a dependable modern-auth-only posture; pair with workload-specific disables.",
         "metadata": {"criticality": "Critical", "v2Status": "Retained", "persona": "All users", "j0eyvEquivalent": "CA002"},
         "include": {"users": "all"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount"], "guestsAndExternals": True},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"], "guestsAndExternals": True},
         "applications": {"include": "all"},
         "conditions": {"clientAppTypes": ["exchangeActiveSync", "other"]},
         "grant": {"operator": "OR", "builtInControls": ["block"]},
@@ -117,7 +117,7 @@ POLICIES: list[dict] = [
         "description": "Device-platform allow list: denies access when the client is not Windows, macOS, iOS, Android, or Linux. Mitigates access from unmanaged or unexpected operating systems across all workloads in scope.",
         "metadata": {"criticality": "Recommended", "v2Status": "Retained", "persona": "All users", "j0eyvEquivalent": "CA204"},
         "include": {"users": "all"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount"], "guestsAndExternals": True},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"], "guestsAndExternals": True},
         "applications": {"include": "all"},
         "conditions": {
             "platforms": {"include": ["all"], "exclude": ["windowsPhone", "windows", "macOS", "iOS", "android", "linux"]},
@@ -128,10 +128,10 @@ POLICIES: list[dict] = [
     {
         "id": "CA106",
         "displayName": "Block Outside Trusted Countries",
-        "description": "Geolocation control using the TRUSTED_COUNTRIES named location. Sign-ins originating outside trusted regions are blocked unless the user is exempted via AC_TravelException (time-bounded travel). Excludes the travel exception group from the country condition so legitimate trips still work.",
+        "description": "Geolocation control using the TRUSTED_COUNTRIES named location. Sign-ins originating outside trusted regions are blocked unless the user is exempted via CA_TravelException (time-bounded travel). Excludes the travel exception group from the country condition so legitimate trips still work.",
         "metadata": {"criticality": "Critical", "v2Status": "Retained", "persona": "All users", "j0eyvEquivalent": "CA001"},
         "include": {"users": "all"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount", "AC_TravelException"], "guestsAndExternals": True},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount", "CA_TravelException"], "guestsAndExternals": True},
         "applications": {"include": "all"},
         "conditions": {"locations": {"include": ["All"], "exclude": ["TRUSTED_COUNTRIES"]}, "clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "builtInControls": ["block"]},
@@ -142,7 +142,7 @@ POLICIES: list[dict] = [
         "description": "Session tightening for standard users: enforces recurring reauthentication (twelve-hour sign-in frequency) and disallows persistent browser sessions. Applies a device filter so compliant or hybrid Entra joined devices can be handled according to organizational exception rules.",
         "metadata": {"criticality": "Recommended", "v2Status": "Updated", "persona": "All users", "j0eyvEquivalent": "CA202 / CA206"},
         "include": {"users": "all"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount"], "guestsAndExternals": True},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"], "guestsAndExternals": True},
         "applications": {"include": "all"},
         "conditions": {
             "deviceFilter": {
@@ -159,7 +159,7 @@ POLICIES: list[dict] = [
         "description": "Blocks high-abuse OAuth flows tied to phishing: denies device-code authentication and OAuth authentication transfer where supported. Exempts freshly approved enterprise device registrations that still need onboarding.",
         "metadata": {"criticality": "Critical", "v2Status": "NEW", "persona": "All users", "j0eyvEquivalent": "CA004"},
         "include": {"users": "all"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount", "AC_DeviceCodeApproved"], "guestsAndExternals": True},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount", "CA_DeviceCodeApproved"], "guestsAndExternals": True},
         "applications": {"include": "all"},
         "conditions": {"authenticationFlows": ["deviceCodeFlow", "authenticationTransfer"], "clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "builtInControls": ["block"]},
@@ -170,7 +170,7 @@ POLICIES: list[dict] = [
         "description": "Protects Azure resource management workloads: MFA is required whenever accessing Azure portal, CLI, REST, Infrastructure-as-Code, or other ARM-related applications. Targets the workload identity surface used to change tenant posture.",
         "metadata": {"criticality": "Recommended", "v2Status": "Retained", "persona": "All users"},
         "include": {"users": "all"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount"], "guestsAndExternals": True},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"], "guestsAndExternals": True},
         "applications": {"include": ["azureManagement"]},
         "conditions": {"clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "builtInControls": ["mfa"]},
@@ -181,7 +181,7 @@ POLICIES: list[dict] = [
         "description": "Threat-intelligence egress control: denies sign-ins that map to indicators in the MALICIOUS_IPS named location (populate with SOC or feed-driven ranges before enforcement). Complements geo and risk policies.",
         "metadata": {"criticality": "Optional", "v2Status": "Retained", "persona": "All users"},
         "include": {"users": "all"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount"], "guestsAndExternals": True},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"], "guestsAndExternals": True},
         "applications": {"include": "all"},
         "conditions": {"locations": {"include": ["MALICIOUS_IPS"]}, "clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "builtInControls": ["block"]},
@@ -189,10 +189,10 @@ POLICIES: list[dict] = [
     {
         "id": "CA111",
         "displayName": "Continuous Access Evaluation - Standard",
-        "description": "Continuous Access Evaluation in standard sensitivity for workforce accounts: reacts faster to revocation or policy changes compared with long-lived tokens. Pair with CA603 (strict CAE). Unlike other workforce policies, exclude guests/external users cannot be applied on this CAE-session-only rule in Graph—the baseline omits guest/external exclusion here only; other policies continue to exclude guests where supported.",
+        "description": "Continuous Access Evaluation baseline for workforce (standard breadth, all cloud apps): deploy resolves intent to Graph sessionControls.continuousAccessEvaluation.mode disabled (matches Entra's non-strict CAE session setting—do not confuse with policy State Off). Pair with CA603 (strict CAE / strict location). Unlike other workforce policies, guest/external exclusion cannot be applied on this CAE-session-only rule in Graph—the baseline omits guest/external exclusion here only; other policies continue to exclude guests where supported.",
         "metadata": {"criticality": "Recommended", "v2Status": "NEW", "persona": "All users", "j0eyvEquivalent": "CA209"},
         "include": {"users": "all"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount"]},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"]},
         "applications": {"include": "all"},
         "conditions": {"clientAppTypes": ["all"]},
         "session": {"continuousAccessEvaluation": "standard"},
@@ -202,8 +202,9 @@ POLICIES: list[dict] = [
         "displayName": "MFA on Device Register or Join",
         "description": "Strengthens Entra device registration and join endpoints: MFA is required anytime a user completes device registration or Workplace Join/Azure AD join workflows, reducing unauthorized device onboarding.",
         "metadata": {"criticality": "Critical", "v2Status": "NEW", "persona": "All users", "j0eyvEquivalent": "CA003"},
+        "deploymentState": "disabled",
         "include": {"users": "all"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount", "AUTOPILOT_DevicePrep"], "guestsAndExternals": True},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount", "AUTOPILOT_DevicePrep"], "guestsAndExternals": True},
         "applications": {"userActions": ["urn:user:registerdevice"]},
         "conditions": {"clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "builtInControls": ["mfa"]},
@@ -211,10 +212,10 @@ POLICIES: list[dict] = [
     {
         "id": "CA113",
         "displayName": "Require Token Protection (Pilot)",
-        "description": "Pilot control binding primary refresh tokens more tightly on supported Windows workloads (token protection). Limits token replay when adversaries steal session material via phishing proxies. Applies only to the AC_TokenProtection_Pilot group\u2014expand deliberately after telemetry review.",
+        "description": "Pilot control binding primary refresh tokens more tightly on supported Windows workloads (token protection). Limits token replay when adversaries steal session material via phishing proxies. Applies only to the CA_TokenProtection_Pilot group\u2014expand deliberately after telemetry review.",
         "metadata": {"criticality": "Optional", "v2Status": "NEW", "persona": "All users"},
-        "include": {"groups": ["AC_TokenProtection_Pilot"]},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass"]},
+        "include": {"groups": ["CA_TokenProtection_Pilot"]},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass"]},
         "applications": {"include": ["exchangeOnline", "sharePointOnline", "teams"]},
         "conditions": {"platforms": {"include": ["windows"]}, "clientAppTypes": ["browser", "mobileAppsAndDesktopClients"]},
         "session": {"tokenProtectionEnforced": True},
@@ -225,7 +226,7 @@ POLICIES: list[dict] = [
         "description": "Regulatory / policy attestation workflow: prompts users for Microsoft Entra Terms of Use before access. Organizations must provision a tenant-specific Terms of Use object and inject its GUID at deployment time (see deploy SPA configuration).",
         "metadata": {"criticality": "Optional", "v2Status": "Retained", "persona": "All users"},
         "include": {"users": "all"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount"], "guestsAndExternals": True},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"], "guestsAndExternals": True},
         "applications": {"include": "all"},
         "conditions": {"clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "termsOfUse": ["TOU_default"]},
@@ -238,7 +239,7 @@ POLICIES: list[dict] = [
         "description": "Secures enrollment into Microsoft Intune: MFA is mandated when enrolling a freshly managed endpoint so attackers cannot silently attach devices without strong proof of possession.",
         "metadata": {"criticality": "Critical", "v2Status": "Retained", "persona": "All users", "j0eyvEquivalent": "CA203"},
         "include": {"users": "all"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount", "AUTOPILOT_DevicePrep"], "guestsAndExternals": True},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount", "AUTOPILOT_DevicePrep"], "guestsAndExternals": True},
         "applications": {"include": ["intuneEnrollment"]},
         "conditions": {"clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "builtInControls": ["mfa"]},
@@ -249,7 +250,7 @@ POLICIES: list[dict] = [
         "description": "Mobile application protection posture for Microsoft 365: requires Intune App Protection Policies on iOS and Android M365 workloads. Matches Microsoft\u2019s APP enforcement model (replaces fragile approved-client-app keyword matching).",
         "metadata": {"criticality": "Critical", "v2Status": "Updated", "persona": "All users", "j0eyvEquivalent": "CA005 / CA006"},
         "include": {"users": "all"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount"], "guestsAndExternals": True},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"], "guestsAndExternals": True},
         "applications": {"include": ["office365"]},
         "conditions": {"platforms": {"include": ["iOS", "android"]}, "clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "builtInControls": ["compliantApplication"]},
@@ -260,7 +261,7 @@ POLICIES: list[dict] = [
         "description": "Optional hardened path for supervised mobile fleets: complements CA202 by requiring Intune-compliant devices on MDM-enrolled handhelds running iOS/Android. Omit or soften if you intentionally stay app-protection-only without enrollment.",
         "metadata": {"criticality": "Optional", "v2Status": "NEW", "persona": "All users"},
         "include": {"users": "all"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount"], "guestsAndExternals": True},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"], "guestsAndExternals": True},
         "applications": {"include": "all"},
         "conditions": {"platforms": {"include": ["iOS", "android"]}, "clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "builtInControls": ["compliantDevice"]},
@@ -271,7 +272,7 @@ POLICIES: list[dict] = [
         "description": "Corporate Windows laptops and desktops must be Entra hybrid joined or marked Intune-compliant before granting access to Microsoft 365 and related cloud apps.",
         "metadata": {"criticality": "Critical", "v2Status": "Updated", "persona": "All users", "j0eyvEquivalent": "CA205"},
         "include": {"users": "all"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount"], "guestsAndExternals": True},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"], "guestsAndExternals": True},
         "applications": {"include": "all"},
         "conditions": {"platforms": {"include": ["windows"]}, "clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "builtInControls": ["compliantDevice", "domainJoinedDevice"]},
@@ -282,7 +283,7 @@ POLICIES: list[dict] = [
         "description": "Same enforcement as CA301 scoped to macOS clients: unmanaged Macs cannot access Microsoft 365 data until they enroll and report healthy compliance posture.",
         "metadata": {"criticality": "Critical", "v2Status": "Updated", "persona": "All users", "j0eyvEquivalent": "CA208"},
         "include": {"users": "all"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount"], "guestsAndExternals": True},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"], "guestsAndExternals": True},
         "applications": {"include": "all"},
         "conditions": {"platforms": {"include": ["macOS"]}, "clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "builtInControls": ["compliantDevice"]},
@@ -293,7 +294,7 @@ POLICIES: list[dict] = [
         "description": "Reduces unmanaged-device blast radius under Microsoft 365: browser sessions can remain read-only/view-like against Exchange Online / SharePoint when the device fails the trusted workstation filter yet still needs lightweight productivity.",
         "metadata": {"criticality": "Recommended", "v2Status": "Updated", "persona": "All users"},
         "include": {"users": "all"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount"], "guestsAndExternals": True},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"], "guestsAndExternals": True},
         "applications": {"include": ["office365"]},
         "conditions": {
             "clientAppTypes": ["browser"],
@@ -311,7 +312,7 @@ POLICIES: list[dict] = [
         "description": "Privileged role assignments (Azure AD Directory Roles, Delegated Administrative Partners, cloud-only role-backed accounts) must use phishing-resistant MFA (FIDO2, Windows Hello for Business with attestation, or federated certificate-based authentication where applicable).",
         "metadata": {"criticality": "Critical", "v2Status": "Updated", "persona": "Admins", "j0eyvEquivalent": "CA100 / CA101 / CA105"},
         "include": {"roles": "privilegedAdmins"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount"]},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"]},
         "applications": {"include": "all"},
         "conditions": {"clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "authenticationStrength": "phishingResistantMfa"},
@@ -322,7 +323,7 @@ POLICIES: list[dict] = [
         "description": "Admin session containment: repeats the tighter session controls applied to privileged accounts\u2014maximum four-hour recurring authentication and disallow persistent browser sessions\u2014for every identity holding directory or workload admin roles included in Privileged Administrators.",
         "metadata": {"criticality": "Critical", "v2Status": "Updated", "persona": "Admins", "j0eyvEquivalent": "CA102 / CA103"},
         "include": {"roles": "privilegedAdmins"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount"]},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"]},
         "applications": {"include": "all"},
         "conditions": {"clientAppTypes": ["all"]},
         "session": {"signInFrequency": {"value": 4, "type": "hours"}, "persistentBrowser": "never"},
@@ -333,7 +334,7 @@ POLICIES: list[dict] = [
         "description": "Strict Continuous Access Evaluation for privileged identities paired with Conditional Access Strict Location evaluation: reacts immediately to IP deltas and high-sensitivity revocation signals suitable for Tier-0 workloads. Evaluate change windows carefully given Real Time CAE telemetry requirements.",
         "metadata": {"criticality": "Critical", "v2Status": "NEW", "persona": "Admins", "j0eyvEquivalent": "CA104"},
         "include": {"roles": "privilegedAdmins"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount"]},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"]},
         "applications": {"include": "all"},
         "conditions": {"clientAppTypes": ["all"]},
         "session": {"continuousAccessEvaluation": "strict"},
@@ -344,7 +345,7 @@ POLICIES: list[dict] = [
         "description": "Break-glass for risky operators: denies admin role holders when Entra Identity Protection marks the user risky at high severity. Keeps admins from deepening compromise while investigative controls run.",
         "metadata": {"criticality": "Critical", "v2Status": "NEW", "persona": "Admins"},
         "include": {"roles": "privilegedAdmins"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount"]},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"]},
         "applications": {"include": "all"},
         "conditions": {"userRiskLevels": ["high"], "clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "builtInControls": ["block"]},
@@ -355,7 +356,7 @@ POLICIES: list[dict] = [
         "description": "Complements CA604 using sign-in risk for administrators: denies access when Identity Protection observes high sign-in risk, closing scenarios where compromised tokens still pass user-risk heuristics slowly.",
         "metadata": {"criticality": "Critical", "v2Status": "NEW", "persona": "Admins"},
         "include": {"roles": "privilegedAdmins"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount"]},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"]},
         "applications": {"include": "all"},
         "conditions": {"signInRiskLevels": ["high"], "clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "builtInControls": ["block"]},
@@ -366,7 +367,7 @@ POLICIES: list[dict] = [
         "description": "Device trust bar for admins: privileged changes may only originate from Hybrid Entra Joined workstations or devices reporting compliant posture to Intune, preventing lateral movement from unmanaged kit.",
         "metadata": {"criticality": "Critical", "v2Status": "NEW", "persona": "Admins"},
         "include": {"roles": "privilegedAdmins"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount"]},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"]},
         "applications": {"include": "all"},
         "conditions": {"clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "builtInControls": ["compliantDevice", "domainJoinedDevice"]},
@@ -378,7 +379,7 @@ POLICIES: list[dict] = [
         "description": "Zero Trust gate for perimeter VPN integrations (Fortinet FortiClient in template form): MFA before granting network tunnel access aligned with phishing-resistant MFA investments elsewhere.",
         "metadata": {"criticality": "Optional", "v2Status": "Retained", "persona": "Application"},
         "include": {"users": "all"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount"], "guestsAndExternals": True},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"], "guestsAndExternals": True},
         "applications": {"include": ["FortiClient SSO"], "lookup": "servicePrincipal"},
         "conditions": {"clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "builtInControls": ["mfa"]},
@@ -391,7 +392,7 @@ POLICIES: list[dict] = [
         "description": "SaaS control for Salesforce: interactive users must satisfy MFA whenever accessing Salesforce through Entra  SSO. Requires a valid enterprise application / service principal in the tenant reflecting production URLs.",
         "metadata": {"criticality": "Optional", "v2Status": "Retained", "persona": "Application"},
         "include": {"users": "all"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount"], "guestsAndExternals": True},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"], "guestsAndExternals": True},
         "applications": {"include": ["Salesforce"], "lookup": "servicePrincipal"},
         "conditions": {"clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "builtInControls": ["mfa"]},
@@ -403,8 +404,8 @@ POLICIES: list[dict] = [
         "displayName": "Service - Require MFA (Interactive)",
         "description": "Service principal hardening subset: mandates MFA whenever the delegated application signs in interactively (think human-driven scripts). Daemon / client-credential workloads remain out of scope via negative group conditioning paired with exclusions.",
         "metadata": {"criticality": "Recommended", "v2Status": "Updated", "persona": "Service", "j0eyvEquivalent": "CA300"},
-        "include": {"groups": ["AC_ServiceAccount_Interactive"]},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount_NonInteractive"]},
+        "include": {"groups": ["CA_ServiceAccount_Interactive"]},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount_NonInteractive"]},
         "applications": {"include": "all"},
         "conditions": {"clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "builtInControls": ["mfa"]},
@@ -414,8 +415,8 @@ POLICIES: list[dict] = [
         "displayName": "Service - Block Outside Trusted IPs",
         "description": "Network perimeter for unattended automation: restricts allowed sign-ins for centralized service principals to the corporate or partner IP ranges modeled in SVC_TRUSTED_IPS, blocking roaming or hostile networks.",
         "metadata": {"criticality": "Critical", "v2Status": "Retained", "persona": "Service", "j0eyvEquivalent": "CA301"},
-        "include": {"groups": ["AC_ServiceAccount"]},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass"]},
+        "include": {"groups": ["CA_ServiceAccount"]},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass"]},
         "applications": {"include": "all"},
         "conditions": {"locations": {"include": ["All"], "exclude": ["SVC_TRUSTED_IPS"]}, "clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "builtInControls": ["block"]},
@@ -425,8 +426,8 @@ POLICIES: list[dict] = [
         "displayName": "Service - Block Legacy Auth",
         "description": "Defense-in-depth block on legacy protocols for workloads using service principals: reinforces CA104 baseline by narrowly scoping SMTP AUTH/similar exposures that often slip through scripted automation identities.",
         "metadata": {"criticality": "Recommended", "v2Status": "Retained", "persona": "Service"},
-        "include": {"groups": ["AC_ServiceAccount"]},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass"]},
+        "include": {"groups": ["CA_ServiceAccount"]},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass"]},
         "applications": {"include": "all"},
         "conditions": {"clientAppTypes": ["exchangeActiveSync", "other"]},
         "grant": {"operator": "OR", "builtInControls": ["block"]},
@@ -436,8 +437,8 @@ POLICIES: list[dict] = [
         "displayName": "Service - Block Non-M365 Apps",
         "description": "Least-privilege SaaS stance for robotic identities: confines service credentials to approved Microsoft 365 applications while denying access to tertiary SaaS and consumer OAuth clients.",
         "metadata": {"criticality": "Recommended", "v2Status": "Retained", "persona": "Service"},
-        "include": {"groups": ["AC_ServiceAccount"]},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass"]},
+        "include": {"groups": ["CA_ServiceAccount"]},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass"]},
         "applications": {"include": "all", "exclude": ["office365"]},
         "conditions": {"clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "builtInControls": ["block"]},
@@ -449,7 +450,7 @@ POLICIES: list[dict] = [
         "description": "Guest/B2B collaboration MFA: ensures every federated partner user proves MFA freshness in your tenant, closing the reliance on weaker home-tenant MFA states alone.",
         "metadata": {"criticality": "Critical", "v2Status": "Retained", "persona": "Guest", "j0eyvEquivalent": "CA400"},
         "include": {"users": "guestsAndExternals"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass"]},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass"]},
         "applications": {"include": "all"},
         "conditions": {"clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "builtInControls": ["mfa"]},
@@ -460,7 +461,7 @@ POLICIES: list[dict] = [
         "description": "Guest risk remediation: denies high sign-in-risk events even when the guest\u2019s home tenant is lenient (defense against cross-tenant token theft).",
         "metadata": {"criticality": "Recommended", "v2Status": "Updated", "persona": "Guest"},
         "include": {"users": "guestsAndExternals"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass"]},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass"]},
         "applications": {"include": "all"},
         "conditions": {"signInRiskLevels": ["high"], "clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "builtInControls": ["block"]},
@@ -471,7 +472,7 @@ POLICIES: list[dict] = [
         "description": "Prevents scripted or legacy-protocol abuse for guest personas; layered with CA901 to mandate modern apps and interactive controls.",
         "metadata": {"criticality": "Recommended", "v2Status": "Retained", "persona": "Guest"},
         "include": {"users": "guestsAndExternals"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass"]},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass"]},
         "applications": {"include": "all"},
         "conditions": {"clientAppTypes": ["exchangeActiveSync", "other"]},
         "grant": {"operator": "OR", "builtInControls": ["block"]},
@@ -482,7 +483,7 @@ POLICIES: list[dict] = [
         "description": "Geographic guardrail for collaborators: restricts guest access paths to countries mirrored in trusted named locations (typically broader lists than workforce policies). Pair with onboarding guidance for visiting partners.",
         "metadata": {"criticality": "Critical", "v2Status": "Retained", "persona": "Guest"},
         "include": {"users": "guestsAndExternals"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass"]},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass"]},
         "applications": {"include": "all"},
         "conditions": {"locations": {"include": ["All"], "exclude": ["TRUSTED_COUNTRIES"]}, "clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "builtInControls": ["block"]},
@@ -493,7 +494,7 @@ POLICIES: list[dict] = [
         "description": "Data-exfiltration control for guests collaborating in Microsoft Teams/Groups: confines Office 365 workloads while blocking ancillary SaaS (except explicitly excluded apps such as delegated admin workloads).",
         "metadata": {"criticality": "Critical", "v2Status": "Retained", "persona": "Guest", "j0eyvEquivalent": "CA401"},
         "include": {"users": "guestsAndExternals"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_MSP_PartnerUsers"]},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_MSP_PartnerUsers"]},
         "applications": {"include": "all", "exclude": ["office365"]},
         "conditions": {"clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "builtInControls": ["block"]},
@@ -504,7 +505,7 @@ POLICIES: list[dict] = [
         "description": "Guest-visible Terms-of-Use acknowledgement for contractual or jurisdictional onboarding before accessing shared resources.",
         "metadata": {"criticality": "Optional", "v2Status": "Retained", "persona": "Guest"},
         "include": {"users": "guestsAndExternals"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass"]},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass"]},
         "applications": {"include": "all"},
         "conditions": {"clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "termsOfUse": ["TOU_guest"]},
@@ -516,7 +517,7 @@ POLICIES: list[dict] = [
         "description": "Session hygiene for collaborators: aligns guest browser sessions with the twelve-hour MFA refresh posture so stolen guest tokens degrade quickly\u2014mirroring CA107 protections for internals.",
         "metadata": {"criticality": "Recommended", "v2Status": "NEW", "persona": "Guest", "j0eyvEquivalent": "CA402 / CA403"},
         "include": {"users": "guestsAndExternals"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass"]},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass"]},
         "applications": {"include": "all"},
         "conditions": {"clientAppTypes": ["all"]},
         "session": {"signInFrequency": {"value": 12, "type": "hours"}, "persistentBrowser": "never"},
@@ -528,7 +529,7 @@ POLICIES: list[dict] = [
         "description": "Workload identities (service principals using agent delegation) flagged high risk by Identity Protection lose access immediately across cloud apps targeted by the workload persona until risk clears.",
         "metadata": {"criticality": "Recommended", "v2Status": "NEW", "persona": "Agent", "j0eyvEquivalent": "CA501"},
         "include": {"agentIds": "all"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "AC_ExcludedAgents"]},
+        "exclude": {"groups": ["CA_ExcludedFromCA", "CA_ExcludedAgents"]},
         "applications": {"include": "all"},
         "conditions": {"agentIdRiskLevels": ["high"], "clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "builtInControls": ["block"]},
@@ -578,90 +579,90 @@ GROUPS: list[dict] = [
         "tier": "required",
     },
     {
-        "displayName": "AC_ExcludedFromCA",
+        "displayName": "CA_ExcludedFromCA",
         "description": (
             "Catch-all exclusion for identities that must never be evaluated by user-facing CA (for example certain "
             "directory sync or legacy integration principals your vendor documents as CA-exempt). Treat membership as "
             "highly privileged—every account here bypasses most workforce controls."
         ),
-        "mailNickname": "ac-excludedfromca",
+        "mailNickname": "ca-excludedfromca",
         "tier": "required",
     },
     {
-        "displayName": "AC_ServiceAccount",
+        "displayName": "CA_ServiceAccount",
         "description": (
             "Parent group for non-human and automation accounts. Policies that target all users exclude this group "
             "so background jobs are not forced through interactive MFA. Nest members into the interactive vs "
             "non-interactive child groups so CA801 can target only human-driven service logons."
         ),
-        "mailNickname": "ac-serviceaccount",
+        "mailNickname": "ca-serviceaccount",
         "tier": "required",
     },
     {
-        "displayName": "AC_ServiceAccount_Interactive",
+        "displayName": "CA_ServiceAccount_Interactive",
         "description": (
             "Service principals or managed identities that sometimes sign in through a browser or device-code style "
             "flow. CA801 requires MFA for this population while leaving pure client-credential automation in the "
             "non-interactive sibling group."
         ),
-        "mailNickname": "ac-serviceaccount-interactive",
+        "mailNickname": "ca-serviceaccount-interactive",
         "tier": "service-tracks",
     },
     {
-        "displayName": "AC_ServiceAccount_NonInteractive",
+        "displayName": "CA_ServiceAccount_NonInteractive",
         "description": (
             "Automation identities that only use client credentials, managed identity, or other non-interactive OAuth "
             "flows. Excluded from CA801 so scheduled jobs are not blocked; pair with CA802-CA804 for network and app "
             "restrictions."
         ),
-        "mailNickname": "ac-serviceaccount-noninteractive",
+        "mailNickname": "ca-serviceaccount-noninteractive",
         "tier": "service-tracks",
     },
     {
-        "displayName": "AC_TravelException",
+        "displayName": "CA_TravelException",
         "description": (
             "Short-lived membership for employees who must sign in from outside TRUSTED_COUNTRIES during approved "
             "travel. CA106 excludes this group from the country condition so the geofence still applies to everyone "
             "else; expire memberships when the trip ends."
         ),
-        "mailNickname": "ac-travelexception",
+        "mailNickname": "ca-travelexception",
         "tier": "exception",
     },
     {
-        "displayName": "AC_DeviceCodeApproved",
+        "displayName": "CA_DeviceCodeApproved",
         "description": (
             "Rare allowance for CA108's block on device-code and authentication-transfer flows (for example controlled "
             "kiosk or DevOps scenarios). Add only fully trusted principals; every member is a phishing surface."
         ),
-        "mailNickname": "ac-devicecodeapproved",
+        "mailNickname": "ca-devicecodeapproved",
         "tier": "exception",
     },
     {
-        "displayName": "AC_TokenProtection_Pilot",
+        "displayName": "CA_TokenProtection_Pilot",
         "description": (
             "Users or devices included in the CA113 Windows token-protection pilot. Start with a small population, "
             "collect sign-in and help-desk telemetry, then expand membership as your estate supports the feature."
         ),
-        "mailNickname": "ac-tokenprotection-pilot",
+        "mailNickname": "ca-tokenprotection-pilot",
         "tier": "pilot",
     },
     {
-        "displayName": "AC_ExcludedAgents",
+        "displayName": "CA_ExcludedAgents",
         "description": (
             "Workload agent or service principal objects that must not be blocked by CAA01 when Identity Protection "
             "flags them high risk (for example monitored automation with known false positives). Keep the group tiny "
             "and review quarterly."
         ),
-        "mailNickname": "ac-excludedagents",
+        "mailNickname": "ca-excludedagents",
         "tier": "exception",
     },
     {
-        "displayName": "AC_MSP_PartnerUsers",
+        "displayName": "CA_MSP_PartnerUsers",
         "description": (
             "Delegated administrator or partner accounts that need access to Microsoft 365 admin experiences blocked for "
             "standard guests in CA905. Requires explicit lifecycle: remove access when the engagement ends."
         ),
-        "mailNickname": "ac-msp-partnerusers",
+        "mailNickname": "ca-msp-partnerusers",
         "tier": "exception",
     },
     {
@@ -764,7 +765,7 @@ def write_manifest(groups, named_locations, policies) -> None:
         "summary": "reference/CA_Baseline_Summary_-_Mirage.xlsx",
         "runbook": "reference/CA_Baseline_-_Runbook.xlsx",
     }
-    manifest["deployState"] = "disabled"
+    manifest["deployState"] = "enabledForReportingButNotEnforced"
     manifest["order"] = ["groups", "namedLocations", "policies"]
     manifest["groups"] = groups
     manifest["namedLocations"] = named_locations
@@ -937,7 +938,7 @@ def write_policy_inventory_html(policy_filenames: list[str]) -> None:
       <span class="logo" aria-hidden="true">CA</span>
       <div>
         <h1>Mirage CA policy catalog</h1>
-        <p class="subtitle">v2026 · {len(rows)} Conditional Access policies · Groups by persona · Deploy remains <strong>Off</strong> until you enable in Microsoft Entra admin center</p>
+        <p class="subtitle">v2026 · {len(rows)} Conditional Access policies · Groups by persona · New deploys: mostly <strong>Report-only</strong>; <strong>CA111</strong>, <strong>CA112</strong>, <strong>CA202</strong>, <strong>CA204</strong>, <strong>CA302</strong>, <strong>CA303</strong>, <strong>CA603</strong>, <strong>CA606</strong>, <strong>CAA01</strong> default to <strong>Off</strong> (override with intent <code>deploymentState</code>); turn <strong>On</strong> in Entra when ready</p>
         <p class="catalog-nav">
           <a href="index.html">Deploy app</a>
           <span aria-hidden="true">·</span>
@@ -949,7 +950,7 @@ def write_policy_inventory_html(policy_filenames: list[str]) -> None:
     </div>
   </header>
   <main id="main-content" class="catalog-main">
-    <p class="catalog-lede">Every policy is pushed in <code>disabled</code> (<strong>Off</strong>) state from the deploy SPA. This page is generated by <code>python scripts/generate-baseline.py</code>.</p>
+    <p class="catalog-lede">New policies deploy in <strong>Report-only</strong> (<code>enabledForReportingButNotEnforced</code>) except these default to <strong>Off</strong> (<code>disabled</code>): <strong>CA111</strong>, <strong>CA112</strong> (User actions — report-only unsupported in Entra), <strong>CA202</strong>, <strong>CA204</strong>, <strong>CA302</strong>, <strong>CA303</strong>, <strong>CA603</strong>, <strong>CA606</strong>, <strong>CAA01</strong>. Set <code>deploymentState</code> on an intent to request report-only for one of these. This page is generated by <code>python scripts/generate-baseline.py</code>.</p>
     {body_inner}
   </main>
   <footer class="catalog-footer">

@@ -71,7 +71,10 @@ export function resolveBaselineUrl() {
   return resolveBaselineUrlBases().join(" · ");
 }
 
-// Hard cap on what state the SPA may set on Conditional Access policies.
-// Anything other than "disabled" is rejected client-side. The README and
-// UI both make this contract explicit so admins can rely on it.
-export const ALLOWED_DEPLOY_STATES = Object.freeze(["disabled"]);
+// Conditional Access policies created by the SPA use only these Graph `state` values:
+// report-only (`enabledForReportingButNotEnforced`) by default; `disabled` for baseline
+// policies in POLICY_IDS_DEPLOY_DISABLED_BY_DEFAULT (plus User actions — translate.js).
+export const ALLOWED_DEPLOY_STATES = Object.freeze([
+  "enabledForReportingButNotEnforced",
+  "disabled",
+]);

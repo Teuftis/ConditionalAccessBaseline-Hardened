@@ -1,6 +1,6 @@
 {
-  "displayName": "AC_DeviceCodeApproved",
+  "displayName": "CA_DeviceCodeApproved",
   "description": "Rare allowance for CA108's block on device-code and authentication-transfer flows (for example controlled kiosk or DevOps scenarios). Add only fully trusted principals; every member is a phishing surface.",
-  "mailNickname": "ac-devicecodeapproved",
+  "mailNickname": "ca-devicecodeapproved",
   "tier": "exception"
 }
