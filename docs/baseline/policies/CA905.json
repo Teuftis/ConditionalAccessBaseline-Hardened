@@ -13,9 +13,9 @@
   },
   "exclude": {
     "groups": [
-      "AC_ExcludedFromCA",
+      "CA_ExcludedFromCA",
       "BG_BreakGlass",
-      "AC_MSP_PartnerUsers"
+      "CA_MSP_PartnerUsers"
     ]
   },
   "applications": {

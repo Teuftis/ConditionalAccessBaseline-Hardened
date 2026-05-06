@@ -1,7 +1,7 @@
 {
   "id": "CA111",
   "displayName": "CA111 — Continuous Access Evaluation - Standard",
-  "description": "Continuous Access Evaluation in standard sensitivity for workforce accounts: reacts faster to revocation or policy changes compared with long-lived tokens. Pair with CA603 (strict CAE). Unlike other workforce policies, exclude guests/external users cannot be applied on this CAE-session-only rule in Graph—the baseline omits guest/external exclusion here only; other policies continue to exclude guests where supported.",
+  "description": "Continuous Access Evaluation baseline for workforce (standard breadth, all cloud apps): deploy resolves intent to Graph sessionControls.continuousAccessEvaluation.mode disabled (matches Entra's non-strict CAE session setting—do not confuse with policy State Off). Pair with CA603 (strict CAE / strict location). Unlike other workforce policies, guest/external exclusion cannot be applied on this CAE-session-only rule in Graph—the baseline omits guest/external exclusion here only; other policies continue to exclude guests where supported.",
   "metadata": {
     "criticality": "Recommended",
     "v2Status": "NEW",
@@ -13,9 +13,9 @@
   },
   "exclude": {
     "groups": [
-      "AC_ExcludedFromCA",
+      "CA_ExcludedFromCA",
       "BG_BreakGlass",
-      "AC_ServiceAccount"
+      "CA_ServiceAccount"
     ]
   },
   "applications": {

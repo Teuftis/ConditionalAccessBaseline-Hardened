@@ -4,7 +4,7 @@
 
 - **40** Conditional Access policies, **11** groups, **4** named locations — stored as **intent JSON** under [`baseline/`](./baseline/), not as a raw tenant export.
 - **Deploy through the hosted app** (the `docs/` bundle on GitHub Pages): **delegated** Microsoft Graph only — **no** OAuth client secret in this repository.
-- **New CA policies are created disabled**; existing policies that already match the baseline **display name** (after normalization) are **never** silently updated via PATCH.
+- **New CA policies deploy in Report-only** (`enabledForReportingButNotEnforced`) by default. **CA112** (device registration MFA / **User actions**) stays **Off** (`disabled`) because Conditional Access report-only is unsupported for that scenario. Existing policies that match the baseline **display name** are **never** silently updated via PATCH.
 - **Not a Microsoft product.** Validate licensing (for example Entra ID P2 for risk-based policies), app coverage, and your change process. See [Legal & reference](#legal--reference).
 
 This project is an opinionated Conditional Access posture for Microsoft Entra ID. Open the **[deploy app](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/)** (static site from [`docs/`](./docs/)), sign in as a tenant admin, and run a dry run or full deploy: the app resolves names to Graph IDs using [`docs/translate.js`](docs/translate.js), applies [`baseline/manifest.json`](./baseline/manifest.json), and creates missing **groups**, **named locations**, and **policies**. Terms of Use and some third-party prerequisites remain **tenant-owned** — they can show as **skipped** until you create or license them.
@@ -21,7 +21,7 @@ This project is an opinionated Conditional Access posture for Microsoft Entra ID
 
 | Outcome | Start here |
 |--------|--------------|
-| **Deploy** baseline objects into a tenant (**policies disabled** until you enable them) | [Deploy in your tenant](#deploy-in-your-tenant) → [After deploy](#after-deploy-in-microsoft-entra-admin-center) |
+| **Deploy** baseline objects into a tenant (**most new policies in Report-only**; **CA112** created **Off**) | [Deploy in your tenant](#deploy-in-your-tenant) → [After deploy](#after-deploy-in-microsoft-entra-admin-center) |
 | **Review** assurance, criticality, and write behavior | [Safety and trust](#safety-and-trust) · [inventory.html](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/inventory.html) · [`POLICY_INVENTORY.md`](./POLICY_INVENTORY.md) · per-policy [`baseline/policies/`](./baseline/policies/) |
 | **Change** definitions or publish your fork | [`scripts/generate-baseline.py`](scripts/generate-baseline.py) and [Customize & fork](#customize--fork); hosting in [GitHub Pages](#github-pages) |
 | **Summarize** for stakeholders | **At a glance** above + artifact counts below |
@@ -30,7 +30,7 @@ This project is an opinionated Conditional Access posture for Microsoft Entra ID
 
 ## What's in this repository
 
-**Intent JSON** describes policies ([`baseline/policies/`](./baseline/policies/)), groups ([`baseline/groups/`](./baseline/groups/)), and named locations ([`baseline/namedLocations/`](./baseline/namedLocations/)). Deploy time resolution uses [`docs/translate.js`](docs/translate.js); [`ALLOWED_DEPLOY_STATES`](docs/config.js) keeps newly created CA policies **`disabled`** until you change them in the admin center.
+**Intent JSON** describes policies ([`baseline/policies/`](./baseline/policies/)), groups ([`baseline/groups/`](./baseline/groups/)), and named locations ([`baseline/namedLocations/`](./baseline/namedLocations/)). Deploy time resolution uses [`docs/translate.js`](docs/translate.js); [`ALLOWED_DEPLOY_STATES`](docs/config.js) constrains new policies to **Report-only** by default, with **Off** for User-actions-only rules (see `resolvePolicyDeployState` in [`docs/translate.js`](docs/translate.js)). Flip to **On** only from the admin center when your runbook says so.
 
 | Artifact | Count | Path |
 |---------|-------|------|
@@ -49,7 +49,7 @@ Policies that scope optional workloads may appear as **skipped** when a third-pa
 | Topic | What to know |
 |-------|----------------|
 | **Credentialed only** | The app uses **your** admin session with **delegated** Graph scopes. There is **no** OAuth client secret in GitHub ([`docs/config.js`](docs/config.js)). |
-| **Writes are guarded** | New CA policies arrive **disabled** ([`ALLOWED_DEPLOY_STATES`](docs/config.js)). If a tenant policy already shares the normalized **display name**, deploy **skips** it — zero silent PATCH. Moving policies to report-only **on** is always a **manual** admin-center decision. |
+| **Writes are guarded** | New CA policies default to **Report-only**; **CA112** is created **Off**. [`ALLOWED_DEPLOY_STATES`](docs/config.js) forbids creating policies **On** from the SPA. If a tenant policy shares the normalized **display name**, deploy **skips** it — zero silent PATCH. |
 | **Supply chain** | Browsers execute whatever `main` publishes to **Pages** via `docs/` and CI — protect the default branch and review changes under `docs/` and [.github/workflows/deploy-pages.yml](.github/workflows/deploy-pages.yml). |
 
 ## Deploy in your tenant
@@ -75,7 +75,7 @@ The log summarizes outcomes (including skips such as **`firstPartyApp:`…** whe
 
 1. Populate **named location** ranges/countries and **group** memberships (break-glass, exclusions, pilots, automation groups).
 2. Review **Protection → Conditional Access**, **Sign-in logs**, and Conditional Access insights before changing policy effects.
-3. Move policies **report-only**, then **on**, aligned to your rollout plan rather than flipping everything simultaneously.
+3. Turn policies **On** (fully enforced) in phases when sign-in logs and your runbook justify it — most land in **Report-only** first from deploy.
 
 ## Customize & fork
 
@@ -156,23 +156,23 @@ Each entry mirrors a JSON file under [`baseline/groups/`](./baseline/groups/). P
 <!-- group-catalog:start -->
 - **BG_BreakGlass** — Required — mailNickname `bg-breakglass`
   Break-glass and other emergency administrator accounts that must remain reachable if Conditional Access misconfiguration locks out normal admins. Keep membership empty until accounts exist; remove members when not actively needed. Excluded from nearly all CA policies so use only for documented recovery procedures.
-- **AC_ExcludedFromCA** — Required — mailNickname `ac-excludedfromca`
+- **CA_ExcludedFromCA** — Required — mailNickname `ca-excludedfromca`
   Catch-all exclusion for identities that must never be evaluated by user-facing CA (for example certain directory sync or legacy integration principals your vendor documents as CA-exempt). Treat membership as highly privileged—every account here bypasses most workforce controls.
-- **AC_ServiceAccount** — Required — mailNickname `ac-serviceaccount`
+- **CA_ServiceAccount** — Required — mailNickname `ca-serviceaccount`
   Parent group for non-human and automation accounts. Policies that target all users exclude this group so background jobs are not forced through interactive MFA. Nest members into the interactive vs non-interactive child groups so CA801 can target only human-driven service logons.
-- **AC_ServiceAccount_Interactive** — Service track — mailNickname `ac-serviceaccount-interactive`
+- **CA_ServiceAccount_Interactive** — Service track — mailNickname `ca-serviceaccount-interactive`
   Service principals or managed identities that sometimes sign in through a browser or device-code style flow. CA801 requires MFA for this population while leaving pure client-credential automation in the non-interactive sibling group.
-- **AC_ServiceAccount_NonInteractive** — Service track — mailNickname `ac-serviceaccount-noninteractive`
+- **CA_ServiceAccount_NonInteractive** — Service track — mailNickname `ca-serviceaccount-noninteractive`
   Automation identities that only use client credentials, managed identity, or other non-interactive OAuth flows. Excluded from CA801 so scheduled jobs are not blocked; pair with CA802-CA804 for network and app restrictions.
-- **AC_TravelException** — Exception — mailNickname `ac-travelexception`
+- **CA_TravelException** — Exception — mailNickname `ca-travelexception`
   Short-lived membership for employees who must sign in from outside TRUSTED_COUNTRIES during approved travel. CA106 excludes this group from the country condition so the geofence still applies to everyone else; expire memberships when the trip ends.
-- **AC_DeviceCodeApproved** — Exception — mailNickname `ac-devicecodeapproved`
+- **CA_DeviceCodeApproved** — Exception — mailNickname `ca-devicecodeapproved`
   Rare allowance for CA108's block on device-code and authentication-transfer flows (for example controlled kiosk or DevOps scenarios). Add only fully trusted principals; every member is a phishing surface.
-- **AC_TokenProtection_Pilot** — Pilot — mailNickname `ac-tokenprotection-pilot`
+- **CA_TokenProtection_Pilot** — Pilot — mailNickname `ca-tokenprotection-pilot`
   Users or devices included in the CA113 Windows token-protection pilot. Start with a small population, collect sign-in and help-desk telemetry, then expand membership as your estate supports the feature.
-- **AC_ExcludedAgents** — Exception — mailNickname `ac-excludedagents`
+- **CA_ExcludedAgents** — Exception — mailNickname `ca-excludedagents`
   Workload agent or service principal objects that must not be blocked by CAA01 when Identity Protection flags them high risk (for example monitored automation with known false positives). Keep the group tiny and review quarterly.
-- **AC_MSP_PartnerUsers** — Exception — mailNickname `ac-msp-partnerusers`
+- **CA_MSP_PartnerUsers** — Exception — mailNickname `ca-msp-partnerusers`
   Delegated administrator or partner accounts that need access to Microsoft 365 admin experiences blocked for standard guests in CA905. Requires explicit lifecycle: remove access when the engagement ends.
 - **AUTOPILOT_DevicePrep** — Exception — mailNickname `autopilot-deviceprep`
   Device objects undergoing Windows Autopilot pre-provisioning so they can complete join/enrollment without triggering CA112 MFA-on-join or CA201 enrollment MFA prematurely. Clean up stale device members after deployment finishes.
@@ -189,4 +189,260 @@ Each entry mirrors a JSON file under [`baseline/groups/`](./baseline/groups/). P
 
 - **License:** [MIT License](./LICENSE)
 - **Security:** [`SECURITY.md`](./SECURITY.md) (prefer GitHub **Security → Report a vulnerability**)
-- **`reference/` spreadsheets:** Authoring companions (`.xlsx`) for the baseline; **not** read by the deploy runtime. Office XML committed here avoids obvious tenant-specific strings — re-scan if you fork heavily.
+- **`reference/` spreadsheets:** Authoring companions (`.xlsx`) for the baseline; **not** read by the deploy runtime. Keep group display names and `mailNickname`-style strings aligned with **`baseline/groups/`** (prefix **`CA_`**, **`ca-`**) when you edit the workbooks; regenerate from **`scripts/generate-baseline.py`** for the JSON side of the house.
+
+## Microsoft Sentinel / Log Analytics — Conditional Access outcome queries
+
+Below queries assume **`SigninLogs`** and **`AADNonInteractiveUserSignInLogs`** (or equivalents) flow into your workspace. Tune `lookback`; policy display names reflect what Entra emits in each sign-in (`ConditionalAccessPolicies`).
+
+### Report-only, hard failures, and interrupts — 5d lookback
+
+Use this to prioritize **baseline policies in Report-only** (`reportOnlyFailure`, `reportOnlyInterrupted`) versus **production hard fails** (`failure`, `interrupted`), including **legacy auth** and **device posture** context.
+
+```kusto
+let lookback = 5d;
+
+union isfuzzy=true
+
+    (SigninLogs | extend SignInType = "Interactive"),
+
+    (AADNonInteractiveUserSignInLogs | extend SignInType = "NonInteractive")
+
+| where TimeGenerated > ago(lookback)
+
+| extend CAPolicies = coalesce(
+
+    todynamic(column_ifexists("ConditionalAccessPolicies_string", "")),
+
+    column_ifexists("ConditionalAccessPolicies_dynamic", dynamic(null)),
+
+    column_ifexists("ConditionalAccessPolicies", dynamic(null)))
+
+| extend StatusObj = coalesce(
+
+    todynamic(column_ifexists("Status_string", "")),
+
+    column_ifexists("Status_dynamic", dynamic(null)),
+
+    column_ifexists("Status", dynamic(null)))
+
+| extend DeviceObj = coalesce(
+
+    todynamic(column_ifexists("DeviceDetail_string", "")),
+
+    column_ifexists("DeviceDetail_dynamic", dynamic(null)),
+
+    column_ifexists("DeviceDetail", dynamic(null)))
+
+| extend LocationObj = coalesce(
+
+    todynamic(column_ifexists("LocationDetails_string", "")),
+
+    column_ifexists("LocationDetails_dynamic", dynamic(null)),
+
+    column_ifexists("LocationDetails", dynamic(null)))
+
+| where isnotempty(CAPolicies) and tostring(CAPolicies) != "[]"
+
+| mv-expand CAPolicies
+
+| extend
+
+    PolicyName    = tostring(CAPolicies.displayName),
+
+    PolicyResult  = tostring(CAPolicies.result),
+
+    GrantControls = tostring(CAPolicies.enforcedGrantControls)
+
+| where PolicyResult in ("failure", "reportOnlyFailure", "interrupted", "reportOnlyInterrupted")
+
+| extend
+
+    ErrorCode     = tostring(StatusObj.errorCode),
+
+    FailureReason = tostring(StatusObj.failureReason),
+
+    IsCompliant   = tobool(DeviceObj.isCompliant),
+
+    IsManaged     = tobool(DeviceObj.isManaged),
+
+    Country       = tostring(LocationObj.countryOrRegion)
+
+| summarize
+
+    HardFailures          = countif(PolicyResult == "failure"),
+
+    ReportOnlyFailures    = countif(PolicyResult == "reportOnlyFailure"),
+
+    Interrupted           = countif(PolicyResult == "interrupted"),
+
+    ReportOnlyInterrupted = countif(PolicyResult == "reportOnlyInterrupted"),
+
+    DistinctIPs           = dcount(IPAddress),
+
+    Apps                  = make_set(AppDisplayName, 10),
+
+    ClientApps            = make_set(ClientAppUsed, 10),
+
+    GrantControlsHit      = make_set(GrantControls, 10),
+
+    ErrorCodes            = make_set(ErrorCode, 10),
+
+    FailureReasons        = make_set(FailureReason, 5),
+
+    Countries             = make_set(Country, 5),
+
+    LegacyAuthSeen        = countif(ClientAppUsed in ("Other clients", "IMAP", "POP", "SMTP", "Exchange ActiveSync", "Authenticated SMTP", "Exchange Web Services")),
+
+    NonCompliantDevice    = countif(IsCompliant == false),
+
+    UnmanagedDevice       = countif(IsManaged == false),
+
+    LastSeen              = max(TimeGenerated)
+
+    by UserPrincipalName, PolicyName, SignInType
+
+| extend Severity = case(
+
+    HardFailures > 0 and LegacyAuthSeen > 0, "High - hard fail + legacy auth",
+
+    HardFailures > 0, "Medium - hard fail",
+
+    ReportOnlyFailures > 0, "Tuning - report-only fail",
+
+    "Low - interrupt only")
+
+| order by HardFailures desc, ReportOnlyFailures desc, Interrupted desc, UserPrincipalName asc
+```
+
+### Enforcement (On) policies — hard failures only — 1d lookback
+
+Excludes Report-only outcomes; focus on **`failure`** for policies that **enforce** (**On**).
+
+```kusto
+let lookback = 1d;
+
+union isfuzzy=true
+
+    (SigninLogs | extend SignInType = "Interactive"),
+
+    (AADNonInteractiveUserSignInLogs | extend SignInType = "NonInteractive")
+
+| where TimeGenerated > ago(lookback)
+
+| extend CAPolicies = coalesce(
+
+    todynamic(column_ifexists("ConditionalAccessPolicies_string", "")),
+
+    column_ifexists("ConditionalAccessPolicies_dynamic", dynamic(null)),
+
+    column_ifexists("ConditionalAccessPolicies", dynamic(null)))
+
+| extend StatusObj = coalesce(
+
+    todynamic(column_ifexists("Status_string", "")),
+
+    column_ifexists("Status_dynamic", dynamic(null)),
+
+    column_ifexists("Status", dynamic(null)))
+
+| extend DeviceObj = coalesce(
+
+    todynamic(column_ifexists("DeviceDetail_string", "")),
+
+    column_ifexists("DeviceDetail_dynamic", dynamic(null)),
+
+    column_ifexists("DeviceDetail", dynamic(null)))
+
+| extend LocationObj = coalesce(
+
+    todynamic(column_ifexists("LocationDetails_string", "")),
+
+    column_ifexists("LocationDetails_dynamic", dynamic(null)),
+
+    column_ifexists("LocationDetails", dynamic(null)))
+
+| where isnotempty(CAPolicies) and tostring(CAPolicies) != "[]"
+
+| mv-expand CAPolicies
+
+| extend
+
+    PolicyName    = tostring(CAPolicies.displayName),
+
+    PolicyResult  = tostring(CAPolicies.result),
+
+    GrantControls = tostring(CAPolicies.enforcedGrantControls)
+
+| where PolicyResult == "failure"
+
+| extend
+
+    ErrorCode     = tostring(StatusObj.errorCode),
+
+    FailureReason = tostring(StatusObj.failureReason),
+
+    IsCompliant   = tobool(DeviceObj.isCompliant),
+
+    IsManaged     = tobool(DeviceObj.isManaged),
+
+    DeviceOS      = tostring(DeviceObj.operatingSystem),
+
+    Country       = tostring(LocationObj.countryOrRegion),
+
+    City          = tostring(LocationObj.city)
+
+| summarize
+
+    Failures         = count(),
+
+    DistinctIPs      = dcount(IPAddress),
+
+    DistinctApps     = dcount(AppDisplayName),
+
+    Apps             = make_set(AppDisplayName, 10),
+
+    ClientApps       = make_set(ClientAppUsed, 10),
+
+    GrantControlsHit = make_set(GrantControls, 10),
+
+    ErrorCodes       = make_set(ErrorCode, 10),
+
+    FailureReasons   = make_set(FailureReason, 5),
+
+    Countries        = make_set(Country, 5),
+
+    Cities           = make_set(City, 5),
+
+    DeviceOSes       = make_set(DeviceOS, 5),
+
+    LegacyAuthHits   = countif(ClientAppUsed in ("Other clients", "IMAP", "POP", "SMTP", "Exchange ActiveSync", "Authenticated SMTP", "Exchange Web Services")),
+
+    NonCompliantHits = countif(IsCompliant == false),
+
+    UnmanagedHits    = countif(IsManaged == false),
+
+    FirstSeen        = min(TimeGenerated),
+
+    LastSeen         = max(TimeGenerated)
+
+    by PolicyName, UserPrincipalName, SignInType
+
+| extend Triage = case(
+
+    LegacyAuthHits > 0, "Legacy auth — check for stale app config or attack",
+
+    NonCompliantHits == Failures, "Device compliance — Intune posture issue",
+
+    UnmanagedHits == Failures, "Unmanaged device — enrollment gap",
+
+    GrantControlsHit has "block", "Block policy fired — verify intent",
+
+    GrantControlsHit has "mfa", "MFA failure — user couldn't complete challenge",
+
+    "Investigate")
+
+| order by Failures desc, LastSeen desc
+```
+
+

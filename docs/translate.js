@@ -4,7 +4,8 @@
 // Why intent-based rather than raw Graph bodies?
 //   * Tenant-specific identifiers (group IDs, named-location IDs, service
 //     principal IDs) are resolved at deploy time. The repo stores names.
-//   * The translation can encode safe defaults (state forced to disabled)
+//   * The translation sets a safe default CA state (report-mostly; Off for a pinned list;
+//     see POLICY_IDS_DEPLOY_DISABLED_BY_DEFAULT and resolvePolicyDeployState)
 //     in one place rather than duplicating state in every policy file.
 //   * For some session-only CAE policies, guest/external exclusions in intent are
 //     omitted in the Graph payload (see resolveUsers) to satisfy API schema.
@@ -247,19 +248,22 @@ function resolveSession(intent) {
     out.persistentBrowser = { isEnabled: true, mode: s.persistentBrowser };
   }
   if (s.continuousAccessEvaluation) {
-    // Intent uses portal-style names; Graph only accepts continuousAccessEvaluationMode.
-    // "strictLocation" is an evolvable enum — Graph rejects it unless the client sends
-    // Prefer: include-unknown-enum-members (see docs/graph.js rawFetch headers).
-    const CAE_TO_GRAPH_MODE = {
-      standard: "strictEnforcement",
-      strict: "strictLocation",
-      strictEnforcement: "strictEnforcement",
-      strictLocation: "strictLocation",
-      disabled: "disabled",
-    };
     const raw = s.continuousAccessEvaluation;
-    const mode = CAE_TO_GRAPH_MODE[raw] ?? raw;
-    out.continuousAccessEvaluation = { mode };
+    // Standard workforce CAE (CA111): Entra session control "Disabled" (not strict location)
+    // maps to Graph `disabled`. Never send `strictEnforcement` — API returns 1138 (rolled back).
+    if (raw === "standard" || raw === "strictEnforcement") {
+      out.continuousAccessEvaluation = { mode: "disabled" };
+    } else {
+      // Intent uses shorthand; Graph only accepts continuousAccessEvaluationMode.
+      // strictLocation is evolvable — send Prefer: include-unknown-enum-members (graph.js).
+      const CAE_TO_GRAPH_MODE = {
+        strict: "strictLocation",
+        strictLocation: "strictLocation",
+        disabled: "disabled",
+      };
+      const mode = CAE_TO_GRAPH_MODE[raw] ?? raw;
+      out.continuousAccessEvaluation = { mode };
+    }
   }
   if (s.applicationEnforcedRestrictions) {
     out.applicationEnforcedRestrictions = { isEnabled: true };
@@ -386,11 +390,44 @@ function finalizeWorkloadAgentPolicyBody(body, intent) {
   return { ...body, conditions };
 }
 
+// Policies that land **Off** on deploy unless `deploymentState` / `deployState` on intent
+// requests `enabledForReportingButNotEnforced` (recommended for phased adoption).
+/** @type {ReadonlySet<string>} */
+export const POLICY_IDS_DEPLOY_DISABLED_BY_DEFAULT = new Set([
+  "CA111", // Session CAE non-strict
+  "CA112", // User actions — report-only unsupported in Entra
+  "CA202", // APP-only mobile
+  "CA204", // MDM-required optional path
+  "CA302",
+  "CA303",
+  "CA603",
+  "CA606",
+  "CAA01", // Agent / workload persona
+]);
+
+function resolvePolicyDeployState(intent) {
+  const apps = intent.applications;
+  if (apps && Array.isArray(apps.userActions) && apps.userActions.length > 0) {
+    // Conditional Access report-only is not supported when the policy targets User actions
+    // (e.g. device registration MFA). Keep those as Off until you enable them in the portal.
+    return "disabled";
+  }
+  const raw = intent.deploymentState ?? intent.deployState;
+  if (typeof raw === "string" && ALLOWED_DEPLOY_STATES.includes(raw)) {
+    return raw;
+  }
+  const pid = intent.id;
+  if (typeof pid === "string" && POLICY_IDS_DEPLOY_DISABLED_BY_DEFAULT.has(pid)) {
+    return "disabled";
+  }
+  return ALLOWED_DEPLOY_STATES[0];
+}
+
 // Build the final Graph body for a CA policy from an intent file.
 export function buildPolicyBody(intent, ctx) {
   const body = {
     displayName: intent.displayName,
-    state: ALLOWED_DEPLOY_STATES[0], // always "disabled"
+    state: resolvePolicyDeployState(intent),
     conditions: {
       userRiskLevels: intent.conditions?.userRiskLevels || [],
       signInRiskLevels: intent.conditions?.signInRiskLevels || [],

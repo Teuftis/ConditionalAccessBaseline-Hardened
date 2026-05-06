@@ -15,7 +15,7 @@
 
 ### Highlights
 
-- **Baseline-as-code:** Conditional Access (40 policies), Entra groups, and named locations as **intent JSON** under `baseline/`, with a **deploy SPA** under `docs/` that resolves names to Graph IDs and creates objects with **new policies disabled** until you enable them in the portal.
+- **Baseline-as-code:** Conditional Access (40 policies), Entra groups, and named locations as **intent JSON** under `baseline/`, with a **deploy SPA** under `docs/` that resolves names to Graph IDs and creates policies in **Report-only** by default (**CA112** / User actions stays **Off** because report-only is unsupported for that scenario).
 - **Deploy safety:** No silent overwrites of existing CA policies (name-based match / skip); **dry run**; clarified **skipped** vs **unchanged** behavior; improvements to policy existence checks and display-name matching to reduce accidental **CREATE** churn.
 - **Graph / API alignment:** Translator and payload fixes for **CAE-only** session policies, **Prefer evolvable** enums, **workload / agent** policies, optional **first-party app** skips, and related **conditionalAccessConditionSet** shape fixes (e.g. **CAA01**, **CA111**).
 - **CA111 (Continuous Access Evaluation — Standard):** Intent and deploy path aligned with Graph limitations (guest / external exclusion omitted where the API rejects that combination for CAE-session-only rules); comments and policy descriptions updated accordingly.
@@ -27,7 +27,7 @@
 
 ### For operators
 
-- Validate **Entra ID P2** where risk-based policies require it; fill **named locations**, **group memberships**, and **break-glass** before broad **On**; roll out in **phases** in the Microsoft Entra admin center.
+- Validate **Entra ID P2** where risk-based policies require it; fill **named locations**, **group memberships**, and **break-glass** before broad **On**; review **sign-in logs** Report-only tabs, then flip to **On** in **phases** in the Entra admin center.
 
 ### Upgrade / migration
 

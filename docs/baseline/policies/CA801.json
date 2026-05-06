@@ -10,14 +10,14 @@
   },
   "include": {
     "groups": [
-      "AC_ServiceAccount_Interactive"
+      "CA_ServiceAccount_Interactive"
     ]
   },
   "exclude": {
     "groups": [
-      "AC_ExcludedFromCA",
+      "CA_ExcludedFromCA",
       "BG_BreakGlass",
-      "AC_ServiceAccount_NonInteractive"
+      "CA_ServiceAccount_NonInteractive"
     ]
   },
   "applications": {

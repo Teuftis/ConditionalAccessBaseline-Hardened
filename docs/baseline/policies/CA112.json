@@ -8,14 +8,15 @@
     "persona": "All users",
     "j0eyvEquivalent": "CA003"
   },
+  "deploymentState": "disabled",
   "include": {
     "users": "all"
   },
   "exclude": {
     "groups": [
-      "AC_ExcludedFromCA",
+      "CA_ExcludedFromCA",
       "BG_BreakGlass",
-      "AC_ServiceAccount",
+      "CA_ServiceAccount",
       "AUTOPILOT_DevicePrep"
     ],
     "guestsAndExternals": true

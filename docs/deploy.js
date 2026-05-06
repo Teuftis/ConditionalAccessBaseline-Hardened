@@ -1,6 +1,7 @@
 // Mirage CA Baseline Deployer - main orchestration.
 // Sign-in -> consent -> create missing groups / named locations -> create Conditional
-// Access policies in Off only when displayName is absent (never PATCH existing CA policies).
+// Create missing Conditional Access policies in Report-only by default (Off only for scenarios
+// where report-only is unsupported, e.g. User actions). Never PATCH existing CA policies.
 import { APP_CONFIG, GRAPH_SCOPES, ALLOWED_DEPLOY_STATES, resolveBaselineUrl, resolveBaselineUrlBases } from "./config.js";
 import { graphGet, graphList, graphPost, graphPatch, findByDisplayName, GraphError } from "./graph.js";
 import {
@@ -396,13 +397,13 @@ async function ensurePolicy(token, intent, ctx, dryRun) {
   }
 
   if (dryRun) {
-    logLine(`policy [${intent.displayName}] WOULD BE CREATED (state=disabled)`, "warn");
+    logLine(`policy [${intent.displayName}] WOULD BE CREATED (state=${body.state})`, "warn");
     return { id: intent.id, status: "would-create" };
   }
 
   try {
     const created = await graphPost(token, "/identity/conditionalAccess/policies", body);
-    logLine(`policy [${intent.displayName}] CREATED (state=disabled, id=${created.id})`, "ok");
+    logLine(`policy [${intent.displayName}] CREATED (state=${body.state}, id=${created.id})`, "ok");
     return { id: intent.id, status: "created" };
   } catch (err) {
     if (isFatalGraphError(err)) throw err;
@@ -525,7 +526,7 @@ async function deploy() {
 
   // Phase 3 - Policies.
   setStatus(
-    `Phase 3/3: Conditional Access policies — create missing as disabled; skip existing display names (${policyIntents.length} in manifest)...`,
+    `Phase 3/3: Conditional Access policies — create missing per baseline defaults (translate.js); skip existing (${policyIntents.length} in manifest)...`,
     "info",
   );
   const results = [];
@@ -557,7 +558,7 @@ async function deploy() {
   setStatus(
     dryRun
       ? "Dry run complete."
-      : "Deployment complete. New policies were created disabled; existing Conditional Access policies (same display name) were not changed.",
+      : "Deployment complete. New policies used Report-only or Off per baseline defaults (User-actions and other pinned intents); existing policies with the same display name were not changed.",
     counts.error ? "warn" : "ok",
   );
   logLine(summary, counts.error ? "warn" : "ok");

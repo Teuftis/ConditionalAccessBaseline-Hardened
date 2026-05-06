@@ -13,10 +13,10 @@
   },
   "exclude": {
     "groups": [
-      "AC_ExcludedFromCA",
+      "CA_ExcludedFromCA",
       "BG_BreakGlass",
-      "AC_ServiceAccount",
-      "AC_DeviceCodeApproved"
+      "CA_ServiceAccount",
+      "CA_DeviceCodeApproved"
     ],
     "guestsAndExternals": true
   },

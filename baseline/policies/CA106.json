@@ -1,7 +1,7 @@
 {
   "id": "CA106",
   "displayName": "CA106 — Block Outside Trusted Countries",
-  "description": "Geolocation control using the TRUSTED_COUNTRIES named location. Sign-ins originating outside trusted regions are blocked unless the user is exempted via AC_TravelException (time-bounded travel). Excludes the travel exception group from the country condition so legitimate trips still work.",
+  "description": "Geolocation control using the TRUSTED_COUNTRIES named location. Sign-ins originating outside trusted regions are blocked unless the user is exempted via CA_TravelException (time-bounded travel). Excludes the travel exception group from the country condition so legitimate trips still work.",
   "metadata": {
     "criticality": "Critical",
     "v2Status": "Retained",
@@ -13,10 +13,10 @@
   },
   "exclude": {
     "groups": [
-      "AC_ExcludedFromCA",
+      "CA_ExcludedFromCA",
       "BG_BreakGlass",
-      "AC_ServiceAccount",
-      "AC_TravelException"
+      "CA_ServiceAccount",
+      "CA_TravelException"
     ],
     "guestsAndExternals": true
   },
