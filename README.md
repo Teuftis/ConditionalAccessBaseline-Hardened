@@ -4,7 +4,7 @@
 
 - **40** Conditional Access policies, **11** groups, **4** named locations — stored as **intent JSON** under [`baseline/`](./baseline/), not as a raw tenant export.
 - **Deploy through the hosted app** (the `docs/` bundle on GitHub Pages): **delegated** Microsoft Graph only — **no** OAuth client secret in this repository.
-- **New CA policies deploy in Report-only** (`enabledForReportingButNotEnforced`) by default. **CA112** (device registration MFA / **User actions**) stays **Off** (`disabled`) because Conditional Access report-only is unsupported for that scenario. Existing policies that match the baseline **display name** are **never** silently updated via PATCH.
+- **New CA policies deploy in Report-only** (`enabledForReportingButNotEnforced`) by default, except **eight** baseline rules land **Off** (`disabled`): **CA111**, **CA202**, **CA204**, **CA302**, **CA303**, **CA603**, **CA606**, **CAA01**. **CA112** (device registration MFA / **User actions**) uses the same deploy default — **Report-only**. Override per policy with intent **`deploymentState`** / **`deployState`** (see **`POLICY_IDS_DEPLOY_DISABLED_BY_DEFAULT`** in [`docs/translate.js`](docs/translate.js)). Existing policies that match the baseline **display name** are **never** silently updated via PATCH.
 - **Not a Microsoft product.** Validate licensing (for example Entra ID P2 for risk-based policies), app coverage, and your change process. See [Legal & reference](#legal--reference).
 
 This project is an opinionated Conditional Access posture for Microsoft Entra ID. Open the **[deploy app](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/)** (static site from [`docs/`](./docs/)), sign in as a tenant admin, and run a dry run or full deploy: the app resolves names to Graph IDs using [`docs/translate.js`](docs/translate.js), applies [`baseline/manifest.json`](./baseline/manifest.json), and creates missing **groups**, **named locations**, and **policies**. Terms of Use and some third-party prerequisites remain **tenant-owned** — they can show as **skipped** until you create or license them.
@@ -21,7 +21,7 @@ This project is an opinionated Conditional Access posture for Microsoft Entra ID
 
 | Outcome | Start here |
 |--------|--------------|
-| **Deploy** baseline objects into a tenant (**most new policies in Report-only**; **CA112** created **Off**) | [Deploy in your tenant](#deploy-in-your-tenant) → [After deploy](#after-deploy-in-microsoft-entra-admin-center) |
+| **Deploy** baseline objects into a tenant (**most new policies in Report-only**; **CA111, CA202, CA204, CA302, CA303, CA603, CA606, CAA01** default **Off**) | [Deploy in your tenant](#deploy-in-your-tenant) → [After deploy](#after-deploy-in-microsoft-entra-admin-center) |
 | **Review** assurance, criticality, and write behavior | [Safety and trust](#safety-and-trust) · [inventory.html](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/inventory.html) · [`POLICY_INVENTORY.md`](./POLICY_INVENTORY.md) · per-policy [`baseline/policies/`](./baseline/policies/) |
 | **Change** definitions or publish your fork | [`scripts/generate-baseline.py`](scripts/generate-baseline.py) and [Customize & fork](#customize--fork); hosting in [GitHub Pages](#github-pages) |
 | **Summarize** for stakeholders | **At a glance** above + artifact counts below |
@@ -30,7 +30,7 @@ This project is an opinionated Conditional Access posture for Microsoft Entra ID
 
 ## What's in this repository
 
-**Intent JSON** describes policies ([`baseline/policies/`](./baseline/policies/)), groups ([`baseline/groups/`](./baseline/groups/)), and named locations ([`baseline/namedLocations/`](./baseline/namedLocations/)). Deploy time resolution uses [`docs/translate.js`](docs/translate.js); [`ALLOWED_DEPLOY_STATES`](docs/config.js) constrains new policies to **Report-only** by default, with **Off** for User-actions-only rules (see `resolvePolicyDeployState` in [`docs/translate.js`](docs/translate.js)). Flip to **On** only from the admin center when your runbook says so.
+**Intent JSON** describes policies ([`baseline/policies/`](./baseline/policies/)), groups ([`baseline/groups/`](./baseline/groups/)), and named locations ([`baseline/namedLocations/`](./baseline/namedLocations/)). Deploy time resolution uses [`docs/translate.js`](docs/translate.js); [`ALLOWED_DEPLOY_STATES`](docs/config.js) constrains new policies so the SPA creates **Report-only** or **Off** only (`enabledForReportingButNotEnforced` vs `disabled`). **Off by default** only for `POLICY_IDS_DEPLOY_DISABLED_BY_DEFAULT` (see `resolvePolicyDeployState`). Flip to **On** only from the admin center when your runbook says so.
 
 | Artifact | Count | Path |
 |---------|-------|------|
@@ -49,7 +49,7 @@ Policies that scope optional workloads may appear as **skipped** when a third-pa
 | Topic | What to know |
 |-------|----------------|
 | **Credentialed only** | The app uses **your** admin session with **delegated** Graph scopes. There is **no** OAuth client secret in GitHub ([`docs/config.js`](docs/config.js)). |
-| **Writes are guarded** | New CA policies default to **Report-only**; **CA112** is created **Off**. [`ALLOWED_DEPLOY_STATES`](docs/config.js) forbids creating policies **On** from the SPA. If a tenant policy shares the normalized **display name**, deploy **skips** it — zero silent PATCH. |
+| **Writes are guarded** | New CA policies default to **Report-only** except **`POLICY_IDS_DEPLOY_DISABLED_BY_DEFAULT`** (**CA111, CA202, CA204, CA302, CA303, CA603, CA606, CAA01**), which are created **Off**. [`ALLOWED_DEPLOY_STATES`](docs/config.js) forbids creating policies **On** from the SPA. If a tenant policy shares the normalized **display name**, deploy **skips** it — zero silent PATCH. |
 | **Supply chain** | Browsers execute whatever `main` publishes to **Pages** via `docs/` and CI — protect the default branch and review changes under `docs/` and [.github/workflows/deploy-pages.yml](.github/workflows/deploy-pages.yml). |
 
 ## Deploy in your tenant
@@ -75,7 +75,7 @@ The log summarizes outcomes (including skips such as **`firstPartyApp:`…** whe
 
 1. Populate **named location** ranges/countries and **group** memberships (break-glass, exclusions, pilots, automation groups).
 2. Review **Protection → Conditional Access**, **Sign-in logs**, and Conditional Access insights before changing policy effects.
-3. Turn policies **On** (fully enforced) in phases when sign-in logs and your runbook justify it — most land in **Report-only** first from deploy.
+3. Turn policies **On** (fully enforced) in phases when sign-in logs and your runbook justify it — most land in **Report-only** from deploy unless they defaulted **Off**.
 
 ## Customize & fork
 
