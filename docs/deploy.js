@@ -1,6 +1,6 @@
 // Mirage CA Baseline Deployer - main orchestration.
-// Sign-in -> consent -> resolve groups & named locations -> create CA
-// policies in Off (disabled) state. Idempotent; safe to re-run.
+// Sign-in -> consent -> create missing groups / named locations -> create Conditional
+// Access policies in Off only when displayName is absent (never PATCH existing CA policies).
 import { APP_CONFIG, GRAPH_SCOPES, ALLOWED_DEPLOY_STATES, resolveBaselineUrl, resolveBaselineUrlBases } from "./config.js";
 import { graphGet, graphList, graphPost, graphPatch, findByDisplayName, GraphError } from "./graph.js";
 import {

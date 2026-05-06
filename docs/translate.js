@@ -6,8 +6,8 @@
 //     principal IDs) are resolved at deploy time. The repo stores names.
 //   * The translation can encode safe defaults (state forced to disabled)
 //     in one place rather than duplicating state in every policy file.
-//   * The same intent file works for the SPA and for a future PowerShell
-//     deployer.
+//   * For some session-only CAE policies, guest/external exclusions in intent are
+//     omitted in the Graph payload (see resolveUsers) to satisfy API schema.
 import { ALLOWED_DEPLOY_STATES } from "./config.js";
 
 // Well-known first-party app identifiers used by name in the intent files.

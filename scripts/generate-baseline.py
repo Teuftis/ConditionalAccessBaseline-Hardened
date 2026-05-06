@@ -188,7 +188,7 @@ POLICIES: list[dict] = [
     {
         "id": "CA111",
         "displayName": "Continuous Access Evaluation - Standard",
-        "description": "Continuous Access Evaluation in standard sensitivity for workforce accounts: reacts faster to revocation or policy changes compared with long-lived tokens. Administrators should pair with CA603 (strict CAE).",
+        "description": "Continuous Access Evaluation in standard sensitivity for workforce accounts: reacts faster to revocation or policy changes compared with long-lived tokens. Administrators should pair with CA603 (strict CAE). Deploy note: Microsoft Graph rejects some CAE-only session payloads that also exclude guests/externals; the deploy SPA omits excludeGuestsOrExternalUsers for this rule (see docs/translate.js); guest collaborators remain covered by other baseline policies.",
         "metadata": {"criticality": "Recommended", "v2Status": "NEW", "persona": "All users", "j0eyvEquivalent": "CA209"},
         "include": {"users": "all"},
         "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount"], "guestsAndExternals": True},
