@@ -1,44 +1,36 @@
 # Mirage Conditional Access Baseline (v2026)
 
-Opinionated, production-oriented **Conditional Access** for Microsoft Entra ID: baseline objects live as **intent JSON** (not tenant-specific Graph payloads). A **static web app under `docs/`** turns names into GUIDs via Microsoft Graph — no backend and no client secret in the repo. Sign in as a tenant admin with delegated consent, then create missing **groups**, **named locations**, and **Conditional Access policies** (new CA policies default to **disabled**).
+**At a glance**
 
-**Not a Microsoft product.** Use as a baseline only: validate against your apps, licenses (for example Entra ID P2 for risk-based controls), and your change process.
+- **40** Conditional Access policies, **11** groups, **4** named locations — stored as **intent JSON** under [`baseline/`](./baseline/), not as a raw tenant export.
+- **Deploy through the hosted app** (the `docs/` bundle on GitHub Pages): **delegated** Microsoft Graph only — **no** OAuth client secret in this repository.
+- **New CA policies are created disabled**; existing policies that already match the baseline **display name** (after normalization) are **never** silently updated via PATCH.
+- **Not a Microsoft product.** Validate licensing (for example Entra ID P2 for risk-based policies), app coverage, and your change process. See [Legal & reference](#legal--reference).
 
-| | |
-|---|---|
-| **Live deploy app** | [ConditionalAccessBaseline-Hardened on Pages](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/) |
-| **Source** | [Teuftis/ConditionalAccessBaseline-Hardened](https://github.com/Teufis/ConditionalAccessBaseline-Hardened) |
-| **Styled policy catalog** | [inventory.html](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/inventory.html) (filters and layout for browsing)
+This project is an opinionated Conditional Access posture for Microsoft Entra ID. Open the **[deploy app](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/)** (static site from [`docs/`](./docs/)), sign in as a tenant admin, and run a dry run or full deploy: the app resolves names to Graph IDs using [`docs/translate.js`](docs/translate.js), applies [`baseline/manifest.json`](./baseline/manifest.json), and creates missing **groups**, **named locations**, and **policies**. Terms of Use and some third-party prerequisites remain **tenant-owned** — they can show as **skipped** until you create or license them.
+
+> **Operational risk:** Graph APIs and CA policy schemas change over time. Prefer a **non-production** tenant for first runs, keep **break-glass** reachable, and move policies to report-only and then on in **phases** in the Microsoft Entra admin center.
 
 [![Open deploy app](https://img.shields.io/badge/Open-deploy%20app-0078D4?logo=microsoftazure&logoColor=white&style=for-the-badge)](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/)
 
-## Choose your path
+**Quick links:** [Deploy app](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/) · [GitHub repo](https://github.com/Teuftis/ConditionalAccessBaseline-Hardened) · [Policy catalog (Pages)](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/inventory.html) · [`POLICY_INVENTORY.md`](./POLICY_INVENTORY.md) · [`SECURITY.md`](./SECURITY.md)
 
-| You want to… | Start here |
-|--------------|------------|
-| Deploy into a tenant today | See [Deploy in your tenant](#deploy-in-your-tenant) · [Safety and trust](#safety-and-trust) · [Further reading](#further-reading) |
-| Maintain the baseline, regenerate JSON, fork the app registration | See [Customize & fork](#customize--fork) · [GitHub Pages](#github-pages) · [Safety and trust](#safety-and-trust) |
+---
 
-## Contents
+## Navigating this repo
 
-| Section | What you'll find |
-|---------|------------------|
-| [What's in this repository](#whats-in-this-repository) | Folders, intent model, skips, catalogs |
-| [Deploy in your tenant](#deploy-in-your-tenant) | Roles, dry run, writes vs untouched policies |
-| [After deploy](#after-deploy-in-microsoft-entra-admin-center) | Portal checklist before enabling policies |
-| [Safety and trust](#safety-and-trust) | Delegated-only writes, naming match, branch supply chain |
-| [Customize & fork](#customize--fork) | Generator, naming, forks, local dev |
-| [GitHub Pages](#github-pages) | Publishing SPA + troubleshooting **404**, `docs/baseline` mirror |
-| [Policy catalog](#policy-catalog) | Long auto-generated appendix (browse [inventory.html](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/inventory.html) first) |
-| [Groups](#groups-entra) | Auto-generated Entra groups appendix |
-| [Further reading](#further-reading) | Microsoft Learn CA links |
-| [Legal & reference](#legal--reference) | License · security · spreadsheets |
+| Outcome | Start here |
+|--------|--------------|
+| **Deploy** baseline objects into a tenant (**policies disabled** until you enable them) | [Deploy in your tenant](#deploy-in-your-tenant) → [After deploy](#after-deploy-in-microsoft-entra-admin-center) |
+| **Review** assurance, criticality, and write behavior | [Safety and trust](#safety-and-trust) · [inventory.html](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/inventory.html) · [`POLICY_INVENTORY.md`](./POLICY_INVENTORY.md) · per-policy [`baseline/policies/`](./baseline/policies/) |
+| **Change** definitions or publish your fork | [`scripts/generate-baseline.py`](scripts/generate-baseline.py) and [Customize & fork](#customize--fork); hosting in [GitHub Pages](#github-pages) |
+| **Summarize** for stakeholders | **At a glance** above + artifact counts below |
 
 ---
 
 ## What's in this repository
 
-**Intent JSON** describes policies ([`baseline/policies/`](./baseline/policies/)), groups ([`baseline/groups/`](./baseline/groups/)), and named locations ([`baseline/namedLocations/`](./baseline/namedLocations/)). At deploy time, [`docs/translate.js`](docs/translate.js) resolves display names into Graph IDs (`ALLOWED_DEPLOY_STATES` in [`docs/config.js`](docs/config.js) forces policies to **`disabled`** for new creations).
+**Intent JSON** describes policies ([`baseline/policies/`](./baseline/policies/)), groups ([`baseline/groups/`](./baseline/groups/)), and named locations ([`baseline/namedLocations/`](./baseline/namedLocations/)). Deploy time resolution uses [`docs/translate.js`](docs/translate.js); [`ALLOWED_DEPLOY_STATES`](docs/config.js) keeps newly created CA policies **`disabled`** until you change them in the admin center.
 
 | Artifact | Count | Path |
 |---------|-------|------|
@@ -46,122 +38,81 @@ Opinionated, production-oriented **Conditional Access** for Microsoft Entra ID: 
 | Groups | 11 | [`baseline/groups/`](./baseline/groups/) |
 | Named locations | 4 | [`baseline/namedLocations/`](./baseline/namedLocations/) |
 
-You do **not** need this repo cloned to deploy: open the **[live app](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/)** once [GitHub Pages](#github-pages) is serving it. Policies that scope optional workloads may **skip** if a required third-party **service principal** is missing. Terms of Use stay **tenant-owned** objects — nothing creates them automatically.
+You **do not** need a local clone just to deploy: use the **[deploy app](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/)** once [GitHub Pages](#github-pages) is publishing the default branch.
 
-For reviews and Git diffs, [`POLICY_INVENTORY.md`](./POLICY_INVENTORY.md) duplicates the appendix as a table. **`python scripts/generate-baseline.py`** keeps **`baseline/`**, the mirrored **`docs/baseline/`** tree (Pages same-origin JSON), [`POLICY_INVENTORY.md`](./POLICY_INVENTORY.md), SPA tables (`docs/inventory.html`, `docs/index.html`), and README appendices aligned — see [Customize & fork](#customize--fork).
+Policies that scope optional workloads may appear as **skipped** when a third-party **service principal** does not exist. **Terms of Use** objects remain **tenant-owned** — deploy does not create them.
 
-[`docs/deploy.js`](docs/deploy.js) runs the manifest flow; **`baseline/manifest.json`** defines deploy order.
-
-## Deploy in your tenant
-
-Delegated roles that can complete the flow commonly include combinations of **Conditional Access Administrator**, **Groups Administrator**, **Security Administrator**, or **Global Administrator**.
-
-1. Open the **[deploy web app](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/)** (blank baseline or errors → [GitHub Pages](#github-pages) troubleshooting).
-2. **Sign in** and accept **delegated** Microsoft Graph scopes.
-3. Optionally keep **Dry run** enabled (preview only — no tenant writes), then disable it for a real run.
-4. Read the activity log: **skipped** (missing deps), **unchanged** (existing **display name** already in tenant), **created**, or **error** (Graph rejected the payload — often schema or missing prerequisite).
-
-**Writes vs what stays unchanged on re-run**
-
-| Artifact | Behavior |
-|---------|----------|
-| Conditional Access policies | **POST** creates a policy **only when no existing policy shares that normalized display name** (exact or Unicode hyphen-normalized match). Existing policies are **never PATCH**ed — state stays as in the tenant. |
-| Groups | Ensured exists; membership and props are **not** updated afterward — only reused for ID resolution during deploy. |
-| Named locations | Created if missing; if present, IPs/countries definitions are **not** overwritten automatically. |
-
-The log summarizes outcomes (including skips like **`firstPartyApp:`**… when required Microsoft-native apps lack a tenant service principal binding).
-
-### After deploy in Microsoft Entra admin center
-
-1. Populate **named location** ranges/countries and **group** memberships (break-glass, exclusions, pilots, automation groups).
-2. Review **Protection → Conditional Access**, **Sign-in logs**, and Conditional Access insights before changing policy effect.
-3. Move policies **report-only**, then **on**, **in phases** that match your runbook — enabling everything at once rarely ends well.
+[`docs/deploy.js`](docs/deploy.js) runs the manifest flow. Regenerating artifacts from the spreadsheet-driven generator is documented under [Customize & fork](#customize--fork).
 
 ## Safety and trust
 
 | Topic | What to know |
 |-------|----------------|
-| **Credentialed only** | The SPA uses your admin session and **delegated** Graph scopes. There is **no** OAuth client secret in Git ([`docs/config.js`](docs/config.js)). |
-| **Writes are guarded** | New CA policies arrive **disabled** ([`ALLOWED_DEPLOY_STATES`](docs/config.js)). Existing tenants keep live rules because policies that **match display name** (after normalization shown in Customize) are skipped — zero silent overwrites via PATCH. Turning policies **report-only / on** stays a **manual** admin-center decision. |
-| **Supply chain** | Whatever ships on **GitHub Pages** from `main` is what browsers execute — protect the default branch and review PRs that touch `docs/` or CI. |
+| **Credentialed only** | The app uses **your** admin session with **delegated** Graph scopes. There is **no** OAuth client secret in GitHub ([`docs/config.js`](docs/config.js)). |
+| **Writes are guarded** | New CA policies arrive **disabled** ([`ALLOWED_DEPLOY_STATES`](docs/config.js)). If a tenant policy already shares the normalized **display name**, deploy **skips** it — zero silent PATCH. Moving policies to report-only **on** is always a **manual** admin-center decision. |
+| **Supply chain** | Browsers execute whatever `main` publishes to **Pages** via `docs/` and CI — protect the default branch and review changes under `docs/` and [.github/workflows/deploy-pages.yml](.github/workflows/deploy-pages.yml). |
+
+## Deploy in your tenant
+
+Delegated roles that can complete the flow commonly combine **Conditional Access Administrator**, **Groups Administrator**, **Security Administrator**, or **Global Administrator**.
+
+1. Open the **[deploy app](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/)** (errors or blank app → [GitHub Pages](#github-pages) troubleshooting).
+2. **Sign in** and accept **delegated** Microsoft Graph scopes.
+3. Optionally keep **Dry run** enabled (preview only — no tenant writes); clear it when you intend to create objects.
+4. Read the activity log: **skipped** (missing prerequisites), **unchanged** (existing **display name** already matches), **created**, or **error** (often schema or prerequisites).
+
+### Writes vs re-run behavior
+
+| Artifact | Behavior |
+|---------|----------|
+| Conditional Access policies | **POST** only when **no** existing policy shares that normalized **display name**. Existing tenant policies **never PATCH** automatically. |
+| Groups | Ensured to exist so IDs resolve; memberships and props are **not** maintained by deploy. |
+| Named locations | Created if missing; if present, IP/country payload is **not** overwritten automatically. |
+
+The log summarizes outcomes (including skips such as **`firstPartyApp:`…** where Microsoft-hosted apps lack a tenant service principal).
+
+### After deploy in Microsoft Entra admin center
+
+1. Populate **named location** ranges/countries and **group** memberships (break-glass, exclusions, pilots, automation groups).
+2. Review **Protection → Conditional Access**, **Sign-in logs**, and Conditional Access insights before changing policy effects.
+3. Move policies **report-only**, then **on**, aligned to your rollout plan rather than flipping everything simultaneously.
 
 ## Customize & fork
 
 | Task | Steps |
 |------|-------|
-| **Change policies or groups** | Edit **`POLICIES`** / **`GROUPS`** (and related structures) in [`scripts/generate-baseline.py`](scripts/generate-baseline.py). Run **`python scripts/generate-baseline.py`**. Commit **`baseline/`**, **`docs/baseline/`**, **`POLICY_INVENTORY.md`**, **`docs/inventory.html`**, **`docs/index.html`**, and the README appendix regions this script rewrites. On Windows, save the script as **UTF-8**. |
-| **Naming in Entra** | Generated **`displayName`** patterns look like **`CA101 — Require MFA`** (em dash **`—`**). Deploy loads all CA policies, then dedupes with exact match **plus** Unicode hyphen normalization and casing (so **`CA101 -`** still matches **`CA101 —`**). Dupes skip creation — rename or delete stale Entra copies if you need a regenerate. |
-| **Fork another app registration** | Multitenant **public client SPA** registration (still no secrets). Paste **`clientId`** + HTTPS redirect URIs into [`docs/config.js`](docs/config.js), expose matching [`GRAPH_SCOPES`](docs/config.js), re-enable Pages hosting on your GH org. |
-| **Hack locally** | From repo root, `python -m http.server` (or VS Code Live Server). Open **`/docs/`**. Register **localhost** redirect URIs on the Entra SPA app alongside your production Pages URL pairings. |
+| **Change policies or groups** | Edit **`POLICIES`** / **`GROUPS`** (and related structures) in [`scripts/generate-baseline.py`](scripts/generate-baseline.py). Run **`python scripts/generate-baseline.py`**. Commit **`baseline/`**, **`docs/baseline/`**, **`POLICY_INVENTORY.md`**, **`docs/inventory.html`**, **`docs/index.html`**, and README appendix markers this script replaces. Save the generator as **UTF-8** on Windows. [`POLICY_INVENTORY.md`](./POLICY_INVENTORY.md) stays in sync as a Markdown mirror of policy rows. |
+| **Naming in Entra** | **`displayName`** values such as **`CA101 — Require MFA`** use an **em dash** (**`—`**). Deploy normalizes hyphen variants (`CA101 —` ↔ `CA101 -`) — dupes skip creation until you rename or remove stale tenant policies. |
+| **Fork another app registration** | Multitenant **public client SPA** (still no secrets). Paste **`clientId`** + HTTPS redirect URIs into [`docs/config.js`](docs/config.js) with [`GRAPH_SCOPES`](docs/config.js), then publish **Pages** on your fork. |
+| **Hack locally** | Repo root → `python -m http.server` (or VS Code Live Server); open **`/docs/`**. Register **localhost** redirect URIs beside your production Pages URIs on the SPA app registration. |
 
 ## GitHub Pages
 
-The browser bundle is **`docs/`**, emitted by [.github/workflows/deploy-pages.yml](.github/workflows/deploy-pages.yml) whenever **`main`** updates.
+The browser bundle is **`docs/`**, rebuilt by [.github/workflows/deploy-pages.yml](.github/workflows/deploy-pages.yml) on **`main`**.
 
-Pages needs one-time **[Settings → Pages → GitHub Actions](https://docs.github.com/pages/getting-started-with-github-pages/about-github-pages)** (historic **branch `/docs`** path also works).
+Configure **Pages** once (**[Settings → Pages → GitHub Actions](https://docs.github.com/pages/getting-started-with-github-pages/about-github-pages)**; historically **Publish from branch `/docs`** also works).
 
-**Architecture note:** workflows run **`rm -rf docs/baseline && cp -r baseline docs/baseline`** so `fetch("./baseline/manifest.json")` stays **same-origin** with the SPA (reduces CORS pain vs only raw GitHub raw endpoints). The generator copies the same mirror when you run it locally.
+**Same-origin baseline JSON:** workflows run **`rm -rf docs/baseline && cp -r baseline docs/baseline`** so `fetch("./baseline/manifest.json")` stays **same-origin** with the SPA. `generate-baseline.py` refreshes that mirror locally too.
 
-**404 or empty manifest in the live app?** Confirm the **Deploy GitHub Pages** workflow finished. Hard-refresh. Legacy forks that never got the copy step can still override `window.MIRAGE_BASELINE_URL` to a reachable baseline root or fall back to **raw.githubusercontent.com** (requires `baseline/` on your default branch).
+**404 or empty manifest?** Confirm the **Deploy GitHub Pages** workflow completed; hard refresh. Older forks lacking the copy step can set `window.MIRAGE_BASELINE_URL` or use **raw.githubusercontent.com** URLs (subject to **CORS**).
 
-## Further reading
+## Appendix
 
-- [Conditional Access overview — Microsoft Learn](https://learn.microsoft.com/entra/identity/conditional-access/overview)
-- [Policies and assignments](https://learn.microsoft.com/entra/identity/conditional-access/concept-conditional-access-policies)
-- [Named locations](https://learn.microsoft.com/entra/identity/conditional-access/concept-assignment-network)
+Auto-generated excerpts follow. Prefer **[inventory.html](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/inventory.html)** for interactive browsing or [`POLICY_INVENTORY.md`](./POLICY_INVENTORY.md) for reviewable tables; README keeps short pointers generated from the same manifest.
 
-## Policy catalog
+### Policy catalog
 
-**Appendix.** The summary table below mirrors [`POLICY_INVENTORY.md`](./POLICY_INVENTORY.md) and the spreadsheet summary (ID, policy title, persona, criticality). It auto-regenerates from JSON when you run **`scripts/generate-baseline.py`**. GitHub Markdown does not support Excel-style cell shading; **criticality** is shown with colored badges (same semantics as the pills in **[inventory.html](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/inventory.html)**). Full descriptions stay in each policy JSON; use the inventory page or `POLICY_INVENTORY.md` for prose.
+Summaries regenerate from [`baseline/policies/`](./baseline/policies/) when you run **`python scripts/generate-baseline.py`**.
 
 <!-- policy-catalog:start -->
-| ID | Policy | Persona | Criticality |
-| --- | --- | --- | --- |
-| CA101 | Require MFA | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
-| CA102 | User Risk - Require MFA + Password Change | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
-| CA103 | Sign-In Risk - Require MFA | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
-| CA104 | Block Legacy Authentication | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
-| CA105 | Block Unknown Platforms | All users | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
-| CA106 | Block Outside Trusted Countries | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
-| CA107 | Session Controls | All users | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
-| CA108 | Block Cross-Device Auth Flows | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
-| CA109 | Require MFA for Azure Management | All users | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
-| CA110 | Block Malicious IPs | All users | ![Optional](https://img.shields.io/static/v1?label=&message=Optional&color=757575&style=flat-square) |
-| CA111 | Continuous Access Evaluation - Standard | All users | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
-| CA112 | MFA on Device Register or Join | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
-| CA113 | Require Token Protection (Pilot) | All users | ![Optional](https://img.shields.io/static/v1?label=&message=Optional&color=757575&style=flat-square) |
-| CA114 | Terms of Use | All users | ![Optional](https://img.shields.io/static/v1?label=&message=Optional&color=757575&style=flat-square) |
-| CA201 | Intune Enrolling - Require MFA | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
-| CA202 | Require App Protection (Mobile) | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
-| CA204 | Require Compliant Mobile (Optional MDM track) | All users | ![Optional](https://img.shields.io/static/v1?label=&message=Optional&color=757575&style=flat-square) |
-| CA301 | Require Compliant Windows | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
-| CA302 | Require Compliant macOS | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
-| CA303 | Limited Browser Access on Unmanaged Devices | All users | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
-| CA601 | Phishing-Resistant MFA for Admins | Admins | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
-| CA602 | Admin Session Controls | Admins | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
-| CA603 | Admin CAE - Strict | Admins | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
-| CA604 | Admin Block High User Risk | Admins | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
-| CA605 | Admin Block High Sign-In Risk | Admins | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
-| CA606 | Admin Require Compliant or Joined Device | Admins | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
-| CA701 | App - FortiClient - MFA | Application | ![Optional](https://img.shields.io/static/v1?label=&message=Optional&color=757575&style=flat-square) |
-| CA702 | App - Salesforce - MFA | Application | ![Optional](https://img.shields.io/static/v1?label=&message=Optional&color=757575&style=flat-square) |
-| CA801 | Service - Require MFA (Interactive) | Service | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
-| CA802 | Service - Block Outside Trusted IPs | Service | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
-| CA803 | Service - Block Legacy Auth | Service | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
-| CA804 | Service - Block Non-M365 Apps | Service | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
-| CA901 | Guest - Require MFA | Guest | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
-| CA902 | Guest - Block High Sign-In Risk | Guest | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
-| CA903 | Guest - Block Legacy Auth | Guest | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
-| CA904 | Guest - Block Outside Trusted Countries | Guest | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
-| CA905 | Guest - Block Non-Collaboration Apps | Guest | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
-| CA906 | Guest - Terms of Use | Guest | ![Optional](https://img.shields.io/static/v1?label=&message=Optional&color=757575&style=flat-square) |
-| CA907 | Guest - Session Controls | Guest | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
-| CAA01 | Agent - Block High Risk | Agent | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
+- **40 policies** — intent JSON under [`baseline/policies/`](./baseline/policies/). By persona: All users (20), Guest (7), Admins (6), Service (4), Application (2), Agent (1).
+- **[Policy catalog on Pages](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/inventory.html)** — filters and colored criticality.
+- **[`POLICY_INVENTORY.md`](./POLICY_INVENTORY.md)** — flat Markdown table (diff-friendly).
 <!-- policy-catalog:end -->
 
-## Groups (Entra)
+### Groups (Entra)
 
-**Appendix (auto-generated).** Every entry below maps to a JSON file under [`baseline/groups/`](./baseline/groups/). Policy intent references these by display name; deploy resolves them to object IDs. **`tier`** labels mean **Required** (foundation), **Service track** (automation splits for CA801/802), **Exception** (short-lived bypasses), **Pilot** (narrow experiments). **`mailNickname`** values are chosen for Graph uniqueness at creation time.
+Each entry mirrors a JSON file under [`baseline/groups/`](./baseline/groups/). Policy intent references groups by **display name**; deploy binds them to object IDs. **`tier`** means **Required** (foundation), **Service track** (automation splits for CA801 / CA802), **Exception** (short-lived allowances), **Pilot** (narrow experiments). **`mailNickname`** values satisfy Graph uniqueness at creation time.
 
 <!-- group-catalog:start -->
 - **BG_BreakGlass** — Required — mailNickname `bg-breakglass`
@@ -188,8 +139,15 @@ Pages needs one-time **[Settings → Pages → GitHub Actions](https://docs.gith
   Device objects undergoing Windows Autopilot pre-provisioning so they can complete join/enrollment without triggering CA112 MFA-on-join or CA201 enrollment MFA prematurely. Clean up stale device members after deployment finishes.
 <!-- group-catalog:end -->
 
+## Further reading
+
+- [Conditional Access overview — Microsoft Learn](https://learn.microsoft.com/entra/identity/conditional-access/overview)
+- [Policies and assignments](https://learn.microsoft.com/entra/identity/conditional-access/concept-conditional-access-policies)
+- [Named locations](https://learn.microsoft.com/entra/identity/conditional-access/concept-assignment-network)
+- Microsoft's Zero Trust / CA architecture materials (conceptual grounding): see [microsoft/ConditionalAccessforZeroTrustResources](https://github.com/microsoft/ConditionalAccessforZeroTrustResources) and linked guidance.
+
 ## Legal & reference
 
 - **License:** [MIT License](./LICENSE)
-- **Security:** [SECURITY.md](./SECURITY.md) (prefer GitHub **Security → Report a vulnerability**)
-- **`reference/` spreadsheets:** Design-time `.xlsx` companions for the baseline (not read by the deploy runtime). Office XML in this repo was scrubbed for obvious sensitive strings (no emails, no `.onmicrosoft` patterns, no extra HTTP(S) URLs beyond Open XML schema refs). Re-scan if you fork and diverge.
+- **Security:** [`SECURITY.md`](./SECURITY.md) (prefer GitHub **Security → Report a vulnerability**)
+- **`reference/` spreadsheets:** Authoring companions (`.xlsx`) for the baseline; **not** read by the deploy runtime. Office XML committed here avoids obvious tenant-specific strings — re-scan if you fork heavily.
