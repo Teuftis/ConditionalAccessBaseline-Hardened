@@ -1,0 +1,37 @@
+{
+  "id": "CA104",
+  "displayName": "CA104 — Block Legacy Authentication",
+  "description": "Tenant-wide legacy authentication hardening: blocks basic authentication and legacy client protocols (for example POP, IMAP, SMTP AUTH, authenticated SMTP, and broader legacy client application types aligned with Microsoft guidance). Enables a dependable modern-auth-only posture; pair with workload-specific disables.",
+  "metadata": {
+    "criticality": "Critical",
+    "v2Status": "Retained",
+    "persona": "All users",
+    "j0eyvEquivalent": "CA002"
+  },
+  "include": {
+    "users": "all"
+  },
+  "exclude": {
+    "groups": [
+      "AC_ExcludedFromCA",
+      "BG_BreakGlass",
+      "AC_ServiceAccount"
+    ],
+    "guestsAndExternals": true
+  },
+  "applications": {
+    "include": "all"
+  },
+  "conditions": {
+    "clientAppTypes": [
+      "exchangeActiveSync",
+      "other"
+    ]
+  },
+  "grant": {
+    "operator": "OR",
+    "builtInControls": [
+      "block"
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "id": "CAA01",
+  "displayName": "CAA01 — Agent - Block High Risk",
+  "description": "Workload identities (service principals using agent delegation) flagged high risk by Identity Protection lose access immediately across cloud apps targeted by the workload persona until risk clears.",
+  "metadata": {
+    "criticality": "Recommended",
+    "v2Status": "NEW",
+    "persona": "Agent",
+    "j0eyvEquivalent": "CA501"
+  },
+  "include": {
+    "agentIds": "all"
+  },
+  "exclude": {
+    "groups": [
+      "AC_ExcludedFromCA",
+      "AC_ExcludedAgents"
+    ]
+  },
+  "applications": {
+    "include": "all"
+  },
+  "conditions": {
+    "agentIdRiskLevels": [
+      "high"
+    ],
+    "clientAppTypes": [
+      "all"
+    ]
+  },
+  "grant": {
+    "operator": "OR",
+    "builtInControls": [
+      "block"
+    ]
+  }
+}

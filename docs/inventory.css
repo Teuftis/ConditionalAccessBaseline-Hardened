@@ -1,0 +1,152 @@
+/* Mirage CA policy catalog — pairs with style.css */
+
+.masthead--catalog {
+  margin-bottom: 20px;
+}
+
+.catalog-nav {
+  margin: 12px 0 0;
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+
+.catalog-nav span[aria-hidden="true"] {
+  margin: 0 6px;
+  opacity: 0.55;
+}
+
+.catalog-main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 24px 56px;
+}
+
+.catalog-lede {
+  margin: 0 0 28px;
+  padding: 14px 18px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+.catalog-lede code {
+  font-size: 0.88em;
+}
+
+.persona-block {
+  margin-bottom: 36px;
+}
+
+.persona-heading {
+  margin: 0 0 16px;
+  font-size: 1.15rem;
+  letter-spacing: -0.02em;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.policy-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .policy-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .policy-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.policy-card {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 100%;
+  transition: border-color 0.15s ease;
+}
+
+.policy-card:hover {
+  border-color: rgba(79, 140, 255, 0.45);
+}
+
+.policy-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.policy-id {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.policy-title {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.policy-desc {
+  margin: 0;
+  font-size: 0.86rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.pill {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--panel-border);
+}
+
+.pill--critical {
+  color: var(--error);
+  border-color: rgba(248, 113, 113, 0.45);
+  background: rgba(248, 113, 113, 0.08);
+}
+
+.pill--recommended {
+  color: var(--warn);
+  border-color: rgba(251, 191, 36, 0.45);
+  background: rgba(251, 191, 36, 0.08);
+}
+
+.pill--optional {
+  color: var(--muted);
+  border-color: var(--panel-border);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.pill--neutral {
+  color: var(--muted);
+}
+
+.catalog-footer {
+  border-top: 1px solid var(--panel-border);
+  padding: 20px 24px 40px;
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--muted);
+}

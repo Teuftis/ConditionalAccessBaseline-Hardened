@@ -1,0 +1,37 @@
+{
+  "id": "CA801",
+  "displayName": "CA801 — Service - Require MFA (Interactive)",
+  "description": "Service principal hardening subset: mandates MFA whenever the delegated application signs in interactively (think human-driven scripts). Daemon / client-credential workloads remain out of scope via negative group conditioning paired with exclusions.",
+  "metadata": {
+    "criticality": "Recommended",
+    "v2Status": "Updated",
+    "persona": "Service",
+    "j0eyvEquivalent": "CA300"
+  },
+  "include": {
+    "groups": [
+      "AC_ServiceAccount_Interactive"
+    ]
+  },
+  "exclude": {
+    "groups": [
+      "AC_ExcludedFromCA",
+      "BG_BreakGlass",
+      "AC_ServiceAccount_NonInteractive"
+    ]
+  },
+  "applications": {
+    "include": "all"
+  },
+  "conditions": {
+    "clientAppTypes": [
+      "all"
+    ]
+  },
+  "grant": {
+    "operator": "OR",
+    "builtInControls": [
+      "mfa"
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "id": "CA110",
+  "displayName": "CA110 — Block Malicious IPs",
+  "description": "Threat-intelligence egress control: denies sign-ins that map to indicators in the MALICIOUS_IPS named location (populate with SOC or feed-driven ranges before enforcement). Complements geo and risk policies.",
+  "metadata": {
+    "criticality": "Optional",
+    "v2Status": "Retained",
+    "persona": "All users"
+  },
+  "include": {
+    "users": "all"
+  },
+  "exclude": {
+    "groups": [
+      "AC_ExcludedFromCA",
+      "BG_BreakGlass",
+      "AC_ServiceAccount"
+    ],
+    "guestsAndExternals": true
+  },
+  "applications": {
+    "include": "all"
+  },
+  "conditions": {
+    "locations": {
+      "include": [
+        "MALICIOUS_IPS"
+      ]
+    },
+    "clientAppTypes": [
+      "all"
+    ]
+  },
+  "grant": {
+    "operator": "OR",
+    "builtInControls": [
+      "block"
+    ]
+  }
+}

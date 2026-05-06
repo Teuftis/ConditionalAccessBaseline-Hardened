@@ -1,0 +1,41 @@
+{
+  "id": "CA204",
+  "displayName": "CA204 — Require Compliant Mobile (Optional MDM track)",
+  "description": "Optional hardened path for supervised mobile fleets: complements CA202 by requiring Intune-compliant devices on MDM-enrolled handhelds running iOS/Android. Omit or soften if you intentionally stay app-protection-only without enrollment.",
+  "metadata": {
+    "criticality": "Optional",
+    "v2Status": "NEW",
+    "persona": "All users"
+  },
+  "include": {
+    "users": "all"
+  },
+  "exclude": {
+    "groups": [
+      "AC_ExcludedFromCA",
+      "BG_BreakGlass",
+      "AC_ServiceAccount"
+    ],
+    "guestsAndExternals": true
+  },
+  "applications": {
+    "include": "all"
+  },
+  "conditions": {
+    "platforms": {
+      "include": [
+        "iOS",
+        "android"
+      ]
+    },
+    "clientAppTypes": [
+      "all"
+    ]
+  },
+  "grant": {
+    "operator": "OR",
+    "builtInControls": [
+      "compliantDevice"
+    ]
+  }
+}

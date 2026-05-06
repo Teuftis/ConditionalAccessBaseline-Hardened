@@ -1,0 +1,35 @@
+{
+  "id": "CA907",
+  "displayName": "CA907 — Guest - Session Controls",
+  "description": "Session hygiene for collaborators: aligns guest browser sessions with the twelve-hour MFA refresh posture so stolen guest tokens degrade quickly—mirroring CA107 protections for internals.",
+  "metadata": {
+    "criticality": "Recommended",
+    "v2Status": "NEW",
+    "persona": "Guest",
+    "j0eyvEquivalent": "CA402 / CA403"
+  },
+  "include": {
+    "users": "guestsAndExternals"
+  },
+  "exclude": {
+    "groups": [
+      "AC_ExcludedFromCA",
+      "BG_BreakGlass"
+    ]
+  },
+  "applications": {
+    "include": "all"
+  },
+  "conditions": {
+    "clientAppTypes": [
+      "all"
+    ]
+  },
+  "session": {
+    "signInFrequency": {
+      "value": 12,
+      "type": "hours"
+    },
+    "persistentBrowser": "never"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "id": "CA111",
+  "displayName": "CA111 — Continuous Access Evaluation - Standard",
+  "description": "Continuous Access Evaluation in standard sensitivity for workforce accounts: reacts faster to revocation or policy changes compared with long-lived tokens. Administrators should pair with CA603 (strict CAE).",
+  "metadata": {
+    "criticality": "Recommended",
+    "v2Status": "NEW",
+    "persona": "All users",
+    "j0eyvEquivalent": "CA209"
+  },
+  "include": {
+    "users": "all"
+  },
+  "exclude": {
+    "groups": [
+      "AC_ExcludedFromCA",
+      "BG_BreakGlass",
+      "AC_ServiceAccount"
+    ],
+    "guestsAndExternals": true
+  },
+  "applications": {
+    "include": "all"
+  },
+  "conditions": {
+    "clientAppTypes": [
+      "all"
+    ]
+  },
+  "session": {
+    "continuousAccessEvaluation": "standard"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "displayName": "AC_TokenProtection_Pilot",
+  "description": "Users or devices included in the CA113 Windows token-protection pilot. Start with a small population, collect sign-in and help-desk telemetry, then expand membership as your estate supports the feature.",
+  "mailNickname": "ac-tokenprotection-pilot",
+  "tier": "pilot"
+}

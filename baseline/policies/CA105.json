@@ -1,0 +1,49 @@
+{
+  "id": "CA105",
+  "displayName": "CA105 — Block Unknown Platforms",
+  "description": "Device-platform allow list: denies access when the client is not Windows, macOS, iOS, Android, or Linux. Mitigates access from unmanaged or unexpected operating systems across all workloads in scope.",
+  "metadata": {
+    "criticality": "Recommended",
+    "v2Status": "Retained",
+    "persona": "All users",
+    "j0eyvEquivalent": "CA204"
+  },
+  "include": {
+    "users": "all"
+  },
+  "exclude": {
+    "groups": [
+      "AC_ExcludedFromCA",
+      "BG_BreakGlass",
+      "AC_ServiceAccount"
+    ],
+    "guestsAndExternals": true
+  },
+  "applications": {
+    "include": "all"
+  },
+  "conditions": {
+    "platforms": {
+      "include": [
+        "all"
+      ],
+      "exclude": [
+        "windowsPhone",
+        "windows",
+        "macOS",
+        "iOS",
+        "android",
+        "linux"
+      ]
+    },
+    "clientAppTypes": [
+      "all"
+    ]
+  },
+  "grant": {
+    "operator": "OR",
+    "builtInControls": [
+      "block"
+    ]
+  }
+}

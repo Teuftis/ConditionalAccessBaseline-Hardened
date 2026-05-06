@@ -1,0 +1,41 @@
+{
+  "id": "CA302",
+  "displayName": "CA302 — Require Compliant macOS",
+  "description": "Same enforcement as CA301 scoped to macOS clients: unmanaged Macs cannot access Microsoft 365 data until they enroll and report healthy compliance posture.",
+  "metadata": {
+    "criticality": "Critical",
+    "v2Status": "Updated",
+    "persona": "All users",
+    "j0eyvEquivalent": "CA208"
+  },
+  "include": {
+    "users": "all"
+  },
+  "exclude": {
+    "groups": [
+      "AC_ExcludedFromCA",
+      "BG_BreakGlass",
+      "AC_ServiceAccount"
+    ],
+    "guestsAndExternals": true
+  },
+  "applications": {
+    "include": "all"
+  },
+  "conditions": {
+    "platforms": {
+      "include": [
+        "macOS"
+      ]
+    },
+    "clientAppTypes": [
+      "all"
+    ]
+  },
+  "grant": {
+    "operator": "OR",
+    "builtInControls": [
+      "compliantDevice"
+    ]
+  }
+}

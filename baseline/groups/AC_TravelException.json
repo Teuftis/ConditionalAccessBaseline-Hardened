@@ -1,0 +1,6 @@
+{
+  "displayName": "AC_TravelException",
+  "description": "Short-lived membership for employees who must sign in from outside TRUSTED_COUNTRIES during approved travel. CA106 excludes this group from the country condition so the geofence still applies to everyone else; expire memberships when the trip ends.",
+  "mailNickname": "ac-travelexception",
+  "tier": "exception"
+}

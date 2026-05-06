@@ -1,0 +1,38 @@
+{
+  "id": "CA303",
+  "displayName": "CA303 — Limited Browser Access on Unmanaged Devices",
+  "description": "Reduces unmanaged-device blast radius under Microsoft 365: browser sessions can remain read-only/view-like against Exchange Online / SharePoint when the device fails the trusted workstation filter yet still needs lightweight productivity.",
+  "metadata": {
+    "criticality": "Recommended",
+    "v2Status": "Updated",
+    "persona": "All users"
+  },
+  "include": {
+    "users": "all"
+  },
+  "exclude": {
+    "groups": [
+      "AC_ExcludedFromCA",
+      "BG_BreakGlass",
+      "AC_ServiceAccount"
+    ],
+    "guestsAndExternals": true
+  },
+  "applications": {
+    "include": [
+      "office365"
+    ]
+  },
+  "conditions": {
+    "clientAppTypes": [
+      "browser"
+    ],
+    "deviceFilter": {
+      "mode": "exclude",
+      "rule": "device.trustType -eq \"ServerAD\" -or device.isCompliant -eq True"
+    }
+  },
+  "session": {
+    "applicationEnforcedRestrictions": true
+  }
+}

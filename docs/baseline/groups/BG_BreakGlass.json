@@ -1,0 +1,6 @@
+{
+  "displayName": "BG_BreakGlass",
+  "description": "Break-glass and other emergency administrator accounts that must remain reachable if Conditional Access misconfiguration locks out normal admins. Keep membership empty until accounts exist; remove members when not actively needed. Excluded from nearly all CA policies so use only for documented recovery procedures.",
+  "mailNickname": "bg-breakglass",
+  "tier": "required"
+}

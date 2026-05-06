@@ -1,0 +1,5 @@
+/ConditionalAccessBaseline
+/IntuneManagement
+
+__pycache__/
+*.pyc

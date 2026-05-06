@@ -1,0 +1,9 @@
+{
+  "displayName": "TRUSTED_IPS",
+  "type": "ip",
+  "isTrusted": true,
+  "ipRanges": [
+    "99.99.99.99/32"
+  ],
+  "_note": "PLACEHOLDER. Replace 99.99.99.99/32 with the actual office / corporate IP ranges before enabling any policy that depends on this location."
+}

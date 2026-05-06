@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Browser-based Mirage CA baseline deployer for Microsoft Entra ID: sign in, optionally dry-run, push Conditional Access policies and related objects in Off state via Microsoft Graph." />
+    <meta name="color-scheme" content="dark light" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Mirage CA Baseline Deployer" />
+    <meta property="og:description" content="Deploy a 40-policy Conditional Access baseline to Microsoft Entra ID from your browser. No backend, no secrets, everything lands Off until you turn it on." />
+    <meta property="og:url" content="https://teuftis.github.io/ConditionalAccessBaseline-Hardened/" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Mirage CA Baseline Deployer" />
+    <meta name="twitter:description" content="Deploy a 40-policy Conditional Access baseline to Microsoft Entra ID from your browser. No backend, no secrets, everything lands Off until you turn it on." />
+    <title>Mirage CA Baseline Deployer</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="data:image/svg+xml;utf8,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'&gt;&lt;text y='14' font-size='14'&gt;CA&lt;/text&gt;&lt;/svg&gt;" />
+    <script
+      src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.28.0/lib/msal-browser.min.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <header class="masthead">
+      <div class="brand">
+        <span class="logo" aria-hidden="true">CA</span>
+        <div>
+          <h1>Mirage CA Baseline Deployer</h1>
+          <p class="subtitle">
+            v2026 · Microsoft Entra ID — Conditional Access policies, groups, and named locations · Deployed in <strong>Off</strong> state (<code>disabled</code>) only.
+          </p>
+          <p class="catalog-nav">
+            <a href="inventory.html">Browse all 40 policies</a>
+            <span aria-hidden="true">·</span>
+            <a href="https://github.com/Teuftis/ConditionalAccessBaseline-Hardened#policy-catalog">README</a>
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <main id="main-content">
+      <nav class="step-rail" aria-label="Deploy steps">
+        <a href="#step-1"><span class="num" aria-hidden="true">1</span><span class="lbl">Sign in</span></a>
+        <a href="#step-2"><span class="num" aria-hidden="true">2</span><span class="lbl">Review</span></a>
+        <a href="#step-3"><span class="num" aria-hidden="true">3</span><span class="lbl">Deploy</span></a>
+      </nav>
+
+      <section class="panel" id="step-1">
+        <h2>1. Sign in to your tenant</h2>
+        <p>
+          You sign in with <strong>your administrator account</strong> to <strong>your</strong> Microsoft Entra tenant (delegated sign-in, not a shared credential). The Mirage CA Baseline Deployer app is a multi-tenant,
+          public client with <strong>no client secret</strong>. The first administrator to use it in your tenant sees the standard Microsoft consent screen for the requested Graph permissions.
+        </p>
+        <div class="actions">
+          <button id="btn-signin" class="primary">Sign in &amp; consent</button>
+          <button id="btn-signout" disabled>Sign out</button>
+        </div>
+        <p class="meta">Account: <span id="account">Not signed in</span></p>
+      </section>
+
+      <section class="panel" id="step-2">
+        <h2>2. Review what will happen</h2>
+        <p class="section-intro">
+          The baseline covers <strong>users, administrators, guests, service accounts, and agents</strong> — not every policy applies to every principal on day one.
+        </p>
+        <ul class="bullets">
+          <li><strong>Groups</strong> (e.g. <code>BG_BreakGlass</code>, <code>AC_ExcludedFromCA</code>) are created if missing or reused by display name.</li>
+          <li><strong>Named locations</strong> ship with placeholder ranges — replace them in <strong>Microsoft Entra admin center</strong> after deploy.</li>
+          <li><strong>40</strong> policies are created or updated, all forced to <code>state: disabled</code> (<strong>Off</strong>). Re-running is idempotent.</li>
+        </ul>
+        <p class="meta">
+          Details: <a href="#policy-catalog">policies on this page</a> · <a href="inventory.html">live catalog</a> (with descriptions) · <a href="https://github.com/Teuftis/ConditionalAccessBaseline-Hardened#policy-catalog">README</a>. Baseline source: <code id="baseline-url">(resolving...)</code>
+        </p>
+      </section>
+
+      <section class="panel" id="policy-catalog">
+        <h2>Policy catalog</h2>
+        <p class="section-intro">
+          All <strong>40</strong> Conditional Access policies that will be created or updated in <strong>Off</strong> state. For descriptions and persona grouping, open the <a href="inventory.html">live catalog</a>.
+        </p>
+        <div class="policy-table-wrap">
+          <table class="policy-table">
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Display name</th>
+                <th scope="col">Persona</th>
+                <th scope="col">Criticality</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- policy-catalog:start -->
+              <tr>
+                <th scope="row"><code>CA101</code></th>
+                <td>Require MFA</td>
+                <td>All users</td>
+                <td><span class="policy-pill policy-pill--critical">Critical</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA102</code></th>
+                <td>User Risk - Require MFA + Password Change</td>
+                <td>All users</td>
+                <td><span class="policy-pill policy-pill--critical">Critical</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA103</code></th>
+                <td>Sign-In Risk - Require MFA</td>
+                <td>All users</td>
+                <td><span class="policy-pill policy-pill--critical">Critical</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA104</code></th>
+                <td>Block Legacy Authentication</td>
+                <td>All users</td>
+                <td><span class="policy-pill policy-pill--critical">Critical</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA105</code></th>
+                <td>Block Unknown Platforms</td>
+                <td>All users</td>
+                <td><span class="policy-pill policy-pill--recommended">Recommended</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA106</code></th>
+                <td>Block Outside Trusted Countries</td>
+                <td>All users</td>
+                <td><span class="policy-pill policy-pill--critical">Critical</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA107</code></th>
+                <td>Session Controls</td>
+                <td>All users</td>
+                <td><span class="policy-pill policy-pill--recommended">Recommended</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA108</code></th>
+                <td>Block Cross-Device Auth Flows</td>
+                <td>All users</td>
+                <td><span class="policy-pill policy-pill--critical">Critical</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA109</code></th>
+                <td>Require MFA for Azure Management</td>
+                <td>All users</td>
+                <td><span class="policy-pill policy-pill--recommended">Recommended</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA110</code></th>
+                <td>Block Malicious IPs</td>
+                <td>All users</td>
+                <td><span class="policy-pill policy-pill--optional">Optional</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA111</code></th>
+                <td>Continuous Access Evaluation - Standard</td>
+                <td>All users</td>
+                <td><span class="policy-pill policy-pill--recommended">Recommended</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA112</code></th>
+                <td>MFA on Device Register or Join</td>
+                <td>All users</td>
+                <td><span class="policy-pill policy-pill--critical">Critical</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA113</code></th>
+                <td>Require Token Protection (Pilot)</td>
+                <td>All users</td>
+                <td><span class="policy-pill policy-pill--optional">Optional</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA114</code></th>
+                <td>Terms of Use</td>
+                <td>All users</td>
+                <td><span class="policy-pill policy-pill--optional">Optional</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA201</code></th>
+                <td>Intune Enrolling - Require MFA</td>
+                <td>All users</td>
+                <td><span class="policy-pill policy-pill--critical">Critical</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA202</code></th>
+                <td>Require App Protection (Mobile)</td>
+                <td>All users</td>
+                <td><span class="policy-pill policy-pill--critical">Critical</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA204</code></th>
+                <td>Require Compliant Mobile (Optional MDM track)</td>
+                <td>All users</td>
+                <td><span class="policy-pill policy-pill--optional">Optional</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA301</code></th>
+                <td>Require Compliant Windows</td>
+                <td>All users</td>
+                <td><span class="policy-pill policy-pill--critical">Critical</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA302</code></th>
+                <td>Require Compliant macOS</td>
+                <td>All users</td>
+                <td><span class="policy-pill policy-pill--critical">Critical</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA303</code></th>
+                <td>Limited Browser Access on Unmanaged Devices</td>
+                <td>All users</td>
+                <td><span class="policy-pill policy-pill--recommended">Recommended</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA601</code></th>
+                <td>Phishing-Resistant MFA for Admins</td>
+                <td>Admins</td>
+                <td><span class="policy-pill policy-pill--critical">Critical</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA602</code></th>
+                <td>Admin Session Controls</td>
+                <td>Admins</td>
+                <td><span class="policy-pill policy-pill--critical">Critical</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA603</code></th>
+                <td>Admin CAE - Strict</td>
+                <td>Admins</td>
+                <td><span class="policy-pill policy-pill--critical">Critical</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA604</code></th>
+                <td>Admin Block High User Risk</td>
+                <td>Admins</td>
+                <td><span class="policy-pill policy-pill--critical">Critical</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA605</code></th>
+                <td>Admin Block High Sign-In Risk</td>
+                <td>Admins</td>
+                <td><span class="policy-pill policy-pill--critical">Critical</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA606</code></th>
+                <td>Admin Require Compliant or Joined Device</td>
+                <td>Admins</td>
+                <td><span class="policy-pill policy-pill--critical">Critical</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA701</code></th>
+                <td>App - FortiClient - MFA</td>
+                <td>Application</td>
+                <td><span class="policy-pill policy-pill--optional">Optional</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA702</code></th>
+                <td>App - Salesforce - MFA</td>
+                <td>Application</td>
+                <td><span class="policy-pill policy-pill--optional">Optional</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA801</code></th>
+                <td>Service - Require MFA (Interactive)</td>
+                <td>Service</td>
+                <td><span class="policy-pill policy-pill--recommended">Recommended</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA802</code></th>
+                <td>Service - Block Outside Trusted IPs</td>
+                <td>Service</td>
+                <td><span class="policy-pill policy-pill--critical">Critical</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA803</code></th>
+                <td>Service - Block Legacy Auth</td>
+                <td>Service</td>
+                <td><span class="policy-pill policy-pill--recommended">Recommended</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA804</code></th>
+                <td>Service - Block Non-M365 Apps</td>
+                <td>Service</td>
+                <td><span class="policy-pill policy-pill--recommended">Recommended</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA901</code></th>
+                <td>Guest - Require MFA</td>
+                <td>Guest</td>
+                <td><span class="policy-pill policy-pill--critical">Critical</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA902</code></th>
+                <td>Guest - Block High Sign-In Risk</td>
+                <td>Guest</td>
+                <td><span class="policy-pill policy-pill--recommended">Recommended</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA903</code></th>
+                <td>Guest - Block Legacy Auth</td>
+                <td>Guest</td>
+                <td><span class="policy-pill policy-pill--recommended">Recommended</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA904</code></th>
+                <td>Guest - Block Outside Trusted Countries</td>
+                <td>Guest</td>
+                <td><span class="policy-pill policy-pill--critical">Critical</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA905</code></th>
+                <td>Guest - Block Non-Collaboration Apps</td>
+                <td>Guest</td>
+                <td><span class="policy-pill policy-pill--critical">Critical</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA906</code></th>
+                <td>Guest - Terms of Use</td>
+                <td>Guest</td>
+                <td><span class="policy-pill policy-pill--optional">Optional</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA907</code></th>
+                <td>Guest - Session Controls</td>
+                <td>Guest</td>
+                <td><span class="policy-pill policy-pill--recommended">Recommended</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CAA01</code></th>
+                <td>Agent - Block High Risk</td>
+                <td>Agent</td>
+                <td><span class="policy-pill policy-pill--recommended">Recommended</span></td>
+              </tr>
+              <!-- policy-catalog:end -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel" id="step-3">
+        <h2>3. Deploy</h2>
+        <p class="section-intro">
+          <strong>Dry run</strong> previews the work — <strong>no directory writes</strong>. Turn it off for a real deploy.
+        </p>
+        <div class="actions">
+          <button id="btn-deploy" class="primary" disabled>Deploy CA Baseline</button>
+          <label class="dry-run">
+            <input id="dry-run" type="checkbox" checked />
+            Dry run (preview only, no changes)
+          </label>
+        </div>
+        <p class="status" id="status" data-kind="info">Sign in to begin.</p>
+        <p class="summary" id="summary"></p>
+        <p class="meta">
+          Next: read the <a href="#activity-log">activity log</a> below, then <a href="#after-deployment">After deployment</a>.
+        </p>
+      </section>
+
+      <section class="panel" id="activity-log">
+        <h2>Activity log</h2>
+        <div id="log" class="log" role="log" aria-live="polite"></div>
+      </section>
+
+      <section class="panel after-deploy" id="after-deployment">
+        <h2>After deployment</h2>
+        <p class="section-intro">Use <strong>Microsoft Entra admin center</strong> — not this page — to finish rollout:</p>
+        <ul class="bullets compact">
+          <li>Open <strong>Protection</strong> → <strong>Conditional Access</strong> and review policies (still <strong>Off</strong>).</li>
+          <li>Update <strong>named locations</strong> and <strong>groups</strong> (break glass, exclusions, service accounts) with real values.</li>
+          <li>Enable policies in a controlled order when your runbook says so — optionally use <strong>Sign-in logs</strong> / <strong>Conditional Access insights</strong> first.</li>
+        </ul>
+        <p class="meta">
+          <strong>Full guidance</strong> (hosting, roles, fork): see the
+          <a href="https://github.com/Teuftis/ConditionalAccessBaseline-Hardened#deploy-in-your-tenant">README — Deploy in your tenant</a>
+          on GitHub.
+        </p>
+      </section>
+
+      <section class="panel small">
+        <h2>What this tool does</h2>
+        <ul class="bullets">
+          <li><strong>Creates or updates</strong> Conditional Access policies in <strong>Off</strong> state only, creates or reuses groups, and creates placeholder named locations — using <strong>delegated</strong> permissions in your session.</li>
+          <li><strong>Does not</strong> enable Conditional Access enforcement or set policies to <strong>Report-only</strong> or <strong>On</strong>; that remains your decision in Microsoft Entra admin center.</li>
+          <li><strong>Does not</strong> use a client secret or application-only permissions; it cannot act without a signed-in administrator.</li>
+          <li><strong>Does not</strong> read mail or files; directory access is limited to what Graph needs for groups, locations, and policies.</li>
+        </ul>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        <a href="https://github.com/Teuftis/ConditionalAccessBaseline-Hardened">Source on GitHub</a>
+        — inspect the SPA and baseline JSON before deploying. Graph operations appear in audit logs for the signed-in admin as application
+        <code>Mirage CA Baseline Deployer</code> (application (client) ID <code>0a54b934-a282-49c8-8e95-eaf7719c9ab2</code>).
+      </p>
+    </footer>
+
+    <!--
+      Baseline JSON: the deploy workflow copies ../baseline → docs/baseline so the SPA reads same-origin first.
+      Fallback: raw.githubusercontent.com/<owner>/<repo>/<ref>/baseline — set window.MIRAGE_BASELINE_REF / MIRAGE_BASELINE_URL if needed.
+    -->
+    <script>
+      // window.MIRAGE_BASELINE_REF = "master";
+      // window.MIRAGE_BASELINE_URL = "https://raw.githubusercontent.com/YOU/YourRepo/main/baseline";
+    </script>
+    <script type="module" src="deploy.js"></script>
+  </body>
+</html>

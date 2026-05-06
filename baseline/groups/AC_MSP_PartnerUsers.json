@@ -1,0 +1,6 @@
+{
+  "displayName": "AC_MSP_PartnerUsers",
+  "description": "Delegated administrator or partner accounts that need access to Microsoft 365 admin experiences blocked for standard guests in CA905. Requires explicit lifecycle: remove access when the engagement ends.",
+  "mailNickname": "ac-msp-partnerusers",
+  "tier": "exception"
+}

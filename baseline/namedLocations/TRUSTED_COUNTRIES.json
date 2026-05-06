@@ -1,0 +1,10 @@
+{
+  "displayName": "TRUSTED_COUNTRIES",
+  "type": "country",
+  "countriesAndRegions": [
+    "CA",
+    "US"
+  ],
+  "includeUnknownCountriesAndRegions": false,
+  "_note": "Defaults to CA, US. Add or remove ISO 3166-1 alpha-2 codes for your operational footprint."
+}

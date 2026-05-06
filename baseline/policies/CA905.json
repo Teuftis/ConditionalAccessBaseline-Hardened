@@ -1,0 +1,38 @@
+{
+  "id": "CA905",
+  "displayName": "CA905 — Guest - Block Non-Collaboration Apps",
+  "description": "Data-exfiltration control for guests collaborating in Microsoft Teams/Groups: confines Office 365 workloads while blocking ancillary SaaS (except explicitly excluded apps such as delegated admin workloads).",
+  "metadata": {
+    "criticality": "Critical",
+    "v2Status": "Retained",
+    "persona": "Guest",
+    "j0eyvEquivalent": "CA401"
+  },
+  "include": {
+    "users": "guestsAndExternals"
+  },
+  "exclude": {
+    "groups": [
+      "AC_ExcludedFromCA",
+      "BG_BreakGlass",
+      "AC_MSP_PartnerUsers"
+    ]
+  },
+  "applications": {
+    "include": "all",
+    "exclude": [
+      "office365"
+    ]
+  },
+  "conditions": {
+    "clientAppTypes": [
+      "all"
+    ]
+  },
+  "grant": {
+    "operator": "OR",
+    "builtInControls": [
+      "block"
+    ]
+  }
+}
