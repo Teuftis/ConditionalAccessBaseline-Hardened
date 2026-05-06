@@ -1,5 +1,7 @@
 /ConditionalAccessBaseline
 /IntuneManagement
 
+# Python — never commit bytecode (regenerated from .py; can be stale or machine-specific)
 __pycache__/
+*.py[cod]
 *.pyc
