@@ -3,7 +3,14 @@
 // policies in Off (disabled) state. Idempotent; safe to re-run.
 import { APP_CONFIG, GRAPH_SCOPES, ALLOWED_DEPLOY_STATES, resolveBaselineUrl, resolveBaselineUrlBases } from "./config.js";
 import { graphGet, graphList, graphPost, graphPatch, findByDisplayName, GraphError } from "./graph.js";
-import { buildGroupBody, buildNamedLocationBody, buildPolicyBody, evaluateSkip } from "./translate.js";
+import {
+  KNOWN_APPS,
+  buildGroupBody,
+  buildNamedLocationBody,
+  buildPolicyBody,
+  evaluateFirstPartyAppSkip,
+  evaluateSkip,
+} from "./translate.js";
 
 // MSAL is loaded as a UMD global from the CDN script tag in index.html.
 const msalApp = new msal.PublicClientApplication({
@@ -251,11 +258,60 @@ function collectServicePrincipalNames(policyIntents) {
   return [...names];
 }
 
+function collectReferencedFirstPartyAppIds(policyIntents) {
+  const ids = new Set();
+  const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const addToken = (token) => {
+    if (!(token in KNOWN_APPS)) return;
+    const appId = KNOWN_APPS[token];
+    if (typeof appId === "string" && uuid.test(appId)) ids.add(appId.toLowerCase());
+  };
+  for (const p of policyIntents) {
+    const apps = p.applications;
+    if (!apps) continue;
+    if (typeof apps.include === "string") addToken(apps.include);
+    if (Array.isArray(apps.include)) for (const t of apps.include) addToken(t);
+  }
+  return ids;
+}
+
+async function indexFirstPartyAppIds(token, policyIntents) {
+  const wanted = collectReferencedFirstPartyAppIds(policyIntents);
+  const present = new Set();
+  for (const appId of wanted) {
+    try {
+      const r = await graphGet(token, "/servicePrincipals", {
+        $filter: `appId eq '${appId}'`,
+        $select: "id",
+        $top: "1",
+      });
+      if (Array.isArray(r.value) && r.value.length) present.add(appId);
+    } catch (e) {
+      logLine(`Could not verify first-party app ${appId}: ${e.message || e}`, "warn");
+    }
+  }
+  for (const appId of wanted) {
+    if (!present.has(appId)) {
+      logLine(
+        `First-party app appId=${appId} has no service principal in this tenant — policies that target only named Microsoft apps will be skipped.`,
+        "warn",
+      );
+    }
+  }
+  return present;
+}
+
 async function ensurePolicy(token, intent, ctx, dryRun) {
   const skip = evaluateSkip(intent, ctx);
   if (skip) {
     logLine(`policy [${intent.displayName}] SKIPPED (missing dependency: ${skip})`, "warn");
     return { id: intent.id, status: "skipped", reason: skip };
+  }
+
+  const skipFp = evaluateFirstPartyAppSkip(intent, ctx);
+  if (skipFp) {
+    logLine(`policy [${intent.displayName}] SKIPPED (missing dependency: ${skipFp})`, "warn");
+    return { id: intent.id, status: "skipped", reason: skipFp };
   }
 
   const body = buildPolicyBody(intent, ctx);
@@ -400,6 +456,9 @@ async function deploy() {
   }
   const spNames = collectServicePrincipalNames(policyIntents);
   if (spNames.length) ctx.servicePrincipalIdsByDisplayName = await indexServicePrincipals(token, spNames);
+
+  setStatus("Verifying Microsoft first-party apps referenced by policies...", "info");
+  ctx.appIdInTenant = await indexFirstPartyAppIds(token, policyIntents);
 
   // Phase 3 - Policies.
   setStatus(`Phase 3/3: ensuring ${policyIntents.length} Conditional Access policies (state=disabled)...`, "info");
