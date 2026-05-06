@@ -9,7 +9,15 @@
 
 This project is an opinionated Conditional Access posture for Microsoft Entra ID. Open the **[deploy app](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/)** (static site from [`docs/`](./docs/)), sign in as a tenant admin, and run a dry run or full deploy: the app resolves names to Graph IDs using [`docs/translate.js`](docs/translate.js), applies [`baseline/manifest.json`](./baseline/manifest.json), and creates missing **groups**, **named locations**, and **policies**. Terms of Use and some third-party prerequisites remain **tenant-owned** — they can show as **skipped** until you create or license them. **Operational risk:** Graph and Conditional Access APIs change over time — use a **non-production** tenant for first runs where you can, keep **break-glass** reachable, and follow the same phased path the repo assumes: most new policies already land as **Report-only** (eight IDs as **Off**; see **At a glance**), so review **Report-only** telemetry and **Sign-in logs** ([After deploy](#after-deploy-in-microsoft-entra-admin-center)) before moving policies fully **On** in the Microsoft Entra admin center.
 
-[![Open deploy app](https://img.shields.io/badge/Open-deploy%20app-0078D4?logo=microsoftazure&logoColor=white&style=for-the-badge)](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/)
+<p align="center">
+  <a href="https://teuftis.github.io/ConditionalAccessBaseline-Hardened/">
+    <img
+      src="https://img.shields.io/badge/Open-deploy%20app-0078D4?logo=microsoftazure&logoColor=white&style=for-the-badge&logoWidth=28"
+      alt="Open deploy app"
+      width="560"
+    />
+  </a>
+</p>
 
 **Quick links:** [Deploy app](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/) · [GitHub repo](https://github.com/Teuftis/ConditionalAccessBaseline-Hardened) · [Policy catalog (Pages)](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/inventory.html) · [`POLICY_INVENTORY.md`](./POLICY_INVENTORY.md) · [`SECURITY.md`](./SECURITY.md)
 
