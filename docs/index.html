@@ -67,7 +67,7 @@
         <ul class="bullets">
           <li><strong>Groups</strong> (e.g. <code>BG_BreakGlass</code>, <code>AC_ExcludedFromCA</code>) are created if missing or reused by display name.</li>
           <li><strong>Named locations</strong> ship with placeholder ranges — replace them in <strong>Microsoft Entra admin center</strong> after deploy.</li>
-          <li><strong>40</strong> policies are created or updated, all forced to <code>state: disabled</code> (<strong>Off</strong>). Re-running is idempotent.</li>
+          <li><strong>40</strong> policies: <strong>new</strong> ones are created in <code>state: disabled</code> (<strong>Off</strong>). If a policy with the same <strong>display name</strong> already exists, it is <strong>left unchanged</strong> (no overwrite of live settings). Re-run is safe.</li>
         </ul>
         <p class="meta">
           Details: <a href="#policy-catalog">policies on this page</a> · <a href="inventory.html">live catalog</a> (with descriptions) · <a href="https://github.com/Teuftis/ConditionalAccessBaseline-Hardened#policy-catalog">README</a>. Baseline source: <code id="baseline-url">(resolving...)</code>
@@ -77,7 +77,7 @@
       <section class="panel" id="policy-catalog">
         <h2>Policy catalog</h2>
         <p class="section-intro">
-          All <strong>40</strong> Conditional Access policies that will be created or updated in <strong>Off</strong> state. For descriptions and persona grouping, open the <a href="inventory.html">live catalog</a>.
+          All <strong>40</strong> Conditional Access policies in the baseline (new deploys create them <strong>Off</strong>; existing names are skipped). For descriptions and persona grouping, open the <a href="inventory.html">live catalog</a>.
         </p>
         <div class="policy-table-wrap">
           <table class="policy-table">

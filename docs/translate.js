@@ -136,7 +136,16 @@ function resolveUsers(intent, ctx) {
   if (Array.isArray(exclude.groups) && !workloadAgentAllAgents) {
     users.excludeGroups = exclude.groups.map((g) => resolveGroup(g, ctx)).filter(Boolean);
   }
-  if (exclude.guestsAndExternals && !workloadAgentAllAgents) {
+  // Graph returns 1007 for CAE-only session controls when excludeGuestsOrExternalUsers is present
+  // alongside includeUsers All (validated vs CA603, which excludes guests intent-only by omission).
+  // Intent JSON may still list guests excluded for operators; workload guest policies remain separate.
+  const caeOnlyNoGrantGuestExcludeFailsGraph =
+    Boolean(intent.session?.continuousAccessEvaluation) && !intent.grant;
+  if (
+    exclude.guestsAndExternals &&
+    !workloadAgentAllAgents &&
+    !caeOnlyNoGrantGuestExcludeFailsGraph
+  ) {
     users.excludeGuestsOrExternalUsers = {
       guestOrExternalUserTypes: GUEST_OR_EXTERNAL_KINDS.join(","),
       externalTenants: { membershipKind: "all" },

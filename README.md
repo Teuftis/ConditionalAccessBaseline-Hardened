@@ -1,6 +1,6 @@
 # Mirage Conditional Access Baseline (v2026)
 
-**Opinionated, production-style Conditional Access for Microsoft Entra ID** — stored as JSON in this repo and applied with a **small static web app** (no backend, no client secret in Git). Sign in as a tenant admin, consent to Microsoft Graph, and create or update policies, groups, and named locations. **Everything is created in Off (disabled)**; you turn policies on in the admin center when you are ready.
+**Opinionated, production-style Conditional Access for Microsoft Entra ID** — stored as JSON in this repo and applied with a **small static web app** (no backend, no client secret in Git). Sign in as a tenant admin, consent to Microsoft Graph, and create **new** policies, groups, and named locations. **New Conditional Access policies are created in Off (disabled)**. If a policy **display name** already exists in the tenant, the deploy app **does not overwrite it** (so active settings stay intact). You turn policies on in the admin center when you are ready.
 
 **This is not a Microsoft product.** Treat the baseline as a starting point: validate against your apps, licenses (for example Entra ID P2 for risk-based policies), and change process.
 
@@ -46,7 +46,7 @@ You do **not** need to clone the repo to deploy: open the **[deploy app](https:/
 
 [`POLICY_INVENTORY.md`](./POLICY_INVENTORY.md) is a Markdown table suited to reviews and PR diffs; the **[styled catalog](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/inventory.html)** adds layout and filters. **`python scripts/generate-baseline.py`** keeps `baseline/`, those files, SPA tables, and the **Policy catalog / Groups** sections at the bottom of this README in sync (see **[Customize & fork](#customize--fork)**).
 
-**Safe defaults:** create/update flows only push policies as **`disabled`** (**Off**) — see [`ALLOWED_DEPLOY_STATES`](docs/config.js). Moving to Report-only or On stays a **manual** admin-center step.
+**Safe defaults:** new policies only are created **`disabled`** (**Off**) — see [`ALLOWED_DEPLOY_STATES`](docs/config.js). Policies that already exist (matched by **display name**) are never updated by the app. Moving to Report-only or On stays a **manual** admin-center step.
 
 ---
 
@@ -72,7 +72,7 @@ You need permissions to manage **Conditional Access** and **groups** (typical co
 | Topic | Detail |
 |-------|--------|
 | **Credentialed access only** | The SPA uses your admin sign-in via **delegated** Graph scopes — nothing runs without **you**. There is **no** client secret in the repo ([`docs/config.js`](docs/config.js)). |
-| **Writes are limited by design** | Policy state from the deploy app is capped at **`disabled`**; Report-only / On remain **portal-only** choices. |
+| **Writes are limited by design** | **New** CA policies are created **`disabled`**. **Existing** CA policies (same **display name**) are **not patched** by the app. Report-only / On remain **portal-only** choices. |
 | **Supply chain** | `main` (and whoever can publish **GitHub Pages**) controls what browsers execute — review PRs and protect the default branch accordingly. |
 
 ---

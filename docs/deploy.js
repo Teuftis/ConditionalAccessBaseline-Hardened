@@ -314,13 +314,6 @@ async function ensurePolicy(token, intent, ctx, dryRun) {
     return { id: intent.id, status: "skipped", reason: skipFp };
   }
 
-  const body = buildPolicyBody(intent, ctx);
-
-  // Hard guard: never deploy in any state but those allowed by config.
-  if (!ALLOWED_DEPLOY_STATES.includes(body.state)) {
-    throw new Error(`Refusing to deploy policy [${intent.displayName}] with state=${body.state}`);
-  }
-
   const existing = await findByDisplayName(
     token,
     "/identity/conditionalAccess/policies",
@@ -329,19 +322,23 @@ async function ensurePolicy(token, intent, ctx, dryRun) {
   );
 
   if (existing) {
-    if (dryRun) {
-      logLine(`policy [${intent.displayName}] WOULD BE UPDATED (id=${existing.id})`, "warn");
-      return { id: intent.id, status: "would-update" };
-    }
-    try {
-      await graphPatch(token, `/identity/conditionalAccess/policies/${existing.id}`, body);
-      logLine(`policy [${intent.displayName}] UPDATED (state=disabled, id=${existing.id})`, "ok");
-      return { id: intent.id, status: "updated" };
-    } catch (err) {
-      if (isFatalGraphError(err)) throw err;
-      logGraphFailure(`policy [${intent.displayName}] PATCH`, err);
-      return { id: intent.id, status: "error", error: err.message };
-    }
+    logLine(
+      `policy [${intent.displayName}] already exists (${dryRun ? "dry run — " : ""}id=${existing.id}, tenant state=${existing.state}) — not modifying to avoid overwriting live settings.`,
+      dryRun ? "warn" : "info",
+    );
+    return {
+      id: intent.id,
+      status: dryRun ? "would-remain" : "unchanged",
+      graphId: existing.id,
+      tenantState: existing.state,
+    };
+  }
+
+  const body = buildPolicyBody(intent, ctx);
+
+  // Hard guard: never deploy in any state but those allowed by config.
+  if (!ALLOWED_DEPLOY_STATES.includes(body.state)) {
+    throw new Error(`Refusing to deploy policy [${intent.displayName}] with state=${body.state}`);
   }
 
   if (dryRun) {
@@ -461,27 +458,42 @@ async function deploy() {
   ctx.appIdInTenant = await indexFirstPartyAppIds(token, policyIntents);
 
   // Phase 3 - Policies.
-  setStatus(`Phase 3/3: ensuring ${policyIntents.length} Conditional Access policies (state=disabled)...`, "info");
+  setStatus(
+    `Phase 3/3: Conditional Access policies — create missing as disabled; skip existing display names (${policyIntents.length} in manifest)...`,
+    "info",
+  );
   const results = [];
   for (const intent of policyIntents) {
     const r = await ensurePolicy(token, intent, ctx, dryRun);
     results.push(r);
   }
 
-  const counts = { created: 0, updated: 0, skipped: 0, error: 0, "would-create": 0, "would-update": 0 };
+  const counts = {
+    created: 0,
+    unchanged: 0,
+    skipped: 0,
+    error: 0,
+    "would-create": 0,
+    "would-remain": 0,
+  };
   for (const r of results) counts[r.status] = (counts[r.status] || 0) + 1;
 
   const summary = [
     `created: ${counts.created}`,
-    `updated: ${counts.updated}`,
+    `unchanged: ${counts.unchanged}`,
     `would-create: ${counts["would-create"]}`,
-    `would-update: ${counts["would-update"]}`,
+    `would-remain: ${counts["would-remain"]}`,
     `skipped: ${counts.skipped}`,
     `error: ${counts.error}`,
   ].join(" | ");
   ui.summary().textContent = summary;
 
-  setStatus(dryRun ? "Dry run complete." : "Deployment complete. All policies in Off (disabled) state.", counts.error ? "warn" : "ok");
+  setStatus(
+    dryRun
+      ? "Dry run complete."
+      : "Deployment complete. New policies were created disabled; existing Conditional Access policies (same display name) were not changed.",
+    counts.error ? "warn" : "ok",
+  );
   logLine(summary, counts.error ? "warn" : "ok");
   if (ctx.missing.length) {
     logLine(`Unresolved references: ${[...new Set(ctx.missing)].join(", ")}`, "warn");
