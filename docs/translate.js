@@ -11,7 +11,7 @@
 import { ALLOWED_DEPLOY_STATES } from "./config.js";
 
 // Well-known first-party app identifiers used by name in the intent files.
-const KNOWN_APPS = {
+export const KNOWN_APPS = {
   azureManagement: "797f4846-ba00-4fd7-ba43-dac1f8f63013",
   intuneEnrollment: "d4ebce55-015a-49b5-a083-c84d1797ae8c",
   exchangeOnline: "00000002-0000-0ff1-ce00-000000000000",
@@ -130,10 +130,13 @@ function resolveUsers(intent, ctx) {
     users.includeUsers = ["None"];
   }
 
-  if (Array.isArray(exclude.groups)) {
+  // Workload / agent-scope policies scope identities via conditions.clientApplications, not users.
+  // User-level excludeGroups with includeUsers: None violates the CA schema (1007).
+  const workloadAgentAllAgents = include.agentIds === "all";
+  if (Array.isArray(exclude.groups) && !workloadAgentAllAgents) {
     users.excludeGroups = exclude.groups.map((g) => resolveGroup(g, ctx)).filter(Boolean);
   }
-  if (exclude.guestsAndExternals) {
+  if (exclude.guestsAndExternals && !workloadAgentAllAgents) {
     users.excludeGuestsOrExternalUsers = {
       guestOrExternalUserTypes: GUEST_OR_EXTERNAL_KINDS.join(","),
       externalTenants: { membershipKind: "all" },
@@ -234,7 +237,19 @@ function resolveSession(intent) {
     out.persistentBrowser = { isEnabled: true, mode: s.persistentBrowser };
   }
   if (s.continuousAccessEvaluation) {
-    out.continuousAccessEvaluation = { mode: s.continuousAccessEvaluation };
+    // Intent uses portal-style names; Graph only accepts continuousAccessEvaluationMode.
+    // "strictLocation" is an evolvable enum — Graph rejects it unless the client sends
+    // Prefer: include-unknown-enum-members (see docs/graph.js rawFetch headers).
+    const CAE_TO_GRAPH_MODE = {
+      standard: "strictEnforcement",
+      strict: "strictLocation",
+      strictEnforcement: "strictEnforcement",
+      strictLocation: "strictLocation",
+      disabled: "disabled",
+    };
+    const raw = s.continuousAccessEvaluation;
+    const mode = CAE_TO_GRAPH_MODE[raw] ?? raw;
+    out.continuousAccessEvaluation = { mode };
   }
   if (s.applicationEnforcedRestrictions) {
     out.applicationEnforcedRestrictions = { isEnabled: true };
@@ -243,6 +258,34 @@ function resolveSession(intent) {
     out.secureSignInSession = { isEnabled: true };
   }
   return Object.keys(out).length ? out : null;
+}
+
+/**
+ * Skip policies that target native first-party apps (resolved from KNOWN_APPS)
+ * when no service principal exists for that appId — common without Intune/MDM.
+ */
+export function evaluateFirstPartyAppSkip(intent, ctx) {
+  const present = ctx.appIdInTenant;
+  if (!present || !(present instanceof Set)) return null;
+  const apps = intent.applications;
+  if (!apps) return null;
+
+  const tokens = [];
+  if (typeof apps.include === "string" && apps.include in KNOWN_APPS) tokens.push(apps.include);
+  if (Array.isArray(apps.include)) {
+    for (const t of apps.include) {
+      if (t in KNOWN_APPS) tokens.push(t);
+    }
+  }
+  for (const token of tokens) {
+    const appId = KNOWN_APPS[token];
+    if (typeof appId !== "string") continue;
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(appId)) continue;
+    if (!present.has(appId.toLowerCase())) {
+      return `firstPartyApp:${token}`;
+    }
+  }
+  return null;
 }
 
 // Apply skipIfMissing rules. Returns a string explaining what is missing,
