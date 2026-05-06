@@ -223,3 +223,17 @@ Deployed from [`baseline/groups/`](./baseline/groups/) with the SPA. **`tier`** 
 - **AUTOPILOT_DevicePrep** — Exception — mailNickname `autopilot-deviceprep`
   Device objects undergoing Windows Autopilot pre-provisioning so they can complete join/enrollment without triggering CA112 MFA-on-join or CA201 enrollment MFA prematurely. Clean up stale device members after deployment finishes.
 <!-- group-catalog:end -->
+
+---
+
+## License
+
+Licensed under the [MIT License](./LICENSE).
+
+## Security
+
+Report vulnerabilities as described in [SECURITY.md](./SECURITY.md) (prefer GitHub **Security → Report a vulnerability**).
+
+## Reference spreadsheets
+
+The **`reference/`** `.xlsx` files are companion material for baseline design (not consumed at runtime by the deploy app). Embedded Office XML has been scanned for obvious sensitive strings: **no email addresses**, **no `.onmicrosoft` / tenant-style identifiers**, and **no non-schema HTTPS/HTTP URLs** beyond standard Open XML schema namespaces. Re-scan your copy if it diverges from this repository before wider distribution.
