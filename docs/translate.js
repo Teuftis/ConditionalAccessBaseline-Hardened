@@ -405,9 +405,11 @@ export const POLICY_IDS_DEPLOY_DISABLED_BY_DEFAULT = new Set([
 ]);
 
 function resolvePolicyDeployState(intent) {
-  // Explicit intent wins first. Default is report-only except POLICY_IDS_DEPLOY_DISABLED_BY_DEFAULT.
-  // User-actions policies use the same rules (CA112 defaults report-only). If Graph rejects
-  // report-only on a given scenario at POST time, set `deploymentState: "disabled"` on that intent file.
+  // Optional per-policy intent field `deploymentState` / `deployState` selects Report-only vs Off
+  // only on first POST — existing tenant policies are never modified (deploy skips same display name).
+  // Default is report-only except POLICY_IDS_DEPLOY_DISABLED_BY_DEFAULT. User-actions (e.g. CA112)
+  // follow the same path. If Graph rejects report-only at POST time, add `deploymentState: "disabled"`
+  // to that intent JSON for your fork.
   const raw = intent.deploymentState ?? intent.deployState;
   if (typeof raw === "string" && ALLOWED_DEPLOY_STATES.includes(raw)) {
     return raw;
