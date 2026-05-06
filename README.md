@@ -57,7 +57,17 @@ You need permissions to manage **Conditional Access** and **groups** (typical co
 1. Open the **[deploy web app](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/)** ([troubleshooting](#github-pages) if you get **404** or an empty baseline).
 2. **Sign in** and complete **delegated consent** for the requested Microsoft Graph scopes.
 3. Optionally leave **Dry run** enabled to preview (**no tenant writes**), then disable it and run **Deploy**.
-4. Scan the activity log — optional workloads may appear as **skipped** until apps or dependencies exist in the tenant.
+4. Scan the activity log — **optional workloads** may show as **skipped** (missing dependencies); **Conditional Access policies** whose **display name** already exist show as **unchanged** (not overwritten). Policies that could not POST will show **error** until prerequisites or translation rules are addressed.
+
+**What writes vs what is left alone**
+
+| Artefact | On re-run |
+|----------|-----------|
+| **Conditional Access policies** | **POST** only when no policy with that **display name** exists. Existing policies are **never PATCHed** (state and rules stay as in the tenant). |
+| **Groups** | Created if missing; if the group exists, its **membership and properties are not updated**—only reused for ID resolution. |
+| **Named locations** | Created if missing; existing objects are reused **without** overwriting IP/country definitions. |
+
+The activity log summarizes **created**, **unchanged**, **skipped**, and **errors** (including **`firstPartyApp:…`** when a Microsoft app lacks a tenant service principal).
 
 ### After deploy in Microsoft Entra admin center
 
@@ -92,7 +102,7 @@ The SPA is **`docs/`**, deployed by [.github/workflows/deploy-pages.yml](.github
 | Task | Steps |
 |------|-------|
 | **Change policies or groups** | Edit **`POLICIES`** / **`GROUPS`** (and related structs) in [`scripts/generate-baseline.py`](scripts/generate-baseline.py); run **`python scripts/generate-baseline.py`**; commit **`baseline/`**, **`POLICY_INVENTORY.md`**, **`docs/inventory.html`**, **`docs/index.html`**, and the generated sections in **`README.md`**. On Windows save the script as UTF-8. |
-| **Naming in Entra** | Generated **`displayName`** values look like **`CA101 — Require MFA`**; deploy resolves existing policies by **`displayName`**. Older manual names (**`Require MFA`**, **`[CA101]`…**) can cause duplicates unless you align names first. |
+| **Naming in Entra** | Generated **`displayName`** values look like **`CA101 — Require MFA`**; deploy looks up existing policies **by that exact name**. Matches are **skipped** (not deleted or PATCHed)—rename or remove a conflicting object in Entra if you intend the app to POST a fresh policy. Older manual names cause **duplicate** parallel policies unless you align names first. |
 | **Fork another account** | Create a multitenant SPA app registration (**public client**, no secret), plug **`clientId`** and redirect URIs into [`docs/config.js`](docs/config.js), enable Pages, use **`https://<you>.github.io/<repo>/`**, and mirror [`GRAPH_SCOPES`](docs/config.js). |
 | **Hack locally** | From repo root run `python -m http.server` (or equivalent), open **`/docs/`**, add **localhost** redirect URIs on the app registration. |
 
@@ -134,7 +144,7 @@ Each bullet is **policy id — short title — persona — criticality**; the in
 - **CA110** — Block Malicious IPs — All users — Optional
   Threat-intelligence egress control: denies sign-ins that map to indicators in the MALICIOUS_IPS named location (populate with SOC or feed-driven ranges before enforcement). Complements geo and risk policies.
 - **CA111** — Continuous Access Evaluation - Standard — All users — Recommended
-  Continuous Access Evaluation in standard sensitivity for workforce accounts: reacts faster to revocation or policy changes compared with long-lived tokens. Administrators should pair with CA603 (strict CAE).
+  Continuous Access Evaluation in standard sensitivity for workforce accounts: reacts faster to revocation or policy changes compared with long-lived tokens. Administrators should pair with CA603 (strict CAE). Deploy note: Microsoft Graph rejects some CAE-only session payloads that also exclude guests/externals; the deploy SPA omits excludeGuestsOrExternalUsers for this rule (see docs/translate.js); guest collaborators remain covered by other baseline policies.
 - **CA112** — MFA on Device Register or Join — All users — Critical
   Strengthens Entra device registration and join endpoints: MFA is required anytime a user completes device registration or Workplace Join/Azure AD join workflows, reducing unauthorized device onboarding.
 - **CA113** — Require Token Protection (Pilot) — All users — Optional

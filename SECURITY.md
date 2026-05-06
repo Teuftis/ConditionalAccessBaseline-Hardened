@@ -18,7 +18,7 @@ If you cannot use GitHub (for example you are not a GitHub user), open an issue 
 
 ## Scope
 
-In scope: issues in this repo that could affect **confidentiality**, **integrity**, or **availability** when using the generate script, static deploy app, or published GitHub Pages artifacts (for example unsafe handling of tokens, unsafe inclusion of third-party scripts, or unintended writes to Microsoft Graph).
+In scope: issues in this repo that could affect **confidentiality**, **integrity**, or **availability** when using the generate script, static deploy app, or published GitHub Pages artifacts (for example unsafe handling of tokens, unsafe inclusion of third-party scripts, unexpected **overwrite** behavior, or unintended **writes** to Microsoft Graph—including **creating** Conditional Access policies the operator did not intend).
 
 Out of scope by default: purely operational or configuration choices in your own Entra tenant after you deploy policies.
 

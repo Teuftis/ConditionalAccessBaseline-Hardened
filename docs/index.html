@@ -3,15 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Browser-based Mirage CA baseline deployer for Microsoft Entra ID: sign in, optionally dry-run, push Conditional Access policies and related objects in Off state via Microsoft Graph." />
+    <meta name="description" content="Browser-based Mirage CA baseline deployer for Microsoft Entra ID: sign in, optionally dry run, create missing Conditional Access policies (disabled) and related objects via Graph — skips existing CA policies by display name." />
     <meta name="color-scheme" content="dark light" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Mirage CA Baseline Deployer" />
-    <meta property="og:description" content="Deploy a 40-policy Conditional Access baseline to Microsoft Entra ID from your browser. No backend, no secrets, everything lands Off until you turn it on." />
+    <meta property="og:description" content="Deploy the Mirage CA baseline from your browser: new CA policies disabled; existing policies left unchanged by name." />
     <meta property="og:url" content="https://teuftis.github.io/ConditionalAccessBaseline-Hardened/" />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="Mirage CA Baseline Deployer" />
-    <meta name="twitter:description" content="Deploy a 40-policy Conditional Access baseline to Microsoft Entra ID from your browser. No backend, no secrets, everything lands Off until you turn it on." />
+    <meta name="twitter:description" content="Deploy Mirage CA from your browser: new policies disabled; skips existing Conditional Access policies with the same display name." />
     <title>Mirage CA Baseline Deployer</title>
     <link rel="stylesheet" href="style.css" />
     <link rel="icon" href="data:image/svg+xml;utf8,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'&gt;&lt;text y='14' font-size='14'&gt;CA&lt;/text&gt;&lt;/svg&gt;" />
@@ -379,7 +379,7 @@
       <section class="panel small">
         <h2>What this tool does</h2>
         <ul class="bullets">
-          <li><strong>Creates or updates</strong> Conditional Access policies in <strong>Off</strong> state only, creates or reuses groups, and creates placeholder named locations — using <strong>delegated</strong> permissions in your session.</li>
+          <li><strong>Creates</strong> missing Conditional Access policies in <strong>Off</strong> only; <strong>skips</strong> policies whose <strong>display name</strong> already exists (no overwrite). <strong>Creates or reuses</strong> groups, and creates missing placeholder named locations — using <strong>delegated</strong> permissions in your session.</li>
           <li><strong>Does not</strong> enable Conditional Access enforcement or set policies to <strong>Report-only</strong> or <strong>On</strong>; that remains your decision in Microsoft Entra admin center.</li>
           <li><strong>Does not</strong> use a client secret or application-only permissions; it cannot act without a signed-in administrator.</li>
           <li><strong>Does not</strong> read mail or files; directory access is limited to what Graph needs for groups, locations, and policies.</li>
