@@ -102,7 +102,7 @@ The SPA is **`docs/`**, deployed by [.github/workflows/deploy-pages.yml](.github
 | Task | Steps |
 |------|-------|
 | **Change policies or groups** | Edit **`POLICIES`** / **`GROUPS`** (and related structs) in [`scripts/generate-baseline.py`](scripts/generate-baseline.py); run **`python scripts/generate-baseline.py`**; commit **`baseline/`**, **`POLICY_INVENTORY.md`**, **`docs/inventory.html`**, **`docs/index.html`**, and the generated sections in **`README.md`**. On Windows save the script as UTF-8. |
-| **Naming in Entra** | Generated **`displayName`** values look like **`CA101 — Require MFA`**; deploy looks up existing policies **by that exact name**. Matches are **skipped** (not deleted or PATCHed)—rename or remove a conflicting object in Entra if you intend the app to POST a fresh policy. Older manual names cause **duplicate** parallel policies unless you align names first. |
+| **Naming in Entra** | Generated **`displayName`** values look like **`CA101 — Require MFA`** (em dash **—**). The deploy app **loads all CA policies** from the tenant, then skips when **`displayName` matches exactly** or after normalizing hyphen/dash Unicode and casing (so **`CA101 - …`** matches **`CA101 — …`**). Matches are **skipped** (not PATCHed). Rename/delete in Entra only if you need a duplicate created. |
 | **Fork another account** | Create a multitenant SPA app registration (**public client**, no secret), plug **`clientId`** and redirect URIs into [`docs/config.js`](docs/config.js), enable Pages, use **`https://<you>.github.io/<repo>/`**, and mirror [`GRAPH_SCOPES`](docs/config.js). |
 | **Hack locally** | From repo root run `python -m http.server` (or equivalent), open **`/docs/`**, add **localhost** redirect URIs on the app registration. |
 

@@ -301,6 +301,62 @@ async function indexFirstPartyAppIds(token, policyIntents) {
   return present;
 }
 
+// Conditional Access existence: Graph $filter displayName can miss policies; listing is canonical.
+/** Collapse hyphen variants + whitespace so tenant `CA101 - Foo` matches intent `CA101 — Foo`. */
+function normalizeCAPolicyLookupKey(displayName) {
+  if (displayName == null || typeof displayName !== "string") return "";
+  return (
+    displayName
+      .trim()
+      .replace(/\uFEFF/g, "")
+      .replace(/\u00A0/g, " ")
+      .replace(/[\u2013\u2014\u2015\u2212]/g, "-")
+      .replace(/\s+/g, " ")
+      .toLowerCase()
+  );
+}
+
+async function indexTenantConditionalAccessPolicies(token) {
+  const items = await graphList(token, "/identity/conditionalAccess/policies", {
+    $select: "id,displayName,state",
+  });
+  const byExact = new Map();
+  const byNormalized = new Map();
+
+  /** @type {{ prev: typeof items[number]; nextDisplay: string }[]} */
+  const normalizedCollisions = [];
+
+  for (const p of items) {
+    if (!p.displayName) continue;
+    byExact.set(p.displayName, p);
+    const k = normalizeCAPolicyLookupKey(p.displayName);
+    if (!k) continue;
+    if (byNormalized.has(k)) {
+      const prev = byNormalized.get(k);
+      if (prev.id !== p.id) normalizedCollisions.push({ prev, nextDisplay: p.displayName });
+    } else {
+      byNormalized.set(k, p);
+    }
+  }
+
+  return { byExact, byNormalized, normalizedCollisions, total: items.length };
+}
+
+function resolveExistingTenantCAPolicy(intent, ctx) {
+  const name = intent.displayName;
+  if (!name) return null;
+
+  let policy = ctx.caPoliciesByExactName?.get(name);
+  let match = policy ? "exact" : null;
+  if (!policy) {
+    const nk = normalizeCAPolicyLookupKey(name);
+    policy = nk ? ctx.caPoliciesByNormalizedName?.get(nk) : null;
+    if (policy) match = "normalized";
+  }
+
+  return policy ? { policy, match } : null;
+}
+
 async function ensurePolicy(token, intent, ctx, dryRun) {
   const skip = evaluateSkip(intent, ctx);
   if (skip) {
@@ -314,16 +370,14 @@ async function ensurePolicy(token, intent, ctx, dryRun) {
     return { id: intent.id, status: "skipped", reason: skipFp };
   }
 
-  const existing = await findByDisplayName(
-    token,
-    "/identity/conditionalAccess/policies",
-    intent.displayName,
-    "id,displayName,state",
-  );
+  const hit = resolveExistingTenantCAPolicy(intent, ctx);
 
-  if (existing) {
+  if (hit) {
+    const existing = hit.policy;
     logLine(
-      `policy [${intent.displayName}] already exists (${dryRun ? "dry run — " : ""}id=${existing.id}, tenant state=${existing.state}) — not modifying to avoid overwriting live settings.`,
+      `policy [${intent.displayName}] already exists (${dryRun ? "dry run — " : ""}` +
+        `${hit.match === "normalized" ? "matched tenant name '" + existing.displayName + "'; " : ""}` +
+        `id=${existing.id}, tenant state=${existing.state}) — not modifying to avoid overwriting live settings.`,
       dryRun ? "warn" : "info",
     );
     return {
@@ -456,6 +510,18 @@ async function deploy() {
 
   setStatus("Verifying Microsoft first-party apps referenced by policies...", "info");
   ctx.appIdInTenant = await indexFirstPartyAppIds(token, policyIntents);
+
+  setStatus("Loading existing Conditional Access policies from this tenant...", "info");
+  const caIdx = await indexTenantConditionalAccessPolicies(token);
+  ctx.caPoliciesByExactName = caIdx.byExact;
+  ctx.caPoliciesByNormalizedName = caIdx.byNormalized;
+  logLine(`Indexed ${caIdx.total} Conditional Access policies in tenant (exact + normalized-name match).`, "info");
+  for (const col of caIdx.normalizedCollisions) {
+    logLine(
+      `Normalized name clash '${col.prev.displayName}' vs '${col.nextDisplay}' — using '${col.prev.displayName}' for lookups.`,
+      "warn",
+    );
+  }
 
   // Phase 3 - Policies.
   setStatus(
