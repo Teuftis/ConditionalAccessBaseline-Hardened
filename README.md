@@ -98,16 +98,55 @@ Configure **Pages** once (**[Settings → Pages → GitHub Actions](https://docs
 
 ## Appendix
 
-Auto-generated excerpts follow. Prefer **[inventory.html](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/inventory.html)** for interactive browsing or [`POLICY_INVENTORY.md`](./POLICY_INVENTORY.md) for reviewable tables; README keeps short pointers generated from the same manifest.
+Auto-generated excerpts follow. The **policy table** below stays in sync with [`POLICY_INVENTORY.md`](./POLICY_INVENTORY.md); for filters and layout use **[inventory.html](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/inventory.html)**.
 
 ### Policy catalog
 
 Summaries regenerate from [`baseline/policies/`](./baseline/policies/) when you run **`python scripts/generate-baseline.py`**.
 
 <!-- policy-catalog:start -->
-- **40 policies** — intent JSON under [`baseline/policies/`](./baseline/policies/). By persona: All users (20), Guest (7), Admins (6), Service (4), Application (2), Agent (1).
-- **[Policy catalog on Pages](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/inventory.html)** — filters and colored criticality.
-- **[`POLICY_INVENTORY.md`](./POLICY_INVENTORY.md)** — flat Markdown table (diff-friendly).
+| ID | Policy | Persona | Criticality |
+| --- | --- | --- | --- |
+| CA101 | Require MFA | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA102 | User Risk - Require MFA + Password Change | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA103 | Sign-In Risk - Require MFA | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA104 | Block Legacy Authentication | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA105 | Block Unknown Platforms | All users | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
+| CA106 | Block Outside Trusted Countries | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA107 | Session Controls | All users | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
+| CA108 | Block Cross-Device Auth Flows | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA109 | Require MFA for Azure Management | All users | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
+| CA110 | Block Malicious IPs | All users | ![Optional](https://img.shields.io/static/v1?label=&message=Optional&color=757575&style=flat-square) |
+| CA111 | Continuous Access Evaluation - Standard | All users | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
+| CA112 | MFA on Device Register or Join | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA113 | Require Token Protection (Pilot) | All users | ![Optional](https://img.shields.io/static/v1?label=&message=Optional&color=757575&style=flat-square) |
+| CA114 | Terms of Use | All users | ![Optional](https://img.shields.io/static/v1?label=&message=Optional&color=757575&style=flat-square) |
+| CA201 | Intune Enrolling - Require MFA | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA202 | Require App Protection (Mobile) | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA204 | Require Compliant Mobile (Optional MDM track) | All users | ![Optional](https://img.shields.io/static/v1?label=&message=Optional&color=757575&style=flat-square) |
+| CA301 | Require Compliant Windows | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA302 | Require Compliant macOS | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA303 | Limited Browser Access on Unmanaged Devices | All users | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
+| CA601 | Phishing-Resistant MFA for Admins | Admins | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA602 | Admin Session Controls | Admins | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA603 | Admin CAE - Strict | Admins | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA604 | Admin Block High User Risk | Admins | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA605 | Admin Block High Sign-In Risk | Admins | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA606 | Admin Require Compliant or Joined Device | Admins | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA701 | App - FortiClient - MFA | Application | ![Optional](https://img.shields.io/static/v1?label=&message=Optional&color=757575&style=flat-square) |
+| CA702 | App - Salesforce - MFA | Application | ![Optional](https://img.shields.io/static/v1?label=&message=Optional&color=757575&style=flat-square) |
+| CA801 | Service - Require MFA (Interactive) | Service | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
+| CA802 | Service - Block Outside Trusted IPs | Service | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA803 | Service - Block Legacy Auth | Service | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
+| CA804 | Service - Block Non-M365 Apps | Service | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
+| CA901 | Guest - Require MFA | Guest | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA902 | Guest - Block High Sign-In Risk | Guest | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
+| CA903 | Guest - Block Legacy Auth | Guest | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
+| CA904 | Guest - Block Outside Trusted Countries | Guest | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA905 | Guest - Block Non-Collaboration Apps | Guest | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA906 | Guest - Terms of Use | Guest | ![Optional](https://img.shields.io/static/v1?label=&message=Optional&color=757575&style=flat-square) |
+| CA907 | Guest - Session Controls | Guest | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
+| CAA01 | Agent - Block High Risk | Agent | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
 <!-- policy-catalog:end -->
 
 ### Groups (Entra)
