@@ -395,7 +395,6 @@ function finalizeWorkloadAgentPolicyBody(body, intent) {
 /** @type {ReadonlySet<string>} */
 export const POLICY_IDS_DEPLOY_DISABLED_BY_DEFAULT = new Set([
   "CA111", // Session CAE non-strict
-  "CA112", // User actions — report-only unsupported in Entra
   "CA202", // APP-only mobile
   "CA204", // MDM-required optional path
   "CA302",
@@ -406,12 +405,9 @@ export const POLICY_IDS_DEPLOY_DISABLED_BY_DEFAULT = new Set([
 ]);
 
 function resolvePolicyDeployState(intent) {
-  const apps = intent.applications;
-  if (apps && Array.isArray(apps.userActions) && apps.userActions.length > 0) {
-    // Conditional Access report-only is not supported when the policy targets User actions
-    // (e.g. device registration MFA). Keep those as Off until you enable them in the portal.
-    return "disabled";
-  }
+  // Explicit intent wins first. Default is report-only except POLICY_IDS_DEPLOY_DISABLED_BY_DEFAULT.
+  // User-actions policies use the same rules (CA112 defaults report-only). If Graph rejects
+  // report-only on a given scenario at POST time, set `deploymentState: "disabled"` on that intent file.
   const raw = intent.deploymentState ?? intent.deployState;
   if (typeof raw === "string" && ALLOWED_DEPLOY_STATES.includes(raw)) {
     return raw;

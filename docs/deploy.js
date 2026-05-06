@@ -1,7 +1,7 @@
 // Mirage CA Baseline Deployer - main orchestration.
 // Sign-in -> consent -> create missing groups / named locations -> create Conditional
-// Create missing Conditional Access policies in Report-only by default (Off only for scenarios
-// where report-only is unsupported, e.g. User actions). Never PATCH existing CA policies.
+// Create missing Conditional Access policies: Report-only by default unless an intent ID is pinned
+// to Off (`POLICY_IDS_DEPLOY_DISABLED_BY_DEFAULT` in translate.js). Never PATCH existing CA policies.
 import { APP_CONFIG, GRAPH_SCOPES, ALLOWED_DEPLOY_STATES, resolveBaselineUrl, resolveBaselineUrlBases } from "./config.js";
 import { graphGet, graphList, graphPost, graphPatch, findByDisplayName, GraphError } from "./graph.js";
 import {
@@ -558,7 +558,7 @@ async function deploy() {
   setStatus(
     dryRun
       ? "Dry run complete."
-      : "Deployment complete. New policies used Report-only or Off per baseline defaults (User-actions and other pinned intents); existing policies with the same display name were not changed.",
+      : "Deployment complete. New policies used Report-only or Off per baseline defaults (pinned intent IDs); existing policies with the same display name were not changed.",
     counts.error ? "warn" : "ok",
   );
   logLine(summary, counts.error ? "warn" : "ok");

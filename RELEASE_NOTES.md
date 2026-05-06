@@ -15,7 +15,7 @@
 
 ### Highlights
 
-- **Baseline-as-code:** Conditional Access (40 policies), Entra groups, and named locations as **intent JSON** under `baseline/`, with a **deploy SPA** under `docs/` that resolves names to Graph IDs and creates policies in **Report-only** by default (**CA112** / User actions stays **Off** because report-only is unsupported for that scenario).
+- **Baseline-as-code:** Conditional Access (40 policies), Entra groups, and named locations as **intent JSON** under `baseline/`, with a **deploy SPA** under `docs/` that resolves names to Graph IDs and creates policies mostly in **Report-only**; **eight** rules default **Off** (**CA111**, **CA202**, **CA204**, **CA302**, **CA303**, **CA603**, **CA606**, **CAA01**) — **`CA112`** (User actions) defaults **Report-only** like the rest. Override with intent `deploymentState` when you want a different safe state at create time.
 - **Deploy safety:** No silent overwrites of existing CA policies (name-based match / skip); **dry run**; clarified **skipped** vs **unchanged** behavior; improvements to policy existence checks and display-name matching to reduce accidental **CREATE** churn.
 - **Graph / API alignment:** Translator and payload fixes for **CAE-only** session policies, **Prefer evolvable** enums, **workload / agent** policies, optional **first-party app** skips, and related **conditionalAccessConditionSet** shape fixes (e.g. **CAA01**, **CA111**).
 - **CA111 (Continuous Access Evaluation — Standard):** Intent and deploy path aligned with Graph limitations (guest / external exclusion omitted where the API rejects that combination for CAE-session-only rules); comments and policy descriptions updated accordingly.

@@ -73,7 +73,7 @@ export function resolveBaselineUrl() {
 
 // Conditional Access policies created by the SPA use only these Graph `state` values:
 // report-only (`enabledForReportingButNotEnforced`) by default; `disabled` for baseline
-// policies in POLICY_IDS_DEPLOY_DISABLED_BY_DEFAULT (plus User actions — translate.js).
+// policies listed in POLICY_IDS_DEPLOY_DISABLED_BY_DEFAULT (`docs/translate.js`).
 export const ALLOWED_DEPLOY_STATES = Object.freeze([
   "enabledForReportingButNotEnforced",
   "disabled",

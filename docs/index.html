@@ -3,15 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Browser-based Mirage CA baseline deployer for Microsoft Entra ID: sign in, optionally dry run, create missing Conditional Access policies (Report-only by default; CA112 Off) via Graph — skips existing CA policies by display name." />
+    <meta name="description" content="Browser-based Mirage CA baseline deployer: create missing Conditional Access policies — most Report-only; eight IDs default Off (CA111 CA202 CA204 CA302 CA303 CA603 CA606 CAA01)." />
     <meta name="color-scheme" content="dark light" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Mirage CA Baseline Deployer" />
-    <meta property="og:description" content="Deploy the Mirage CA baseline from your browser: new CA policies Report-only by default (CA112 Off); existing policies unchanged by display name." />
+    <meta property="og:description" content="Deploy Mirage CA: most policies Report-only; eight IDs default Off; CA112 defaults Report-only." />
     <meta property="og:url" content="https://teuftis.github.io/ConditionalAccessBaseline-Hardened/" />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="Mirage CA Baseline Deployer" />
-    <meta name="twitter:description" content="Deploy Mirage CA from your browser: new policies Report-only (CA112 Off); skips tenant policies matching the same display name." />
+    <meta name="twitter:description" content="Mirage CA deploy: Report-only defaults; eight policies Off by default; skips matching display names." />
     <title>Mirage CA Baseline Deployer</title>
     <link rel="stylesheet" href="style.css" />
     <link rel="icon" href="data:image/svg+xml;utf8,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'&gt;&lt;text y='14' font-size='14'&gt;CA&lt;/text&gt;&lt;/svg&gt;" />
@@ -28,7 +28,7 @@
         <div>
           <h1>Mirage CA Baseline Deployer</h1>
           <p class="subtitle">
-            v2026 · Microsoft Entra ID — Conditional Access policies, groups, and named locations · New CA policies deploy in <strong>Report-only</strong> (<code>enabledForReportingButNotEnforced</code>). <strong>CA112</strong> stays <strong>Off</strong> — User-actions policies cannot use report-only in Entra today.
+            v2026 · Microsoft Entra ID — Conditional Access policies, groups, and named locations · New CA policies mostly <strong>Report-only</strong> (<code>enabledForReportingButNotEnforced</code>), including device registration MFA (<strong>CA112</strong> / User actions). Eight baseline rules default <strong>Off</strong>: <strong>CA111</strong>, <strong>CA202</strong>, <strong>CA204</strong>, <strong>CA302</strong>, <strong>CA303</strong>, <strong>CA603</strong>, <strong>CA606</strong>, <strong>CAA01</strong> — optional report-only via intent <code>deploymentState</code>.
           </p>
           <p class="catalog-nav">
             <a href="inventory.html">Browse all 40 policies</a>
@@ -67,7 +67,7 @@
         <ul class="bullets">
           <li><strong>Groups</strong> (e.g. <code>BG_BreakGlass</code>, <code>CA_ExcludedFromCA</code>) are created if missing or reused by display name.</li>
           <li><strong>Named locations</strong> ship with placeholder ranges — replace them in <strong>Microsoft Entra admin center</strong> after deploy.</li>
-          <li><strong>40</strong> policies: <strong>new</strong> ones use <code>state: enabledForReportingButNotEnforced</code> (<strong>Report-only</strong>) except <strong>CA112</strong> (<code>state: disabled</code>, device registration MFA / User actions). If a tenant policy shares the normalized <strong>display name</strong>, it stays <strong>unchanged</strong>. Re-run is safe.</li>
+          <li><strong>40</strong> policies: <strong>new</strong> ones use <code>state: enabledForReportingButNotEnforced</code> (<strong>Report-only</strong>) except eight that default <code>state: disabled</code> (<strong>CA111</strong>, <strong>CA202</strong>, <strong>CA204</strong>, <strong>CA302</strong>, <strong>CA303</strong>, <strong>CA603</strong>, <strong>CA606</strong>, <strong>CAA01</strong>). <strong>CA112</strong> (device registration MFA) defaults <strong>Report-only</strong>. If a tenant policy shares the normalized <strong>display name</strong>, it stays <strong>unchanged</strong>. Re-run is safe.</li>
         </ul>
         <p class="meta">
           Details: <a href="#policy-catalog">policies on this page</a> · <a href="inventory.html">live catalog</a> (with descriptions) · <a href="https://github.com/Teuftis/ConditionalAccessBaseline-Hardened#policy-catalog">README</a>. Baseline source: <code id="baseline-url">(resolving...)</code>
@@ -77,7 +77,7 @@
       <section class="panel" id="policy-catalog">
         <h2>Policy catalog</h2>
         <p class="section-intro">
-          All <strong>40</strong> Conditional Access policies in the baseline (new deploys: <strong>Report-only</strong> except <strong>CA112</strong> <strong>Off</strong>). For descriptions and personas, open the <a href="inventory.html">live catalog</a>.
+          All <strong>40</strong> Conditional Access policies in the baseline (new deploys: <strong>Report-only</strong> except eight default <strong>Off</strong> — see bullets above). For descriptions and personas, open the <a href="inventory.html">live catalog</a>.
         </p>
         <div class="policy-table-wrap">
           <table class="policy-table">
@@ -365,7 +365,7 @@
         <h2>After deployment</h2>
         <p class="section-intro">Use <strong>Microsoft Entra admin center</strong> — not this page — to finish rollout:</p>
         <ul class="bullets compact">
-          <li>Open <strong>Protection</strong> → <strong>Conditional Access</strong>: most new baseline policies evaluate in <strong>Report-only</strong>; CA112 arrives <strong>Off</strong>.</li>
+          <li>Open <strong>Protection</strong> → <strong>Conditional Access</strong>: most new baseline policies evaluate in <strong>Report-only</strong>; eight default <strong>Off</strong> (<strong>CA111</strong>, <strong>CA202</strong>, <strong>CA204</strong>, <strong>CA302</strong>, <strong>CA303</strong>, <strong>CA603</strong>, <strong>CA606</strong>, <strong>CAA01</strong>) until you enable them.</li>
           <li>Update <strong>named locations</strong> and <strong>groups</strong> (break glass, exclusions, service accounts) with real values.</li>
           <li>Enable policies in a controlled order when your runbook says so — optionally use <strong>Sign-in logs</strong> / <strong>Conditional Access insights</strong> first.</li>
         </ul>
@@ -379,7 +379,7 @@
       <section class="panel small">
         <h2>What this tool does</h2>
         <ul class="bullets">
-          <li><strong>Creates</strong> missing Conditional Access policies in <strong>Report-only</strong> (<strong>Off</strong> for CA112 / User actions only); <strong>skips</strong> when the <strong>display name</strong> already exists. <strong>Creates or reuses</strong> groups and placeholder named locations — <strong>delegated</strong> permissions from your session.</li>
+          <li><strong>Creates</strong> missing Conditional Access policies: <strong>Report-only</strong> by default, <strong>Off</strong> for eight pinned IDs (see bullets above); <strong>skips</strong> when the <strong>display name</strong> already exists. <strong>Creates or reuses</strong> groups and placeholder named locations — <strong>delegated</strong> permissions from your session.</li>
           <li><strong>Does not</strong> set policies <strong>On</strong> (fully enforced); moving from Report-only to On stays a <strong>manual</strong> admin-center decision.</li>
           <li><strong>Does not</strong> use a client secret or application-only permissions; it cannot act without a signed-in administrator.</li>
           <li><strong>Does not</strong> read mail or files; directory access is limited to what Graph needs for groups, locations, and policies.</li>

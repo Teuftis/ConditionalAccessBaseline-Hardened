@@ -8,7 +8,6 @@
     "persona": "All users",
     "j0eyvEquivalent": "CA003"
   },
-  "deploymentState": "disabled",
   "include": {
     "users": "all"
   },
