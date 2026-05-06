@@ -1,0 +1,36 @@
+{
+  "id": "CA101",
+  "displayName": "CA101 — Require MFA",
+  "description": "Foundation control for workforce users: requires multifactor authentication on every interactive sign-in to cloud applications. Applies broadly (all users) with exclusions for break-glass, CA-wide exclusions, service principals in AC_ServiceAccount, and external/guest identities (covered by guest policies).",
+  "metadata": {
+    "criticality": "Critical",
+    "v2Status": "Updated",
+    "persona": "All users",
+    "j0eyvEquivalent": "CA000 / CA200"
+  },
+  "include": {
+    "users": "all"
+  },
+  "exclude": {
+    "groups": [
+      "AC_ExcludedFromCA",
+      "BG_BreakGlass",
+      "AC_ServiceAccount"
+    ],
+    "guestsAndExternals": true
+  },
+  "applications": {
+    "include": "all"
+  },
+  "conditions": {
+    "clientAppTypes": [
+      "all"
+    ]
+  },
+  "grant": {
+    "operator": "OR",
+    "builtInControls": [
+      "mfa"
+    ]
+  }
+}

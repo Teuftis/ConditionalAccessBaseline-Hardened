@@ -1,0 +1,47 @@
+{
+  "id": "CA701",
+  "displayName": "CA701 — App - FortiClient - MFA",
+  "description": "Zero Trust gate for perimeter VPN integrations (Fortinet FortiClient in template form): MFA before granting network tunnel access aligned with phishing-resistant MFA investments elsewhere.",
+  "metadata": {
+    "criticality": "Optional",
+    "v2Status": "Retained",
+    "persona": "Application"
+  },
+  "include": {
+    "users": "all"
+  },
+  "exclude": {
+    "groups": [
+      "AC_ExcludedFromCA",
+      "BG_BreakGlass",
+      "AC_ServiceAccount"
+    ],
+    "guestsAndExternals": true
+  },
+  "applications": {
+    "include": [
+      "FortiClient SSO"
+    ],
+    "lookup": "servicePrincipal"
+  },
+  "conditions": {
+    "clientAppTypes": [
+      "all"
+    ]
+  },
+  "grant": {
+    "operator": "OR",
+    "builtInControls": [
+      "mfa"
+    ]
+  },
+  "session": {
+    "signInFrequency": {
+      "value": 4,
+      "type": "hours"
+    }
+  },
+  "skipIfMissing": [
+    "servicePrincipal:FortiClient SSO"
+  ]
+}

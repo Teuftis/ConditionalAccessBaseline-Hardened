@@ -1,0 +1,41 @@
+{
+  "id": "CA102",
+  "displayName": "CA102 — User Risk - Require MFA + Password Change",
+  "description": "Identity Protection remediation for elevated user risk (medium or high): requires MFA and a secure password change during the session. Depends on Entra ID P2 (user risk evaluations). Honors standard exclusions including guests and externals disabled for this persona.",
+  "metadata": {
+    "criticality": "Critical",
+    "v2Status": "Updated",
+    "persona": "All users",
+    "j0eyvEquivalent": "CA201"
+  },
+  "include": {
+    "users": "all"
+  },
+  "exclude": {
+    "groups": [
+      "AC_ExcludedFromCA",
+      "BG_BreakGlass",
+      "AC_ServiceAccount"
+    ],
+    "guestsAndExternals": true
+  },
+  "applications": {
+    "include": "all"
+  },
+  "conditions": {
+    "userRiskLevels": [
+      "medium",
+      "high"
+    ],
+    "clientAppTypes": [
+      "all"
+    ]
+  },
+  "grant": {
+    "operator": "AND",
+    "builtInControls": [
+      "mfa",
+      "passwordChange"
+    ]
+  }
+}

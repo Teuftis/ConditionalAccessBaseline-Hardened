@@ -1,0 +1,37 @@
+{
+  "id": "CA605",
+  "displayName": "CA605 — Admin Block High Sign-In Risk",
+  "description": "Complements CA604 using sign-in risk for administrators: denies access when Identity Protection observes high sign-in risk, closing scenarios where compromised tokens still pass user-risk heuristics slowly.",
+  "metadata": {
+    "criticality": "Critical",
+    "v2Status": "NEW",
+    "persona": "Admins"
+  },
+  "include": {
+    "roles": "privilegedAdmins"
+  },
+  "exclude": {
+    "groups": [
+      "AC_ExcludedFromCA",
+      "BG_BreakGlass",
+      "AC_ServiceAccount"
+    ]
+  },
+  "applications": {
+    "include": "all"
+  },
+  "conditions": {
+    "signInRiskLevels": [
+      "high"
+    ],
+    "clientAppTypes": [
+      "all"
+    ]
+  },
+  "grant": {
+    "operator": "OR",
+    "builtInControls": [
+      "block"
+    ]
+  }
+}

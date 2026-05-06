@@ -1,0 +1,41 @@
+{
+  "id": "CA904",
+  "displayName": "CA904 — Guest - Block Outside Trusted Countries",
+  "description": "Geographic guardrail for collaborators: restricts guest access paths to countries mirrored in trusted named locations (typically broader lists than workforce policies). Pair with onboarding guidance for visiting partners.",
+  "metadata": {
+    "criticality": "Critical",
+    "v2Status": "Retained",
+    "persona": "Guest"
+  },
+  "include": {
+    "users": "guestsAndExternals"
+  },
+  "exclude": {
+    "groups": [
+      "AC_ExcludedFromCA",
+      "BG_BreakGlass"
+    ]
+  },
+  "applications": {
+    "include": "all"
+  },
+  "conditions": {
+    "locations": {
+      "include": [
+        "All"
+      ],
+      "exclude": [
+        "TRUSTED_COUNTRIES"
+      ]
+    },
+    "clientAppTypes": [
+      "all"
+    ]
+  },
+  "grant": {
+    "operator": "OR",
+    "builtInControls": [
+      "block"
+    ]
+  }
+}

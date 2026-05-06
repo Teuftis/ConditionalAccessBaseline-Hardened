@@ -1,0 +1,37 @@
+{
+  "id": "CA109",
+  "displayName": "CA109 — Require MFA for Azure Management",
+  "description": "Protects Azure resource management workloads: MFA is required whenever accessing Azure portal, CLI, REST, Infrastructure-as-Code, or other ARM-related applications. Targets the workload identity surface used to change tenant posture.",
+  "metadata": {
+    "criticality": "Recommended",
+    "v2Status": "Retained",
+    "persona": "All users"
+  },
+  "include": {
+    "users": "all"
+  },
+  "exclude": {
+    "groups": [
+      "AC_ExcludedFromCA",
+      "BG_BreakGlass",
+      "AC_ServiceAccount"
+    ],
+    "guestsAndExternals": true
+  },
+  "applications": {
+    "include": [
+      "azureManagement"
+    ]
+  },
+  "conditions": {
+    "clientAppTypes": [
+      "all"
+    ]
+  },
+  "grant": {
+    "operator": "OR",
+    "builtInControls": [
+      "mfa"
+    ]
+  }
+}

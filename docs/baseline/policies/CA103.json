@@ -1,0 +1,39 @@
+{
+  "id": "CA103",
+  "displayName": "CA103 — Sign-In Risk - Require MFA",
+  "description": "Identity Protection challenge for risky sign-ins (medium or high): requires MFA to continue the session when Entra evaluates elevated sign-in risk. Requires Entra ID P2. Excludes universal exclusions and separates guest traffic via policy construction.",
+  "metadata": {
+    "criticality": "Critical",
+    "v2Status": "Updated",
+    "persona": "All users"
+  },
+  "include": {
+    "users": "all"
+  },
+  "exclude": {
+    "groups": [
+      "AC_ExcludedFromCA",
+      "BG_BreakGlass",
+      "AC_ServiceAccount"
+    ],
+    "guestsAndExternals": true
+  },
+  "applications": {
+    "include": "all"
+  },
+  "conditions": {
+    "signInRiskLevels": [
+      "medium",
+      "high"
+    ],
+    "clientAppTypes": [
+      "all"
+    ]
+  },
+  "grant": {
+    "operator": "OR",
+    "builtInControls": [
+      "mfa"
+    ]
+  }
+}

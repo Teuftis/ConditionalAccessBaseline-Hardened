@@ -1,0 +1,41 @@
+{
+  "id": "CA107",
+  "displayName": "CA107 — Session Controls",
+  "description": "Session tightening for standard users: enforces recurring reauthentication (twelve-hour sign-in frequency) and disallows persistent browser sessions. Applies a device filter so compliant or hybrid Entra joined devices can be handled according to organizational exception rules.",
+  "metadata": {
+    "criticality": "Recommended",
+    "v2Status": "Updated",
+    "persona": "All users",
+    "j0eyvEquivalent": "CA202 / CA206"
+  },
+  "include": {
+    "users": "all"
+  },
+  "exclude": {
+    "groups": [
+      "AC_ExcludedFromCA",
+      "BG_BreakGlass",
+      "AC_ServiceAccount"
+    ],
+    "guestsAndExternals": true
+  },
+  "applications": {
+    "include": "all"
+  },
+  "conditions": {
+    "deviceFilter": {
+      "mode": "exclude",
+      "rule": "device.trustType -eq \"ServerAD\" -or device.isCompliant -eq True"
+    },
+    "clientAppTypes": [
+      "all"
+    ]
+  },
+  "session": {
+    "signInFrequency": {
+      "value": 12,
+      "type": "hours"
+    },
+    "persistentBrowser": "never"
+  }
+}

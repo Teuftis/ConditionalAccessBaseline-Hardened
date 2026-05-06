@@ -1,0 +1,34 @@
+{
+  "id": "CA901",
+  "displayName": "CA901 — Guest - Require MFA",
+  "description": "Guest/B2B collaboration MFA: ensures every federated partner user proves MFA freshness in your tenant, closing the reliance on weaker home-tenant MFA states alone.",
+  "metadata": {
+    "criticality": "Critical",
+    "v2Status": "Retained",
+    "persona": "Guest",
+    "j0eyvEquivalent": "CA400"
+  },
+  "include": {
+    "users": "guestsAndExternals"
+  },
+  "exclude": {
+    "groups": [
+      "AC_ExcludedFromCA",
+      "BG_BreakGlass"
+    ]
+  },
+  "applications": {
+    "include": "all"
+  },
+  "conditions": {
+    "clientAppTypes": [
+      "all"
+    ]
+  },
+  "grant": {
+    "operator": "OR",
+    "builtInControls": [
+      "mfa"
+    ]
+  }
+}

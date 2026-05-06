@@ -1,0 +1,39 @@
+{
+  "id": "CA201",
+  "displayName": "CA201 — Intune Enrolling - Require MFA",
+  "description": "Secures enrollment into Microsoft Intune: MFA is mandated when enrolling a freshly managed endpoint so attackers cannot silently attach devices without strong proof of possession.",
+  "metadata": {
+    "criticality": "Critical",
+    "v2Status": "Retained",
+    "persona": "All users",
+    "j0eyvEquivalent": "CA203"
+  },
+  "include": {
+    "users": "all"
+  },
+  "exclude": {
+    "groups": [
+      "AC_ExcludedFromCA",
+      "BG_BreakGlass",
+      "AC_ServiceAccount",
+      "AUTOPILOT_DevicePrep"
+    ],
+    "guestsAndExternals": true
+  },
+  "applications": {
+    "include": [
+      "intuneEnrollment"
+    ]
+  },
+  "conditions": {
+    "clientAppTypes": [
+      "all"
+    ]
+  },
+  "grant": {
+    "operator": "OR",
+    "builtInControls": [
+      "mfa"
+    ]
+  }
+}

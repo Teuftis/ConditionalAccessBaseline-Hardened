@@ -1,0 +1,36 @@
+{
+  "id": "CA906",
+  "displayName": "CA906 — Guest - Terms of Use",
+  "description": "Guest-visible Terms-of-Use acknowledgement for contractual or jurisdictional onboarding before accessing shared resources.",
+  "metadata": {
+    "criticality": "Optional",
+    "v2Status": "Retained",
+    "persona": "Guest"
+  },
+  "include": {
+    "users": "guestsAndExternals"
+  },
+  "exclude": {
+    "groups": [
+      "AC_ExcludedFromCA",
+      "BG_BreakGlass"
+    ]
+  },
+  "applications": {
+    "include": "all"
+  },
+  "conditions": {
+    "clientAppTypes": [
+      "all"
+    ]
+  },
+  "grant": {
+    "operator": "OR",
+    "termsOfUse": [
+      "TOU_guest"
+    ]
+  },
+  "skipIfMissing": [
+    "termsOfUse:TOU_guest"
+  ]
+}

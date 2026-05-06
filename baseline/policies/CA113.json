@@ -1,0 +1,42 @@
+{
+  "id": "CA113",
+  "displayName": "CA113 — Require Token Protection (Pilot)",
+  "description": "Pilot control binding primary refresh tokens more tightly on supported Windows workloads (token protection). Limits token replay when adversaries steal session material via phishing proxies. Applies only to the AC_TokenProtection_Pilot group—expand deliberately after telemetry review.",
+  "metadata": {
+    "criticality": "Optional",
+    "v2Status": "NEW",
+    "persona": "All users"
+  },
+  "include": {
+    "groups": [
+      "AC_TokenProtection_Pilot"
+    ]
+  },
+  "exclude": {
+    "groups": [
+      "AC_ExcludedFromCA",
+      "BG_BreakGlass"
+    ]
+  },
+  "applications": {
+    "include": [
+      "exchangeOnline",
+      "sharePointOnline",
+      "teams"
+    ]
+  },
+  "conditions": {
+    "platforms": {
+      "include": [
+        "windows"
+      ]
+    },
+    "clientAppTypes": [
+      "browser",
+      "mobileAppsAndDesktopClients"
+    ]
+  },
+  "session": {
+    "tokenProtectionEnforced": true
+  }
+}

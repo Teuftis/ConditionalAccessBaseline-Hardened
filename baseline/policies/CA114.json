@@ -1,0 +1,38 @@
+{
+  "id": "CA114",
+  "displayName": "CA114 — Terms of Use",
+  "description": "Regulatory / policy attestation workflow: prompts users for Microsoft Entra Terms of Use before access. Organizations must provision a tenant-specific Terms of Use object and inject its GUID at deployment time (see deploy SPA configuration).",
+  "metadata": {
+    "criticality": "Optional",
+    "v2Status": "Retained",
+    "persona": "All users"
+  },
+  "include": {
+    "users": "all"
+  },
+  "exclude": {
+    "groups": [
+      "AC_ExcludedFromCA",
+      "BG_BreakGlass",
+      "AC_ServiceAccount"
+    ],
+    "guestsAndExternals": true
+  },
+  "applications": {
+    "include": "all"
+  },
+  "conditions": {
+    "clientAppTypes": [
+      "all"
+    ]
+  },
+  "grant": {
+    "operator": "OR",
+    "termsOfUse": [
+      "TOU_default"
+    ]
+  },
+  "skipIfMissing": [
+    "termsOfUse:TOU_default"
+  ]
+}

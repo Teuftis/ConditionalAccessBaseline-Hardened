@@ -1,0 +1,9 @@
+{
+  "displayName": "MALICIOUS_IPS",
+  "type": "ip",
+  "isTrusted": false,
+  "ipRanges": [
+    "99.99.99.99/32"
+  ],
+  "_note": "PLACEHOLDER. Replace 99.99.99.99/32 with known-bad IPs / threat feed exports."
+}

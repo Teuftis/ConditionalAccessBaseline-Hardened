@@ -1,0 +1,44 @@
+{
+  "id": "CA202",
+  "displayName": "CA202 — Require App Protection (Mobile)",
+  "description": "Mobile application protection posture for Microsoft 365: requires Intune App Protection Policies on iOS and Android M365 workloads. Matches Microsoft’s APP enforcement model (replaces fragile approved-client-app keyword matching).",
+  "metadata": {
+    "criticality": "Critical",
+    "v2Status": "Updated",
+    "persona": "All users",
+    "j0eyvEquivalent": "CA005 / CA006"
+  },
+  "include": {
+    "users": "all"
+  },
+  "exclude": {
+    "groups": [
+      "AC_ExcludedFromCA",
+      "BG_BreakGlass",
+      "AC_ServiceAccount"
+    ],
+    "guestsAndExternals": true
+  },
+  "applications": {
+    "include": [
+      "office365"
+    ]
+  },
+  "conditions": {
+    "platforms": {
+      "include": [
+        "iOS",
+        "android"
+      ]
+    },
+    "clientAppTypes": [
+      "all"
+    ]
+  },
+  "grant": {
+    "operator": "OR",
+    "builtInControls": [
+      "compliantApplication"
+    ]
+  }
+}

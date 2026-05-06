@@ -1,0 +1,9 @@
+{
+  "displayName": "SVC_TRUSTED_IPS",
+  "type": "ip",
+  "isTrusted": true,
+  "ipRanges": [
+    "99.99.99.99/32"
+  ],
+  "_note": "PLACEHOLDER. Replace 99.99.99.99/32 with the IP ranges from which service accounts may sign in."
+}

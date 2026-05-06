@@ -1,0 +1,6 @@
+{
+  "displayName": "AUTOPILOT_DevicePrep",
+  "description": "Device objects undergoing Windows Autopilot pre-provisioning so they can complete join/enrollment without triggering CA112 MFA-on-join or CA201 enrollment MFA prematurely. Clean up stale device members after deployment finishes.",
+  "mailNickname": "autopilot-deviceprep",
+  "tier": "exception"
+}
