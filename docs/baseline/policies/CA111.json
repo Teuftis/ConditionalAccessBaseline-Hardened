@@ -1,7 +1,7 @@
 {
   "id": "CA111",
   "displayName": "CA111 — Continuous Access Evaluation - Standard",
-  "description": "Continuous Access Evaluation in standard sensitivity for workforce accounts: reacts faster to revocation or policy changes compared with long-lived tokens. Administrators should pair with CA603 (strict CAE). Deploy note: Microsoft Graph rejects some CAE-only session payloads that also exclude guests/externals; the deploy SPA omits excludeGuestsOrExternalUsers for this rule (see docs/translate.js); guest collaborators remain covered by other baseline policies.",
+  "description": "Continuous Access Evaluation in standard sensitivity for workforce accounts: reacts faster to revocation or policy changes compared with long-lived tokens. Pair with CA603 (strict CAE). Unlike other workforce policies, exclude guests/external users cannot be applied on this CAE-session-only rule in Graph—the baseline omits guest/external exclusion here only; other policies continue to exclude guests where supported.",
   "metadata": {
     "criticality": "Recommended",
     "v2Status": "NEW",
@@ -16,8 +16,7 @@
       "AC_ExcludedFromCA",
       "BG_BreakGlass",
       "AC_ServiceAccount"
-    ],
-    "guestsAndExternals": true
+    ]
   },
   "applications": {
     "include": "all"

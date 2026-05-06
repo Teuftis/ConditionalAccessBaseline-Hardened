@@ -117,7 +117,7 @@
     <span class="pill pill--recommended">Recommended</span>
   </div>
   <h3 class="policy-title">Continuous Access Evaluation - Standard</h3>
-  <p class="policy-desc">Continuous Access Evaluation in standard sensitivity for workforce accounts: reacts faster to revocation or policy changes compared with long-lived tokens. Administrators should pair with CA603 (strict CAE). Deploy note: Microsoft Graph rejects some CAE-only session payloads that also exclude guests/externals; the deploy SPA omits excludeGuestsOrExternalUsers for this rule (see docs/translate.js); guest collaborators remain covered by other baseline policies.</p>
+  <p class="policy-desc">Continuous Access Evaluation in standard sensitivity for workforce accounts: reacts faster to revocation or policy changes compared with long-lived tokens. Pair with CA603 (strict CAE). Unlike other workforce policies, exclude guests/external users cannot be applied on this CAE-session-only rule in Graph—the baseline omits guest/external exclusion here only; other policies continue to exclude guests where supported.</p>
 </article>
 <article class="policy-card" id="CA112">
   <div class="policy-card__head">

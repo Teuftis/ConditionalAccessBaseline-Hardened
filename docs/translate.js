@@ -136,9 +136,10 @@ function resolveUsers(intent, ctx) {
   if (Array.isArray(exclude.groups) && !workloadAgentAllAgents) {
     users.excludeGroups = exclude.groups.map((g) => resolveGroup(g, ctx)).filter(Boolean);
   }
-  // Graph returns 1007 for CAE-only session controls when excludeGuestsOrExternalUsers is present
-  // alongside includeUsers All (validated vs CA603, which excludes guests intent-only by omission).
-  // Intent JSON may still list guests excluded for operators; workload guest policies remain separate.
+  // Guest/external exclusion works on most workforce policies via excludeGuestsOrExternalUsers.
+  // Graph rejects session-only Continuous Access Evaluation (continuousAccessEvaluation intent, no grant)
+  // combined with excludeGuestsOrExternalUsers and includeUsers All (1007). Baseline CA111 therefore
+  // does not declare guestsAndExternals in exclude.
   const caeOnlyNoGrantGuestExcludeFailsGraph =
     Boolean(intent.session?.continuousAccessEvaluation) && !intent.grant;
   if (
@@ -342,6 +343,49 @@ function stripEmptyGraphCollections(value) {
   return value;
 }
 
+// Workload identities (Agent-ID scoped) CA policies validate against a fuller
+// conditionalAccessConditionSet shape on create than intent + strip-empty leaves.
+// See Graph beta POST example 7: conditionalaccessroot-post-policies (block high-risk agents).
+function finalizeWorkloadAgentPolicyBody(body, intent) {
+  if ((intent.include || {}).agentIds !== "all") return body;
+
+  const prev = body.conditions || {};
+  const apps = prev.applications || {};
+  const levels = intent.conditions?.agentIdRiskLevels;
+
+  const conditions = {
+    ...prev,
+    agentIdRiskLevels:
+      Array.isArray(levels) && levels.length === 1 ? levels[0] : prev.agentIdRiskLevels,
+    applications: {
+      includeApplications: apps.includeApplications || ["All"],
+      excludeApplications: apps.excludeApplications || [],
+      includeUserActions: apps.includeUserActions || [],
+      includeAuthenticationContextClassReferences: apps.includeAuthenticationContextClassReferences || [],
+      applicationFilter: apps.applicationFilter ?? null,
+    },
+    users: {
+      includeUsers: ["None"],
+      excludeUsers: [],
+      includeGroups: [],
+      excludeGroups: [],
+      includeRoles: [],
+      excludeRoles: [],
+      includeGuestsOrExternalUsers: null,
+      excludeGuestsOrExternalUsers: null,
+    },
+    clientApplications: {
+      includeServicePrincipals: [],
+      includeAgentIdServicePrincipals: ["All"],
+      excludeServicePrincipals: [],
+      excludeAgentIdServicePrincipals: [],
+      agentIdServicePrincipalFilter: null,
+    },
+  };
+
+  return { ...body, conditions };
+}
+
 // Build the final Graph body for a CA policy from an intent file.
 export function buildPolicyBody(intent, ctx) {
   const body = {
@@ -372,19 +416,17 @@ export function buildPolicyBody(intent, ctx) {
     body.conditions.agentIdRiskLevels = intent.conditions.agentIdRiskLevels;
   }
 
-  if ((intent.include || {}).agentIds === "all") {
-    body.conditions.clientApplications = {
-      includeAgentIdServicePrincipals: ["All"],
-    };
-  }
-
   const grant = resolveGrant(intent, ctx);
   if (grant) body.grantControls = grant;
 
   const session = resolveSession(intent);
   if (session) body.sessionControls = session;
 
-  return stripEmptyGraphCollections(body);
+  let out = stripEmptyGraphCollections(body);
+  if ((intent.include || {}).agentIds === "all") {
+    out = finalizeWorkloadAgentPolicyBody(out, intent);
+  }
+  return out;
 }
 
 // Build the Graph body for a group create call from a group intent file.

@@ -30,6 +30,7 @@ import html
 import json
 import os
 import shutil
+import urllib.parse
 import sys
 from collections import OrderedDict
 from pathlib import Path
@@ -188,10 +189,10 @@ POLICIES: list[dict] = [
     {
         "id": "CA111",
         "displayName": "Continuous Access Evaluation - Standard",
-        "description": "Continuous Access Evaluation in standard sensitivity for workforce accounts: reacts faster to revocation or policy changes compared with long-lived tokens. Administrators should pair with CA603 (strict CAE). Deploy note: Microsoft Graph rejects some CAE-only session payloads that also exclude guests/externals; the deploy SPA omits excludeGuestsOrExternalUsers for this rule (see docs/translate.js); guest collaborators remain covered by other baseline policies.",
+        "description": "Continuous Access Evaluation in standard sensitivity for workforce accounts: reacts faster to revocation or policy changes compared with long-lived tokens. Pair with CA603 (strict CAE). Unlike other workforce policies, exclude guests/external users cannot be applied on this CAE-session-only rule in Graph—the baseline omits guest/external exclusion here only; other policies continue to exclude guests where supported.",
         "metadata": {"criticality": "Recommended", "v2Status": "NEW", "persona": "All users", "j0eyvEquivalent": "CA209"},
         "include": {"users": "all"},
-        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount"], "guestsAndExternals": True},
+        "exclude": {"groups": ["AC_ExcludedFromCA", "BG_BreakGlass", "AC_ServiceAccount"]},
         "applications": {"include": "all"},
         "conditions": {"clientAppTypes": ["all"]},
         "session": {"continuousAccessEvaluation": "standard"},
@@ -969,18 +970,42 @@ def _readme_catalog_text(value: object) -> str:
     return str("" if value is None else value).replace("\n", " ").strip()
 
 
+def _readme_table_cell(value: object) -> str:
+    """GFM table cell: flatten and avoid breaking the table on pipe characters."""
+    return _readme_catalog_text(value).replace("|", "\\|")
+
+
+def _readme_criticality_badge(criticality: str) -> str:
+    """Shields badge (GitHub README has no native table cell colors)."""
+    key = (criticality or "").strip().lower()
+    if key == "critical":
+        msg, color = "Critical", "c62828"
+    elif key == "recommended":
+        msg, color = "Recommended", "1565c0"
+    elif key == "optional":
+        msg, color = "Optional", "757575"
+    else:
+        msg = (criticality or "Unknown").strip() or "Unknown"
+        color = "757575"
+    qs = urllib.parse.urlencode(
+        {"label": "", "message": msg, "color": color, "style": "flat-square"}
+    )
+    return f"![{msg}](https://img.shields.io/static/v1?{qs})"
+
+
 def write_readme_policy_catalog(policy_filenames: list[str]) -> None:
-    """Replace the Markdown bullet list between markers in README.md."""
+    """Replace the Markdown block between markers in README.md with a summary table."""
     rows = _load_policy_inventory_rows(policy_filenames)
-    lines: list[str] = []
-    for rid, dn, pers, crit, desc in rows:
+    lines: list[str] = [
+        "| ID | Policy | Persona | Criticality |",
+        "| --- | --- | --- | --- |",
+    ]
+    for rid, dn, pers, crit, _desc in rows:
+        badge = _readme_criticality_badge(crit)
         lines.append(
-            f"- **{_readme_catalog_text(rid)}** — {_readme_catalog_text(dn)} — "
-            f"{_readme_catalog_text(pers)} — {_readme_catalog_text(crit)}"
+            f"| {_readme_table_cell(rid)} | {_readme_table_cell(dn)} | "
+            f"{_readme_table_cell(pers)} | {badge} |"
         )
-        desc_line = _readme_catalog_text(desc)
-        if desc_line:
-            lines.append(f"  {desc_line}")
     block = "\n".join(lines) + "\n"
     readme_path = os.path.join(REPO_ROOT, "README.md")
     readme = Path(readme_path).read_text(encoding="utf-8")

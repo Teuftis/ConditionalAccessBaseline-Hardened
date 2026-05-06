@@ -1,114 +1,108 @@
 # Mirage Conditional Access Baseline (v2026)
 
-**Opinionated, production-style Conditional Access for Microsoft Entra ID** — stored as JSON in this repo and applied with a **small static web app** (no backend, no client secret in Git). Sign in as a tenant admin, consent to Microsoft Graph, and create **new** policies, groups, and named locations. **New Conditional Access policies are created in Off (disabled)**. If a policy **display name** already exists in the tenant, the deploy app **does not overwrite it** (so active settings stay intact). You turn policies on in the admin center when you are ready.
+Opinionated, production-oriented **Conditional Access** for Microsoft Entra ID: baseline objects live as **intent JSON** (not tenant-specific Graph payloads). A **static web app under `docs/`** turns names into GUIDs via Microsoft Graph — no backend and no client secret in the repo. Sign in as a tenant admin with delegated consent, then create missing **groups**, **named locations**, and **Conditional Access policies** (new CA policies default to **disabled**).
 
-**This is not a Microsoft product.** Treat the baseline as a starting point: validate against your apps, licenses (for example Entra ID P2 for risk-based policies), and change process.
+**Not a Microsoft product.** Use as a baseline only: validate against your apps, licenses (for example Entra ID P2 for risk-based controls), and your change process.
 
 | | |
 |---|---|
-| **Live deploy app** | [teuftis.github.io/ConditionalAccessBaseline-Hardened](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/) |
-| **Source** | [Teuftis/ConditionalAccessBaseline-Hardened](https://github.com/Teuftis/ConditionalAccessBaseline-Hardened) |
-| **Browse policies (styled)** | [inventory.html](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/inventory.html) on GitHub Pages |
+| **Live deploy app** | [ConditionalAccessBaseline-Hardened on Pages](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/) |
+| **Source** | [Teuftis/ConditionalAccessBaseline-Hardened](https://github.com/Teufis/ConditionalAccessBaseline-Hardened) |
+| **Styled policy catalog** | [inventory.html](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/inventory.html) (filters and layout for browsing)
 
 [![Open deploy app](https://img.shields.io/badge/Open-deploy%20app-0078D4?logo=microsoftazure&logoColor=white&style=for-the-badge)](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/)
 
-Tenant admins → **[Deploy in your tenant](#deploy-in-your-tenant)** · Fork owners → **[GitHub Pages](#github-pages)** · **[Customize & fork](#customize--fork)**
+## Choose your path
+
+| You want to… | Start here |
+|--------------|------------|
+| Deploy into a tenant today | See [Deploy in your tenant](#deploy-in-your-tenant) · [Safety and trust](#safety-and-trust) · [Further reading](#further-reading) |
+| Maintain the baseline, regenerate JSON, fork the app registration | See [Customize & fork](#customize--fork) · [GitHub Pages](#github-pages) · [Safety and trust](#safety-and-trust) |
+
+## Contents
+
+| Section | What you'll find |
+|---------|------------------|
+| [What's in this repository](#whats-in-this-repository) | Folders, intent model, skips, catalogs |
+| [Deploy in your tenant](#deploy-in-your-tenant) | Roles, dry run, writes vs untouched policies |
+| [After deploy](#after-deploy-in-microsoft-entra-admin-center) | Portal checklist before enabling policies |
+| [Safety and trust](#safety-and-trust) | Delegated-only writes, naming match, branch supply chain |
+| [Customize & fork](#customize--fork) | Generator, naming, forks, local dev |
+| [GitHub Pages](#github-pages) | Publishing SPA + troubleshooting **404**, `docs/baseline` mirror |
+| [Policy catalog](#policy-catalog) | Long auto-generated appendix (browse [inventory.html](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/inventory.html) first) |
+| [Groups](#groups-entra) | Auto-generated Entra groups appendix |
+| [Further reading](#further-reading) | Microsoft Learn CA links |
+| [Legal & reference](#legal--reference) | License · security · spreadsheets |
 
 ---
 
-### On this page
+## What's in this repository
 
-| Section | Contents |
-|---------|----------|
-| [Overview](#overview) | What ships in `baseline/` and how writes work |
-| [Deploy](#deploy-in-your-tenant) | Steps to run the app in your directory |
-| [After deploy](#after-deploy-in-microsoft-entra-admin-center) | Portal work before turning policies on |
-| [Trust](#trust) | Permissions, posture, reviewer expectations |
-| [GitHub Pages](#github-pages) | Publishing the SPA from this repo |
-| [Customize](#customize--fork) | Editing the baseline and running the generator |
-| [Further reading](#further-reading) | Microsoft docs |
-| [Policy catalog](#policy-catalog) | Full regenerated list (~40 rows) |
-| [Groups](#groups-entra) | Regenerated Entra group summaries |
+**Intent JSON** describes policies ([`baseline/policies/`](./baseline/policies/)), groups ([`baseline/groups/`](./baseline/groups/)), and named locations ([`baseline/namedLocations/`](./baseline/namedLocations/)). At deploy time, [`docs/translate.js`](docs/translate.js) resolves display names into Graph IDs (`ALLOWED_DEPLOY_STATES` in [`docs/config.js`](docs/config.js) forces policies to **`disabled`** for new creations).
 
----
-
-## Overview
-
-Baseline objects live under **`baseline/`**: **intent** JSON for policies (**not** raw Graph bodies — [`docs/translate.js`](docs/translate.js) turns names into IDs at deploy time).
-
-| Artefact | Count | Location |
-|---------|-------|----------|
+| Artifact | Count | Path |
+|---------|-------|------|
 | Conditional Access policies | 40 | [`baseline/policies/`](./baseline/policies/) |
 | Groups | 11 | [`baseline/groups/`](./baseline/groups/) |
 | Named locations | 4 | [`baseline/namedLocations/`](./baseline/namedLocations/) |
 
-You do **not** need to clone the repo to deploy: open the **[deploy app](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/)** after [Pages](#github-pages) is publishing. Scoped policies (for example optional SaaS apps) **may skip** if the referenced service principal is missing. Terms of Use are **your** objects — they are **not** created automatically.
+You do **not** need this repo cloned to deploy: open the **[live app](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/)** once [GitHub Pages](#github-pages) is serving it. Policies that scope optional workloads may **skip** if a required third-party **service principal** is missing. Terms of Use stay **tenant-owned** objects — nothing creates them automatically.
 
-[`POLICY_INVENTORY.md`](./POLICY_INVENTORY.md) is a Markdown table suited to reviews and PR diffs; the **[styled catalog](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/inventory.html)** adds layout and filters. **`python scripts/generate-baseline.py`** keeps `baseline/`, those files, SPA tables, and the **Policy catalog / Groups** sections at the bottom of this README in sync (see **[Customize & fork](#customize--fork)**).
+For reviews and Git diffs, [`POLICY_INVENTORY.md`](./POLICY_INVENTORY.md) duplicates the appendix as a table. **`python scripts/generate-baseline.py`** keeps **`baseline/`**, the mirrored **`docs/baseline/`** tree (Pages same-origin JSON), [`POLICY_INVENTORY.md`](./POLICY_INVENTORY.md), SPA tables (`docs/inventory.html`, `docs/index.html`), and README appendices aligned — see [Customize & fork](#customize--fork).
 
-**Safe defaults:** new policies only are created **`disabled`** (**Off**) — see [`ALLOWED_DEPLOY_STATES`](docs/config.js). Policies that already exist (matched by **display name**) are never updated by the app. Moving to Report-only or On stays a **manual** admin-center step.
-
----
+[`docs/deploy.js`](docs/deploy.js) runs the manifest flow; **`baseline/manifest.json`** defines deploy order.
 
 ## Deploy in your tenant
 
-You need permissions to manage **Conditional Access** and **groups** (typical combos: **Conditional Access Administrator** + **Groups Administrator**, **Security Administrator**, or **Global Administrator**, depending on the tenant).
+Delegated roles that can complete the flow commonly include combinations of **Conditional Access Administrator**, **Groups Administrator**, **Security Administrator**, or **Global Administrator**.
 
-1. Open the **[deploy web app](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/)** ([troubleshooting](#github-pages) if you get **404** or an empty baseline).
-2. **Sign in** and complete **delegated consent** for the requested Microsoft Graph scopes.
-3. Optionally leave **Dry run** enabled to preview (**no tenant writes**), then disable it and run **Deploy**.
-4. Scan the activity log — **optional workloads** may show as **skipped** (missing dependencies); **Conditional Access policies** whose **display name** already exist show as **unchanged** (not overwritten). Policies that could not POST will show **error** until prerequisites or translation rules are addressed.
+1. Open the **[deploy web app](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/)** (blank baseline or errors → [GitHub Pages](#github-pages) troubleshooting).
+2. **Sign in** and accept **delegated** Microsoft Graph scopes.
+3. Optionally keep **Dry run** enabled (preview only — no tenant writes), then disable it for a real run.
+4. Read the activity log: **skipped** (missing deps), **unchanged** (existing **display name** already in tenant), **created**, or **error** (Graph rejected the payload — often schema or missing prerequisite).
 
-**What writes vs what is left alone**
+**Writes vs what stays unchanged on re-run**
 
-| Artefact | On re-run |
-|----------|-----------|
-| **Conditional Access policies** | **POST** only when no policy with that **display name** exists. Existing policies are **never PATCHed** (state and rules stay as in the tenant). |
-| **Groups** | Created if missing; if the group exists, its **membership and properties are not updated**—only reused for ID resolution. |
-| **Named locations** | Created if missing; existing objects are reused **without** overwriting IP/country definitions. |
+| Artifact | Behavior |
+|---------|----------|
+| Conditional Access policies | **POST** creates a policy **only when no existing policy shares that normalized display name** (exact or Unicode hyphen-normalized match). Existing policies are **never PATCH**ed — state stays as in the tenant. |
+| Groups | Ensured exists; membership and props are **not** updated afterward — only reused for ID resolution during deploy. |
+| Named locations | Created if missing; if present, IPs/countries definitions are **not** overwritten automatically. |
 
-The activity log summarizes **created**, **unchanged**, **skipped**, and **errors** (including **`firstPartyApp:…`** when a Microsoft app lacks a tenant service principal).
+The log summarizes outcomes (including skips like **`firstPartyApp:`**… when required Microsoft-native apps lack a tenant service principal binding).
 
 ### After deploy in Microsoft Entra admin center
 
-1. Finish **named location** definitions and **group** membership (break glass, exclusions, automation groups, pilots).
-2. Review **Protection → Conditional Access** and use **Sign-in logs** / **Conditional Access insights** before changing policy states.
-3. Turn policies **On** in **phases** that match your runbook rather than flipping the full set at once.
+1. Populate **named location** ranges/countries and **group** memberships (break-glass, exclusions, pilots, automation groups).
+2. Review **Protection → Conditional Access**, **Sign-in logs**, and Conditional Access insights before changing policy effect.
+3. Move policies **report-only**, then **on**, **in phases** that match your runbook — enabling everything at once rarely ends well.
 
----
+## Safety and trust
 
-## Trust
-
-| Topic | Detail |
-|-------|--------|
-| **Credentialed access only** | The SPA uses your admin sign-in via **delegated** Graph scopes — nothing runs without **you**. There is **no** client secret in the repo ([`docs/config.js`](docs/config.js)). |
-| **Writes are limited by design** | **New** CA policies are created **`disabled`**. **Existing** CA policies (same **display name**) are **not patched** by the app. Report-only / On remain **portal-only** choices. |
-| **Supply chain** | `main` (and whoever can publish **GitHub Pages**) controls what browsers execute — review PRs and protect the default branch accordingly. |
-
----
-
-## GitHub Pages
-
-The SPA is **`docs/`**, deployed by [.github/workflows/deploy-pages.yml](.github/workflows/deploy-pages.yml) on pushes to **`main`**.
-
-**First publish:** Repository **Settings → Pages** → source **GitHub Actions** (or **Deploy from branch** → **`main` / `/docs`**). Run the workflow and approve **`github-pages`** if GitHub prompts. A short delay before the site appears is normal.
-
-**404 or missing manifest?** Confirm the **Deploy GitHub Pages** workflow has run after this change (it copies `baseline/` beside the SPA). Hard-refresh the site. Older setups that only publish `docs/` without that copy can still set `window.MIRAGE_BASELINE_URL` to a reachable `.../baseline` base URL, or rely on **raw.githubusercontent.com** as the second fallback (requires `baseline/` committed on `main`). Background: [About GitHub Pages](https://docs.github.com/pages/getting-started-with-github-pages/about-github-pages).
-
----
+| Topic | What to know |
+|-------|----------------|
+| **Credentialed only** | The SPA uses your admin session and **delegated** Graph scopes. There is **no** OAuth client secret in Git ([`docs/config.js`](docs/config.js)). |
+| **Writes are guarded** | New CA policies arrive **disabled** ([`ALLOWED_DEPLOY_STATES`](docs/config.js)). Existing tenants keep live rules because policies that **match display name** (after normalization shown in Customize) are skipped — zero silent overwrites via PATCH. Turning policies **report-only / on** stays a **manual** admin-center decision. |
+| **Supply chain** | Whatever ships on **GitHub Pages** from `main` is what browsers execute — protect the default branch and review PRs that touch `docs/` or CI. |
 
 ## Customize & fork
 
 | Task | Steps |
 |------|-------|
-| **Change policies or groups** | Edit **`POLICIES`** / **`GROUPS`** (and related structs) in [`scripts/generate-baseline.py`](scripts/generate-baseline.py); run **`python scripts/generate-baseline.py`**; commit **`baseline/`**, **`POLICY_INVENTORY.md`**, **`docs/inventory.html`**, **`docs/index.html`**, and the generated sections in **`README.md`**. On Windows save the script as UTF-8. |
-| **Naming in Entra** | Generated **`displayName`** values look like **`CA101 — Require MFA`** (em dash **—**). The deploy app **loads all CA policies** from the tenant, then skips when **`displayName` matches exactly** or after normalizing hyphen/dash Unicode and casing (so **`CA101 - …`** matches **`CA101 — …`**). Matches are **skipped** (not PATCHed). Rename/delete in Entra only if you need a duplicate created. |
-| **Fork another account** | Create a multitenant SPA app registration (**public client**, no secret), plug **`clientId`** and redirect URIs into [`docs/config.js`](docs/config.js), enable Pages, use **`https://<you>.github.io/<repo>/`**, and mirror [`GRAPH_SCOPES`](docs/config.js). |
-| **Hack locally** | From repo root run `python -m http.server` (or equivalent), open **`/docs/`**, add **localhost** redirect URIs on the app registration. |
+| **Change policies or groups** | Edit **`POLICIES`** / **`GROUPS`** (and related structures) in [`scripts/generate-baseline.py`](scripts/generate-baseline.py). Run **`python scripts/generate-baseline.py`**. Commit **`baseline/`**, **`docs/baseline/`**, **`POLICY_INVENTORY.md`**, **`docs/inventory.html`**, **`docs/index.html`**, and the README appendix regions this script rewrites. On Windows, save the script as **UTF-8**. |
+| **Naming in Entra** | Generated **`displayName`** patterns look like **`CA101 — Require MFA`** (em dash **`—`**). Deploy loads all CA policies, then dedupes with exact match **plus** Unicode hyphen normalization and casing (so **`CA101 -`** still matches **`CA101 —`**). Dupes skip creation — rename or delete stale Entra copies if you need a regenerate. |
+| **Fork another app registration** | Multitenant **public client SPA** registration (still no secrets). Paste **`clientId`** + HTTPS redirect URIs into [`docs/config.js`](docs/config.js), expose matching [`GRAPH_SCOPES`](docs/config.js), re-enable Pages hosting on your GH org. |
+| **Hack locally** | From repo root, `python -m http.server` (or VS Code Live Server). Open **`/docs/`**. Register **localhost** redirect URIs on the Entra SPA app alongside your production Pages URL pairings. |
 
-[`docs/deploy.js`](docs/deploy.js) orchestrates sequencing; **`baseline/manifest.json`** controls order.
+## GitHub Pages
 
----
+The browser bundle is **`docs/`**, emitted by [.github/workflows/deploy-pages.yml](.github/workflows/deploy-pages.yml) whenever **`main`** updates.
+
+Pages needs one-time **[Settings → Pages → GitHub Actions](https://docs.github.com/pages/getting-started-with-github-pages/about-github-pages)** (historic **branch `/docs`** path also works).
+
+**Architecture note:** workflows run **`rm -rf docs/baseline && cp -r baseline docs/baseline`** so `fetch("./baseline/manifest.json")` stays **same-origin** with the SPA (reduces CORS pain vs only raw GitHub raw endpoints). The generator copies the same mirror when you run it locally.
+
+**404 or empty manifest in the live app?** Confirm the **Deploy GitHub Pages** workflow finished. Hard-refresh. Legacy forks that never got the copy step can still override `window.MIRAGE_BASELINE_URL` to a reachable baseline root or fall back to **raw.githubusercontent.com** (requires `baseline/` on your default branch).
 
 ## Further reading
 
@@ -116,98 +110,58 @@ The SPA is **`docs/`**, deployed by [.github/workflows/deploy-pages.yml](.github
 - [Policies and assignments](https://learn.microsoft.com/entra/identity/conditional-access/concept-conditional-access-policies)
 - [Named locations](https://learn.microsoft.com/entra/identity/conditional-access/concept-assignment-network)
 
----
-
 ## Policy catalog
 
-Each bullet is **policy id — short title — persona — criticality**; the indented line matches the **`description`** field from that policy JSON. Prefer **[inventory.html](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/inventory.html)** for browsing — full list for search and clones below. **[POLICY_INVENTORY.md](./POLICY_INVENTORY.md)** duplicates this as a table. Regenerated alongside **[Groups (Entra)](#groups-entra)** by **`scripts/generate-baseline.py`**.
+**Appendix.** The summary table below mirrors [`POLICY_INVENTORY.md`](./POLICY_INVENTORY.md) and the spreadsheet summary (ID, policy title, persona, criticality). It auto-regenerates from JSON when you run **`scripts/generate-baseline.py`**. GitHub Markdown does not support Excel-style cell shading; **criticality** is shown with colored badges (same semantics as the pills in **[inventory.html](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/inventory.html)**). Full descriptions stay in each policy JSON; use the inventory page or `POLICY_INVENTORY.md` for prose.
 
 <!-- policy-catalog:start -->
-- **CA101** — Require MFA — All users — Critical
-  Foundation control for workforce users: requires multifactor authentication on every interactive sign-in to cloud applications. Applies broadly (all users) with exclusions for break-glass, CA-wide exclusions, service principals in AC_ServiceAccount, and external/guest identities (covered by guest policies).
-- **CA102** — User Risk - Require MFA + Password Change — All users — Critical
-  Identity Protection remediation for elevated user risk (medium or high): requires MFA and a secure password change during the session. Depends on Entra ID P2 (user risk evaluations). Honors standard exclusions including guests and externals disabled for this persona.
-- **CA103** — Sign-In Risk - Require MFA — All users — Critical
-  Identity Protection challenge for risky sign-ins (medium or high): requires MFA to continue the session when Entra evaluates elevated sign-in risk. Requires Entra ID P2. Excludes universal exclusions and separates guest traffic via policy construction.
-- **CA104** — Block Legacy Authentication — All users — Critical
-  Tenant-wide legacy authentication hardening: blocks basic authentication and legacy client protocols (for example POP, IMAP, SMTP AUTH, authenticated SMTP, and broader legacy client application types aligned with Microsoft guidance). Enables a dependable modern-auth-only posture; pair with workload-specific disables.
-- **CA105** — Block Unknown Platforms — All users — Recommended
-  Device-platform allow list: denies access when the client is not Windows, macOS, iOS, Android, or Linux. Mitigates access from unmanaged or unexpected operating systems across all workloads in scope.
-- **CA106** — Block Outside Trusted Countries — All users — Critical
-  Geolocation control using the TRUSTED_COUNTRIES named location. Sign-ins originating outside trusted regions are blocked unless the user is exempted via AC_TravelException (time-bounded travel). Excludes the travel exception group from the country condition so legitimate trips still work.
-- **CA107** — Session Controls — All users — Recommended
-  Session tightening for standard users: enforces recurring reauthentication (twelve-hour sign-in frequency) and disallows persistent browser sessions. Applies a device filter so compliant or hybrid Entra joined devices can be handled according to organizational exception rules.
-- **CA108** — Block Cross-Device Auth Flows — All users — Critical
-  Blocks high-abuse OAuth flows tied to phishing: denies device-code authentication and OAuth authentication transfer where supported. Exempts freshly approved enterprise device registrations that still need onboarding.
-- **CA109** — Require MFA for Azure Management — All users — Recommended
-  Protects Azure resource management workloads: MFA is required whenever accessing Azure portal, CLI, REST, Infrastructure-as-Code, or other ARM-related applications. Targets the workload identity surface used to change tenant posture.
-- **CA110** — Block Malicious IPs — All users — Optional
-  Threat-intelligence egress control: denies sign-ins that map to indicators in the MALICIOUS_IPS named location (populate with SOC or feed-driven ranges before enforcement). Complements geo and risk policies.
-- **CA111** — Continuous Access Evaluation - Standard — All users — Recommended
-  Continuous Access Evaluation in standard sensitivity for workforce accounts: reacts faster to revocation or policy changes compared with long-lived tokens. Administrators should pair with CA603 (strict CAE). Deploy note: Microsoft Graph rejects some CAE-only session payloads that also exclude guests/externals; the deploy SPA omits excludeGuestsOrExternalUsers for this rule (see docs/translate.js); guest collaborators remain covered by other baseline policies.
-- **CA112** — MFA on Device Register or Join — All users — Critical
-  Strengthens Entra device registration and join endpoints: MFA is required anytime a user completes device registration or Workplace Join/Azure AD join workflows, reducing unauthorized device onboarding.
-- **CA113** — Require Token Protection (Pilot) — All users — Optional
-  Pilot control binding primary refresh tokens more tightly on supported Windows workloads (token protection). Limits token replay when adversaries steal session material via phishing proxies. Applies only to the AC_TokenProtection_Pilot group—expand deliberately after telemetry review.
-- **CA114** — Terms of Use — All users — Optional
-  Regulatory / policy attestation workflow: prompts users for Microsoft Entra Terms of Use before access. Organizations must provision a tenant-specific Terms of Use object and inject its GUID at deployment time (see deploy SPA configuration).
-- **CA201** — Intune Enrolling - Require MFA — All users — Critical
-  Secures enrollment into Microsoft Intune: MFA is mandated when enrolling a freshly managed endpoint so attackers cannot silently attach devices without strong proof of possession.
-- **CA202** — Require App Protection (Mobile) — All users — Critical
-  Mobile application protection posture for Microsoft 365: requires Intune App Protection Policies on iOS and Android M365 workloads. Matches Microsoft’s APP enforcement model (replaces fragile approved-client-app keyword matching).
-- **CA204** — Require Compliant Mobile (Optional MDM track) — All users — Optional
-  Optional hardened path for supervised mobile fleets: complements CA202 by requiring Intune-compliant devices on MDM-enrolled handhelds running iOS/Android. Omit or soften if you intentionally stay app-protection-only without enrollment.
-- **CA301** — Require Compliant Windows — All users — Critical
-  Corporate Windows laptops and desktops must be Entra hybrid joined or marked Intune-compliant before granting access to Microsoft 365 and related cloud apps.
-- **CA302** — Require Compliant macOS — All users — Critical
-  Same enforcement as CA301 scoped to macOS clients: unmanaged Macs cannot access Microsoft 365 data until they enroll and report healthy compliance posture.
-- **CA303** — Limited Browser Access on Unmanaged Devices — All users — Recommended
-  Reduces unmanaged-device blast radius under Microsoft 365: browser sessions can remain read-only/view-like against Exchange Online / SharePoint when the device fails the trusted workstation filter yet still needs lightweight productivity.
-- **CA601** — Phishing-Resistant MFA for Admins — Admins — Critical
-  Privileged role assignments (Azure AD Directory Roles, Delegated Administrative Partners, cloud-only role-backed accounts) must use phishing-resistant MFA (FIDO2, Windows Hello for Business with attestation, or federated certificate-based authentication where applicable).
-- **CA602** — Admin Session Controls — Admins — Critical
-  Admin session containment: repeats the tighter session controls applied to privileged accounts—maximum four-hour recurring authentication and disallow persistent browser sessions—for every identity holding directory or workload admin roles included in Privileged Administrators.
-- **CA603** — Admin CAE - Strict — Admins — Critical
-  Strict Continuous Access Evaluation for privileged identities paired with Conditional Access Strict Location evaluation: reacts immediately to IP deltas and high-sensitivity revocation signals suitable for Tier-0 workloads. Evaluate change windows carefully given Real Time CAE telemetry requirements.
-- **CA604** — Admin Block High User Risk — Admins — Critical
-  Break-glass for risky operators: denies admin role holders when Entra Identity Protection marks the user risky at high severity. Keeps admins from deepening compromise while investigative controls run.
-- **CA605** — Admin Block High Sign-In Risk — Admins — Critical
-  Complements CA604 using sign-in risk for administrators: denies access when Identity Protection observes high sign-in risk, closing scenarios where compromised tokens still pass user-risk heuristics slowly.
-- **CA606** — Admin Require Compliant or Joined Device — Admins — Critical
-  Device trust bar for admins: privileged changes may only originate from Hybrid Entra Joined workstations or devices reporting compliant posture to Intune, preventing lateral movement from unmanaged kit.
-- **CA701** — App - FortiClient - MFA — Application — Optional
-  Zero Trust gate for perimeter VPN integrations (Fortinet FortiClient in template form): MFA before granting network tunnel access aligned with phishing-resistant MFA investments elsewhere.
-- **CA702** — App - Salesforce - MFA — Application — Optional
-  SaaS control for Salesforce: interactive users must satisfy MFA whenever accessing Salesforce through Entra  SSO. Requires a valid enterprise application / service principal in the tenant reflecting production URLs.
-- **CA801** — Service - Require MFA (Interactive) — Service — Recommended
-  Service principal hardening subset: mandates MFA whenever the delegated application signs in interactively (think human-driven scripts). Daemon / client-credential workloads remain out of scope via negative group conditioning paired with exclusions.
-- **CA802** — Service - Block Outside Trusted IPs — Service — Critical
-  Network perimeter for unattended automation: restricts allowed sign-ins for centralized service principals to the corporate or partner IP ranges modeled in SVC_TRUSTED_IPS, blocking roaming or hostile networks.
-- **CA803** — Service - Block Legacy Auth — Service — Recommended
-  Defense-in-depth block on legacy protocols for workloads using service principals: reinforces CA104 baseline by narrowly scoping SMTP AUTH/similar exposures that often slip through scripted automation identities.
-- **CA804** — Service - Block Non-M365 Apps — Service — Recommended
-  Least-privilege SaaS stance for robotic identities: confines service credentials to approved Microsoft 365 applications while denying access to tertiary SaaS and consumer OAuth clients.
-- **CA901** — Guest - Require MFA — Guest — Critical
-  Guest/B2B collaboration MFA: ensures every federated partner user proves MFA freshness in your tenant, closing the reliance on weaker home-tenant MFA states alone.
-- **CA902** — Guest - Block High Sign-In Risk — Guest — Recommended
-  Guest risk remediation: denies high sign-in-risk events even when the guest’s home tenant is lenient (defense against cross-tenant token theft).
-- **CA903** — Guest - Block Legacy Auth — Guest — Recommended
-  Prevents scripted or legacy-protocol abuse for guest personas; layered with CA901 to mandate modern apps and interactive controls.
-- **CA904** — Guest - Block Outside Trusted Countries — Guest — Critical
-  Geographic guardrail for collaborators: restricts guest access paths to countries mirrored in trusted named locations (typically broader lists than workforce policies). Pair with onboarding guidance for visiting partners.
-- **CA905** — Guest - Block Non-Collaboration Apps — Guest — Critical
-  Data-exfiltration control for guests collaborating in Microsoft Teams/Groups: confines Office 365 workloads while blocking ancillary SaaS (except explicitly excluded apps such as delegated admin workloads).
-- **CA906** — Guest - Terms of Use — Guest — Optional
-  Guest-visible Terms-of-Use acknowledgement for contractual or jurisdictional onboarding before accessing shared resources.
-- **CA907** — Guest - Session Controls — Guest — Recommended
-  Session hygiene for collaborators: aligns guest browser sessions with the twelve-hour MFA refresh posture so stolen guest tokens degrade quickly—mirroring CA107 protections for internals.
-- **CAA01** — Agent - Block High Risk — Agent — Recommended
-  Workload identities (service principals using agent delegation) flagged high risk by Identity Protection lose access immediately across cloud apps targeted by the workload persona until risk clears.
+| ID | Policy | Persona | Criticality |
+| --- | --- | --- | --- |
+| CA101 | Require MFA | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA102 | User Risk - Require MFA + Password Change | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA103 | Sign-In Risk - Require MFA | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA104 | Block Legacy Authentication | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA105 | Block Unknown Platforms | All users | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
+| CA106 | Block Outside Trusted Countries | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA107 | Session Controls | All users | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
+| CA108 | Block Cross-Device Auth Flows | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA109 | Require MFA for Azure Management | All users | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
+| CA110 | Block Malicious IPs | All users | ![Optional](https://img.shields.io/static/v1?label=&message=Optional&color=757575&style=flat-square) |
+| CA111 | Continuous Access Evaluation - Standard | All users | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
+| CA112 | MFA on Device Register or Join | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA113 | Require Token Protection (Pilot) | All users | ![Optional](https://img.shields.io/static/v1?label=&message=Optional&color=757575&style=flat-square) |
+| CA114 | Terms of Use | All users | ![Optional](https://img.shields.io/static/v1?label=&message=Optional&color=757575&style=flat-square) |
+| CA201 | Intune Enrolling - Require MFA | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA202 | Require App Protection (Mobile) | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA204 | Require Compliant Mobile (Optional MDM track) | All users | ![Optional](https://img.shields.io/static/v1?label=&message=Optional&color=757575&style=flat-square) |
+| CA301 | Require Compliant Windows | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA302 | Require Compliant macOS | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA303 | Limited Browser Access on Unmanaged Devices | All users | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
+| CA601 | Phishing-Resistant MFA for Admins | Admins | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA602 | Admin Session Controls | Admins | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA603 | Admin CAE - Strict | Admins | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA604 | Admin Block High User Risk | Admins | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA605 | Admin Block High Sign-In Risk | Admins | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA606 | Admin Require Compliant or Joined Device | Admins | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA701 | App - FortiClient - MFA | Application | ![Optional](https://img.shields.io/static/v1?label=&message=Optional&color=757575&style=flat-square) |
+| CA702 | App - Salesforce - MFA | Application | ![Optional](https://img.shields.io/static/v1?label=&message=Optional&color=757575&style=flat-square) |
+| CA801 | Service - Require MFA (Interactive) | Service | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
+| CA802 | Service - Block Outside Trusted IPs | Service | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA803 | Service - Block Legacy Auth | Service | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
+| CA804 | Service - Block Non-M365 Apps | Service | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
+| CA901 | Guest - Require MFA | Guest | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA902 | Guest - Block High Sign-In Risk | Guest | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
+| CA903 | Guest - Block Legacy Auth | Guest | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
+| CA904 | Guest - Block Outside Trusted Countries | Guest | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA905 | Guest - Block Non-Collaboration Apps | Guest | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA906 | Guest - Terms of Use | Guest | ![Optional](https://img.shields.io/static/v1?label=&message=Optional&color=757575&style=flat-square) |
+| CA907 | Guest - Session Controls | Guest | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
+| CAA01 | Agent - Block High Risk | Agent | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
 <!-- policy-catalog:end -->
 
 ## Groups (Entra)
 
-Deployed from [`baseline/groups/`](./baseline/groups/) with the SPA. **`tier`** labels: **Required** (foundation), **Service track** (automation subdivisions referenced by CA801/802 paths), **Exception** (short-lived bypasses), **Pilot** (narrow experiments). **`mailNickname`** values are chosen for uniqueness at creation time via Graph.
+**Appendix (auto-generated).** Every entry below maps to a JSON file under [`baseline/groups/`](./baseline/groups/). Policy intent references these by display name; deploy resolves them to object IDs. **`tier`** labels mean **Required** (foundation), **Service track** (automation splits for CA801/802), **Exception** (short-lived bypasses), **Pilot** (narrow experiments). **`mailNickname`** values are chosen for Graph uniqueness at creation time.
 
 <!-- group-catalog:start -->
 - **BG_BreakGlass** — Required — mailNickname `bg-breakglass`
@@ -234,16 +188,8 @@ Deployed from [`baseline/groups/`](./baseline/groups/) with the SPA. **`tier`** 
   Device objects undergoing Windows Autopilot pre-provisioning so they can complete join/enrollment without triggering CA112 MFA-on-join or CA201 enrollment MFA prematurely. Clean up stale device members after deployment finishes.
 <!-- group-catalog:end -->
 
----
+## Legal & reference
 
-## License
-
-Licensed under the [MIT License](./LICENSE).
-
-## Security
-
-Report vulnerabilities as described in [SECURITY.md](./SECURITY.md) (prefer GitHub **Security → Report a vulnerability**).
-
-## Reference spreadsheets
-
-The **`reference/`** `.xlsx` files are companion material for baseline design (not consumed at runtime by the deploy app). Embedded Office XML has been scanned for obvious sensitive strings: **no email addresses**, **no `.onmicrosoft` / tenant-style identifiers**, and **no non-schema HTTPS/HTTP URLs** beyond standard Open XML schema namespaces. Re-scan your copy if it diverges from this repository before wider distribution.
+- **License:** [MIT License](./LICENSE)
+- **Security:** [SECURITY.md](./SECURITY.md) (prefer GitHub **Security → Report a vulnerability**)
+- **`reference/` spreadsheets:** Design-time `.xlsx` companions for the baseline (not read by the deploy runtime). Office XML in this repo was scrubbed for obvious sensitive strings (no emails, no `.onmicrosoft` patterns, no extra HTTP(S) URLs beyond Open XML schema refs). Re-scan if you fork and diverge.
