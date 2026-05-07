@@ -18,7 +18,7 @@ The policy catalog and group descriptions are at the bottom of this README. Full
 
 ### Why CA304 — Require Compliant Linux
 
-The Entra Conditional Access platform condition is parsed from the (self-reported) User-Agent string. CA301 (Windows), CA302 (macOS), CA204 (iOS / Android) and CA202 (mobile app protection) are all `platforms.include`-scoped, so an attacker holding stolen credentials who presents `User-Agent: Linux` satisfies CA101 MFA but skips every device-compliance gate (CA606 still covers admins). CA304 mirrors CA301 with `platforms.include: ["linux"]` and a `compliantDevice` grant — combined with CA105 already blocking unknown UAs, every UA string an attacker can present is now covered by either a compliance gate or a hard block. Pre-requisite: Intune for Linux compliance policies on Ubuntu / RHEL desktops; if you do not run managed Linux endpoints, prefer dropping `linux` from CA105's `exclude` list to block the platform outright. Background: [Modern42 — Your Conditional Access Device Filters Are a Paper Wall](https://www.modern42.com/labs/research/entra/entra-id/conditional-access/device-filters/your-device-filters-are-a-paper-wall).
+Added to close the Linux User-Agent spoof gap: the CA platform condition is self-reported (from User-Agent), so without CA304, an attacker can present `User-Agent: Linux` and skip the Windows/macOS/mobile compliance gates. CA304 requires compliant Linux devices, completing the platform coverage. If you don't run managed Linux endpoints, drop `linux` from CA105's exclude list to block it outright instead.
 
 ## What state policies deploy in
 
