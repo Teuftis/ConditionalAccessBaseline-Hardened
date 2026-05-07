@@ -4,7 +4,7 @@ A Conditional Access baseline for Microsoft 365 plus a browser-based deployer. 4
 
 Deployer: https://teuftis.github.io/ConditionalAccessBaseline-Hardened/
 
-Click the badge, sign in as a CA admin, deploy. The deployer is a single-page app using PKCE — no client secret, no backend, no GitHub Actions, no Cloud Shell. Your delegated Graph token does the work and dies when the tab closes.
+Click the badge, sign in as a CA admin, deploy. The deployer is a single-page app using PKCE - no client secret, no backend, no GitHub Actions, no Cloud Shell. Your delegated Graph token does the work and dies when the tab closes.
 
 [![Open deploy app](https://img.shields.io/badge/Open-deploy%20app-0078D4?logo=microsoftazure&logoColor=white&style=for-the-badge&logoWidth=28)](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/)
 
@@ -12,21 +12,21 @@ Quick links: [deployer](https://teuftis.github.io/ConditionalAccessBaseline-Hard
 
 ## What gets created
 
-41 Conditional Access policies, 11 groups, and 4 named locations. Stored as intent JSON under [`baseline/`](./baseline/), not as raw Graph exports — the deployer in [`docs/`](./docs/) resolves display names to object IDs at write time.
+41 Conditional Access policies, 11 groups, and 4 named locations. Stored as intent JSON under [`baseline/`](./baseline/), not as raw Graph exports - the deployer in [`docs/`](./docs/) resolves display names to object IDs at write time.
 
 The policy catalog and group descriptions are at the bottom of this README. Full per-policy detail lives in [`baseline/policies/`](./baseline/policies/).
 
-### Why CA304 — Require Compliant Linux
+### Why CA304 - Require Compliant Linux
 
 Added to close the Linux User-Agent spoof gap: the CA platform condition is self-reported (from User-Agent), so without CA304, an attacker can present `User-Agent: Linux` and skip the Windows/macOS/mobile compliance gates. CA304 requires compliant Linux devices, completing the platform coverage. If you don't run managed Linux endpoints, drop `linux` from CA105's exclude list to block it outright instead.
 
 ## What state policies deploy in
 
-Most land in **Report-only**. Eight specific policies deploy **disabled** because Report-only either doesn't apply to them cleanly or misrepresents what they'd do once enforced — those are `CA111`, `CA202`, `CA204`, `CA302`, `CA303`, `CA603`, `CA606`, `CAA01`. The list lives in `POLICY_IDS_DEPLOY_DISABLED_BY_DEFAULT` in [`docs/translate.js`](docs/translate.js) and `ALLOWED_DEPLOY_STATES` in [`docs/config.js`](docs/config.js) blocks the SPA from creating anything in the On state regardless of intent. You enable manually from the Entra admin center after reviewing telemetry.
+Most land in **Report-only**. Eight specific policies deploy **disabled** because Report-only either doesn't apply to them cleanly or misrepresents what they'd do once enforced - those are `CA111`, `CA202`, `CA204`, `CA302`, `CA303`, `CA603`, `CA606`, `CAA01`. The list lives in `POLICY_IDS_DEPLOY_DISABLED_BY_DEFAULT` in [`docs/translate.js`](docs/translate.js) and `ALLOWED_DEPLOY_STATES` in [`docs/config.js`](docs/config.js) blocks the SPA from creating anything in the On state regardless of intent. You enable manually from the Entra admin center after reviewing telemetry.
 
 If a policy with the same display name already exists in the tenant, deploy leaves it alone. There is no PATCH path. Same for groups and named locations: created if missing, never overwritten.
 
-You can override the default state per-policy in a fork by adding `deploymentState` (or `deployState`) to a policy intent file. That only affects the first POST when no policy with that name exists yet — it doesn't unlock PATCH.
+You can override the default state per-policy in a fork by adding `deploymentState` (or `deployState`) to a policy intent file. That only affects the first POST when no policy with that name exists yet - it doesn't unlock PATCH.
 
 ## Deploying
 
@@ -36,7 +36,7 @@ You need one of: Conditional Access Administrator, Security Administrator, Group
 2. Sign in. Accept the delegated Graph scopes.
 3. Run with **Dry run** enabled the first time. No writes happen, but you'll see exactly what would.
 4. Clear Dry run and run again to actually deploy.
-5. Read the activity log. Outcomes are `created`, `unchanged` (display name already matches), `skipped` (missing prerequisite — usually a third-party service principal that doesn't exist in your tenant yet), or `error`.
+5. Read the activity log. Outcomes are `created`, `unchanged` (display name already matches), `skipped` (missing prerequisite - usually a third-party service principal that doesn't exist in your tenant yet), or `error`.
 
 After deploy, in the Entra admin center:
 
@@ -76,21 +76,21 @@ If the deployer loads blank or 404s on the manifest, the Pages workflow probably
 
 - Not a Microsoft product. Nothing here is supported by them.
 - Risk-based policies need Entra ID P2.
-- Graph and CA schemas drift. If a POST returns 400, the schema probably moved — open an issue with the response body.
-- Display names use an em dash, e.g. `CA101 — Require MFA`. The deployer normalizes em-dash and hyphen variants when matching, but policies you've already created with a different convention won't be touched.
+- Graph and CA schemas drift. If a POST returns 400, the schema probably moved - open an issue with the response body.
+- Policy **display names** look like `CA101 - Require MFA` (intent JSON may use a Unicode em dash or ASCII hyphen). The deployer normalizes those variants when matching, but policies you've already created with a different convention won't be touched.
 - Terms of Use objects are tenant-owned by Microsoft's design. The deployer can't create them.
 - Use a non-prod tenant for first runs if you have one, and confirm at least one break-glass account is excluded from everything before flipping any policy to On.
 
 ## Issues and contributions
 
-Issues are the right place to start. A reproduction with the deployer's activity log helps most. PRs require collaboration access on this repo — open an issue first and we can sort it from there.
+Issues are the right place to start. A reproduction with the deployer's activity log helps most. PRs require collaboration access on this repo - open an issue first and we can sort it from there.
 
 ## Repo layout
 
 ```
 baseline/                  intent JSON: policies, groups, namedLocations
 docs/                      the deployer (GitHub Pages source)
-scripts/                   generate-baseline.py — rebuilds baseline/ from dicts
+scripts/                   generate-baseline.py - rebuilds baseline/ from dicts
 reference/                 authoring spreadsheets, not read at runtime
 .github/workflows/         deploy-pages.yml publishes Pages on main
 POLICY_INVENTORY.md        markdown mirror of the policy table below
@@ -157,27 +157,27 @@ Each group below has a JSON file under [`baseline/groups/`](./baseline/groups/).
 `tier` values: **Required** is foundation, **Service track** is the automation split that lets CA801 hit interactive service logons without breaking unattended ones, **Exception** is short-lived allowances, **Pilot** is narrow experiments.
 
 <!-- group-catalog:start -->
-- **BG_BreakGlass** — Required — mailNickname `bg-breakglass`
+- **BG_BreakGlass** - Required - mailNickname `bg-breakglass`
   Break-glass and other emergency administrator accounts that must remain reachable if Conditional Access misconfiguration locks out normal admins. Keep membership empty until accounts exist; remove members when not actively needed. Excluded from nearly all CA policies so use only for documented recovery procedures.
-- **CA_ExcludedFromCA** — Required — mailNickname `ca-excludedfromca`
-  Catch-all exclusion for identities that must never be evaluated by user-facing CA (for example certain directory sync or legacy integration principals your vendor documents as CA-exempt). Treat membership as highly privileged—every account here bypasses most workforce controls.
-- **CA_ServiceAccount** — Required — mailNickname `ca-serviceaccount`
+- **CA_ExcludedFromCA** - Required - mailNickname `ca-excludedfromca`
+  Catch-all exclusion for identities that must never be evaluated by user-facing CA (for example certain directory sync or legacy integration principals your vendor documents as CA-exempt). Treat membership as highly privileged-every account here bypasses most workforce controls.
+- **CA_ServiceAccount** - Required - mailNickname `ca-serviceaccount`
   Parent group for non-human and automation accounts. Policies that target all users exclude this group so background jobs are not forced through interactive MFA. Nest members into the interactive vs non-interactive child groups so CA801 can target only human-driven service logons.
-- **CA_ServiceAccount_Interactive** — Service track — mailNickname `ca-serviceaccount-interactive`
+- **CA_ServiceAccount_Interactive** - Service track - mailNickname `ca-serviceaccount-interactive`
   Service principals or managed identities that sometimes sign in through a browser or device-code style flow. CA801 requires MFA for this population while leaving pure client-credential automation in the non-interactive sibling group.
-- **CA_ServiceAccount_NonInteractive** — Service track — mailNickname `ca-serviceaccount-noninteractive`
+- **CA_ServiceAccount_NonInteractive** - Service track - mailNickname `ca-serviceaccount-noninteractive`
   Automation identities that only use client credentials, managed identity, or other non-interactive OAuth flows. Excluded from CA801 so scheduled jobs are not blocked; pair with CA802-CA804 for network and app restrictions.
-- **CA_TravelException** — Exception — mailNickname `ca-travelexception`
+- **CA_TravelException** - Exception - mailNickname `ca-travelexception`
   Short-lived membership for employees who must sign in from outside TRUSTED_COUNTRIES during approved travel. CA106 excludes this group from the country condition so the geofence still applies to everyone else; expire memberships when the trip ends.
-- **CA_DeviceCodeApproved** — Exception — mailNickname `ca-devicecodeapproved`
+- **CA_DeviceCodeApproved** - Exception - mailNickname `ca-devicecodeapproved`
   Rare allowance for CA108's block on device-code and authentication-transfer flows (for example controlled kiosk or DevOps scenarios). Add only fully trusted principals; every member is a phishing surface.
-- **CA_TokenProtection_Pilot** — Pilot — mailNickname `ca-tokenprotection-pilot`
+- **CA_TokenProtection_Pilot** - Pilot - mailNickname `ca-tokenprotection-pilot`
   Users or devices included in the CA113 Windows token-protection pilot. Start with a small population, collect sign-in and help-desk telemetry, then expand membership as your estate supports the feature.
-- **CA_ExcludedAgents** — Exception — mailNickname `ca-excludedagents`
+- **CA_ExcludedAgents** - Exception - mailNickname `ca-excludedagents`
   Workload agent or service principal objects that must not be blocked by CAA01 when Identity Protection flags them high risk (for example monitored automation with known false positives). Keep the group tiny and review quarterly.
-- **CA_MSP_PartnerUsers** — Exception — mailNickname `ca-msp-partnerusers`
+- **CA_MSP_PartnerUsers** - Exception - mailNickname `ca-msp-partnerusers`
   Delegated administrator or partner accounts that need access to Microsoft 365 admin experiences blocked for standard guests in CA905. Requires explicit lifecycle: remove access when the engagement ends.
-- **AUTOPILOT_DevicePrep** — Exception — mailNickname `autopilot-deviceprep`
+- **AUTOPILOT_DevicePrep** - Exception - mailNickname `autopilot-deviceprep`
   Device objects undergoing Windows Autopilot pre-provisioning so they can complete join/enrollment without triggering CA112 MFA-on-join or CA201 enrollment MFA prematurely. Clean up stale device members after deployment finishes.
 <!-- group-catalog:end -->
 
@@ -309,11 +309,11 @@ union isfuzzy=true
     LastSeen         = max(TimeGenerated)
     by PolicyName, UserPrincipalName, SignInType
 | extend Triage = case(
-    LegacyAuthHits > 0, "Legacy auth — check for stale app config or attack",
-    NonCompliantHits == Failures, "Device compliance — Intune posture issue",
-    UnmanagedHits == Failures, "Unmanaged device — enrollment gap",
-    GrantControlsHit has "block", "Block policy fired — verify intent",
-    GrantControlsHit has "mfa", "MFA failure — user couldn't complete challenge",
+    LegacyAuthHits > 0, "Legacy auth - check for stale app config or attack",
+    NonCompliantHits == Failures, "Device compliance - Intune posture issue",
+    UnmanagedHits == Failures, "Unmanaged device - enrollment gap",
+    GrantControlsHit has "block", "Block policy fired - verify intent",
+    GrantControlsHit has "mfa", "MFA failure - user couldn't complete challenge",
     "Investigate")
 | order by Failures desc, LastSeen desc
 ```
