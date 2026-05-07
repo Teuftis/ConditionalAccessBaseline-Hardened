@@ -1,6 +1,6 @@
 # Mirage CA Baseline
 
-A Conditional Access baseline for Microsoft 365 plus a browser-based deployer. 40 policies covering users, admins, applications, service accounts, guests, and workload identities, with 11 supporting groups and 4 named locations.
+A Conditional Access baseline for Microsoft 365 plus a browser-based deployer. 41 policies covering users, admins, applications, service accounts, guests, and workload identities, with 11 supporting groups and 4 named locations.
 
 Deployer: https://teuftis.github.io/ConditionalAccessBaseline-Hardened/
 
@@ -12,9 +12,13 @@ Quick links: [deployer](https://teuftis.github.io/ConditionalAccessBaseline-Hard
 
 ## What gets created
 
-40 Conditional Access policies, 11 groups, and 4 named locations. Stored as intent JSON under [`baseline/`](./baseline/), not as raw Graph exports — the deployer in [`docs/`](./docs/) resolves display names to object IDs at write time.
+41 Conditional Access policies, 11 groups, and 4 named locations. Stored as intent JSON under [`baseline/`](./baseline/), not as raw Graph exports — the deployer in [`docs/`](./docs/) resolves display names to object IDs at write time.
 
 The policy catalog and group descriptions are at the bottom of this README. Full per-policy detail lives in [`baseline/policies/`](./baseline/policies/).
+
+### Why CA304 — Require Compliant Linux
+
+The Entra Conditional Access platform condition is parsed from the (self-reported) User-Agent string. CA301 (Windows), CA302 (macOS), CA204 (iOS / Android) and CA202 (mobile app protection) are all `platforms.include`-scoped, so an attacker holding stolen credentials who presents `User-Agent: Linux` satisfies CA101 MFA but skips every device-compliance gate (CA606 still covers admins). CA304 mirrors CA301 with `platforms.include: ["linux"]` and a `compliantDevice` grant — combined with CA105 already blocking unknown UAs, every UA string an attacker can present is now covered by either a compliance gate or a hard block. Pre-requisite: Intune for Linux compliance policies on Ubuntu / RHEL desktops; if you do not run managed Linux endpoints, prefer dropping `linux` from CA105's `exclude` list to block the platform outright. Background: [Modern42 — Your Conditional Access Device Filters Are a Paper Wall](https://www.modern42.com/labs/research/entra/entra-id/conditional-access/device-filters/your-device-filters-are-a-paper-wall).
 
 ## What state policies deploy in
 
@@ -123,6 +127,7 @@ Auto-generated from [`baseline/policies/`](./baseline/policies/) via `python scr
 | CA301 | Require Compliant Windows | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
 | CA302 | Require Compliant macOS | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
 | CA303 | Limited Browser Access on Unmanaged Devices | All users | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
+| CA304 | Require Compliant Linux | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
 | CA601 | Phishing-Resistant MFA for Admins | Admins | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
 | CA602 | Admin Session Controls | Admins | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
 | CA603 | Admin CAE - Strict | Admins | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
@@ -152,28 +157,28 @@ Each group below has a JSON file under [`baseline/groups/`](./baseline/groups/).
 `tier` values: **Required** is foundation, **Service track** is the automation split that lets CA801 hit interactive service logons without breaking unattended ones, **Exception** is short-lived allowances, **Pilot** is narrow experiments.
 
 <!-- group-catalog:start -->
-- **BG_BreakGlass** (Required, mailNickname `bg-breakglass`)
-  Emergency administrator accounts that must remain reachable if a CA misconfiguration locks out normal admins. Excluded from nearly all CA policies. Keep membership empty until accounts exist; remove members when not needed.
-- **CA_ExcludedFromCA** (Required, mailNickname `ca-excludedfromca`)
-  Catch-all exclusion for identities that should never be evaluated by user-facing CA — directory sync, certain legacy integration principals, anything your vendor documents as CA-exempt. Treat membership as highly privileged: every account here bypasses most workforce controls.
-- **CA_ServiceAccount** (Required, mailNickname `ca-serviceaccount`)
-  Parent group for non-human and automation accounts. Policies that target all users exclude this group so background jobs aren't forced through interactive MFA. Nest members into the interactive vs non-interactive children below.
-- **CA_ServiceAccount_Interactive** (Service track, mailNickname `ca-serviceaccount-interactive`)
-  Service principals or managed identities that sometimes sign in through a browser or device-code style flow. CA801 requires MFA for these while leaving pure client-credential automation alone.
-- **CA_ServiceAccount_NonInteractive** (Service track, mailNickname `ca-serviceaccount-noninteractive`)
-  Automation identities that only use client credentials, managed identity, or other non-interactive OAuth flows. Excluded from CA801 so scheduled jobs aren't blocked. Pair with CA802–CA804 for network and app restrictions.
-- **CA_TravelException** (Exception, mailNickname `ca-travelexception`)
-  Short-lived membership for employees signing in from outside `TRUSTED_COUNTRIES` during approved travel. CA106 excludes this group from the country condition while keeping the geofence on for everyone else. Expire memberships when the trip ends.
-- **CA_DeviceCodeApproved** (Exception, mailNickname `ca-devicecodeapproved`)
-  Rare allowance for CA108's block on device-code and authentication-transfer flows. Use only for fully trusted principals — every member is a phishing surface.
-- **CA_TokenProtection_Pilot** (Pilot, mailNickname `ca-tokenprotection-pilot`)
-  Users or devices in the CA113 Windows token-protection pilot. Start small, watch sign-in and helpdesk telemetry, expand as your estate supports the feature.
-- **CA_ExcludedAgents** (Exception, mailNickname `ca-excludedagents`)
-  Workload agent or service principal objects that shouldn't be blocked by CAA01 when Identity Protection flags them high risk. Keep tiny, review quarterly.
-- **CA_MSP_PartnerUsers** (Exception, mailNickname `ca-msp-partnerusers`)
-  Delegated administrator or partner accounts that need access to admin experiences blocked for standard guests in CA905. Lifecycle this group: remove access when the engagement ends.
-- **AUTOPILOT_DevicePrep** (Exception, mailNickname `autopilot-deviceprep`)
-  Device objects undergoing Windows Autopilot pre-provisioning so they can complete enrollment without tripping CA112 or CA201. Clean up stale members after deployment finishes.
+- **BG_BreakGlass** — Required — mailNickname `bg-breakglass`
+  Break-glass and other emergency administrator accounts that must remain reachable if Conditional Access misconfiguration locks out normal admins. Keep membership empty until accounts exist; remove members when not actively needed. Excluded from nearly all CA policies so use only for documented recovery procedures.
+- **CA_ExcludedFromCA** — Required — mailNickname `ca-excludedfromca`
+  Catch-all exclusion for identities that must never be evaluated by user-facing CA (for example certain directory sync or legacy integration principals your vendor documents as CA-exempt). Treat membership as highly privileged—every account here bypasses most workforce controls.
+- **CA_ServiceAccount** — Required — mailNickname `ca-serviceaccount`
+  Parent group for non-human and automation accounts. Policies that target all users exclude this group so background jobs are not forced through interactive MFA. Nest members into the interactive vs non-interactive child groups so CA801 can target only human-driven service logons.
+- **CA_ServiceAccount_Interactive** — Service track — mailNickname `ca-serviceaccount-interactive`
+  Service principals or managed identities that sometimes sign in through a browser or device-code style flow. CA801 requires MFA for this population while leaving pure client-credential automation in the non-interactive sibling group.
+- **CA_ServiceAccount_NonInteractive** — Service track — mailNickname `ca-serviceaccount-noninteractive`
+  Automation identities that only use client credentials, managed identity, or other non-interactive OAuth flows. Excluded from CA801 so scheduled jobs are not blocked; pair with CA802-CA804 for network and app restrictions.
+- **CA_TravelException** — Exception — mailNickname `ca-travelexception`
+  Short-lived membership for employees who must sign in from outside TRUSTED_COUNTRIES during approved travel. CA106 excludes this group from the country condition so the geofence still applies to everyone else; expire memberships when the trip ends.
+- **CA_DeviceCodeApproved** — Exception — mailNickname `ca-devicecodeapproved`
+  Rare allowance for CA108's block on device-code and authentication-transfer flows (for example controlled kiosk or DevOps scenarios). Add only fully trusted principals; every member is a phishing surface.
+- **CA_TokenProtection_Pilot** — Pilot — mailNickname `ca-tokenprotection-pilot`
+  Users or devices included in the CA113 Windows token-protection pilot. Start with a small population, collect sign-in and help-desk telemetry, then expand membership as your estate supports the feature.
+- **CA_ExcludedAgents** — Exception — mailNickname `ca-excludedagents`
+  Workload agent or service principal objects that must not be blocked by CAA01 when Identity Protection flags them high risk (for example monitored automation with known false positives). Keep the group tiny and review quarterly.
+- **CA_MSP_PartnerUsers** — Exception — mailNickname `ca-msp-partnerusers`
+  Delegated administrator or partner accounts that need access to Microsoft 365 admin experiences blocked for standard guests in CA905. Requires explicit lifecycle: remove access when the engagement ends.
+- **AUTOPILOT_DevicePrep** — Exception — mailNickname `autopilot-deviceprep`
+  Device objects undergoing Windows Autopilot pre-provisioning so they can complete join/enrollment without triggering CA112 MFA-on-join or CA201 enrollment MFA prematurely. Clean up stale device members after deployment finishes.
 <!-- group-catalog:end -->
 
 ## Microsoft Sentinel queries
