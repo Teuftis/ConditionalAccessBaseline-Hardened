@@ -31,7 +31,7 @@
             v2026 · Microsoft Entra ID — Conditional Access policies, groups, and named locations · New CA policies mostly <strong>Report-only</strong> (<code>enabledForReportingButNotEnforced</code>), including device registration MFA (<strong>CA112</strong> / User actions). Eight baseline rules default <strong>Off</strong>: <strong>CA111</strong>, <strong>CA202</strong>, <strong>CA204</strong>, <strong>CA302</strong>, <strong>CA303</strong>, <strong>CA603</strong>, <strong>CA606</strong>, <strong>CAA01</strong>. Optional <code>deploymentState</code> in intent JSON applies <strong>only on first create</strong> (POST; never PATCH existing policies).
           </p>
           <p class="catalog-nav">
-            <a href="inventory.html">Browse all 40 policies</a>
+            <a href="inventory.html">Browse all 41 policies</a>
             <span aria-hidden="true">·</span>
             <a href="https://github.com/Teuftis/ConditionalAccessBaseline-Hardened#policy-catalog">README</a>
           </p>
@@ -67,7 +67,7 @@
         <ul class="bullets">
           <li><strong>Groups</strong> (e.g. <code>BG_BreakGlass</code>, <code>CA_ExcludedFromCA</code>) are created if missing or reused by display name.</li>
           <li><strong>Named locations</strong> ship with placeholder ranges — replace them in <strong>Microsoft Entra admin center</strong> after deploy.</li>
-          <li><strong>40</strong> policies: <strong>new</strong> ones use <code>state: enabledForReportingButNotEnforced</code> (<strong>Report-only</strong>) except eight that default <code>state: disabled</code> (<strong>CA111</strong>, <strong>CA202</strong>, <strong>CA204</strong>, <strong>CA302</strong>, <strong>CA303</strong>, <strong>CA603</strong>, <strong>CA606</strong>, <strong>CAA01</strong>). <strong>CA112</strong> (device registration MFA) defaults <strong>Report-only</strong>. If a tenant policy shares the normalized <strong>display name</strong>, it stays <strong>unchanged</strong>. Re-run is safe.</li>
+          <li><strong>41</strong> policies: <strong>new</strong> ones use <code>state: enabledForReportingButNotEnforced</code> (<strong>Report-only</strong>) except eight that default <code>state: disabled</code> (<strong>CA111</strong>, <strong>CA202</strong>, <strong>CA204</strong>, <strong>CA302</strong>, <strong>CA303</strong>, <strong>CA603</strong>, <strong>CA606</strong>, <strong>CAA01</strong>). <strong>CA112</strong> (device registration MFA) defaults <strong>Report-only</strong>. If a tenant policy shares the normalized <strong>display name</strong>, it stays <strong>unchanged</strong>. Re-run is safe.</li>
         </ul>
         <p class="meta">
           Details: <a href="#policy-catalog">policies on this page</a> · <a href="inventory.html">live catalog</a> (with descriptions) · <a href="https://github.com/Teuftis/ConditionalAccessBaseline-Hardened#policy-catalog">README</a>. Baseline source: <code id="baseline-url">(resolving...)</code>
@@ -77,7 +77,7 @@
       <section class="panel" id="policy-catalog">
         <h2>Policy catalog</h2>
         <p class="section-intro">
-          All <strong>40</strong> Conditional Access policies in the baseline (new deploys: <strong>Report-only</strong> except eight default <strong>Off</strong> — see bullets above). For descriptions and personas, open the <a href="inventory.html">live catalog</a>.
+          All <strong>41</strong> Conditional Access policies in the baseline (new deploys: <strong>Report-only</strong> except eight default <strong>Off</strong> — see bullets above). For descriptions and personas, open the <a href="inventory.html">live catalog</a>.
         </p>
         <div class="policy-table-wrap">
           <table class="policy-table">
@@ -210,6 +210,12 @@
                 <td>Limited Browser Access on Unmanaged Devices</td>
                 <td>All users</td>
                 <td><span class="policy-pill policy-pill--recommended">Recommended</span></td>
+              </tr>
+              <tr>
+                <th scope="row"><code>CA304</code></th>
+                <td>Require Compliant Linux</td>
+                <td>All users</td>
+                <td><span class="policy-pill policy-pill--critical">Critical</span></td>
               </tr>
               <tr>
                 <th scope="row"><code>CA601</code></th>
