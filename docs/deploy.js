@@ -21,7 +21,8 @@ const msalApp = new msal.PublicClientApplication({
     redirectUri: APP_CONFIG.redirectUri,
     postLogoutRedirectUri: APP_CONFIG.postLogoutRedirectUri,
   },
-  cache: { cacheLocation: "sessionStorage" },
+  // In-memory only: no MSAL token cache in sessionStorage; refresh or close tab requires sign-in again.
+  cache: { cacheLocation: "memory" },
 });
 
 let msalInitialized = false;
@@ -592,7 +593,7 @@ function wire() {
       if (account) {
         msalApp.setActiveAccount(account);
         setSignedIn(account);
-        setStatus("Existing session restored. Ready to deploy.", "ok");
+        setStatus("You're already signed in this tab. Ready to deploy.", "ok");
       } else {
         setSignedOut();
         setStatus("Sign in to begin.", "info");

@@ -22,6 +22,20 @@ In scope: issues in this repo that could affect **confidentiality**, **integrity
 
 Out of scope by default: purely operational or configuration choices in your own Entra tenant after you deploy policies.
 
+## Client-side hardening (GitHub Pages)
+
+The deploy SPA builds UI text with **`textContent`** only (never `innerHTML`) so tenant or Graph-derived strings cannot execute as markup.
+
+Defense in depth shipped in [`docs/index.html`](docs/index.html):
+
+- **Content-Security-Policy** (meta tag — Pages sites cannot emit security headers unless you front them with a proxy or CDN you control). The policy limits script to same-origin modules plus the pinned MSAL CDN host, restricts `connect-src` to Graph / Microsoft login endpoints and **`raw.githubusercontent.com`** baseline fallback, and sets `frame-src` for hidden auth iframes. **National clouds** may use other hosts — if sign-in breaks, extend [`docs/index.html`](docs/index.html) accordingly or drop the meta tag temporarily and report an issue.
+
+- [**Subresource Integrity**](https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity) on the [`@azure/msal-browser`](https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.28.0/lib/msal-browser.min.js) script (`integrity="sha384-…"`). You must bump the hash when upgrading the pinned MSAL version.
+
+The [`docs/inventory.html`](docs/inventory.html) catalog is script-free CSP `script-src 'none'` (policy template in [`scripts/generate-baseline.py`](scripts/generate-baseline.py)).
+
+**Not covered here:** CSP `frame-ancestors` (clickjacking) is ignored in `<meta>` in most browsers; use HTTP headers via an edge/WAF/reverse-proxy if framing is a concern.
+
 ## Safe harbor
 
 We support coordinated disclosure and will not take legal action against good-faith security research that follows this process and avoids harm to users or data.
