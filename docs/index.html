@@ -3,6 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- CSP via meta (GitHub Pages has no response headers): mitigates inline injection and rogue script hosts. Does not substitute for safe DOM APIs (see deploy.js uses textContent). -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; base-uri 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://graph.microsoft.com https://graph.microsoft.us https://*.microsoftonline.com https://*.microsoft.com https://raw.githubusercontent.com; frame-src https://login.microsoftonline.com https://login.microsoftonline.us https://*.microsoftonline.com https://*.microsoft.com; object-src 'none'; worker-src 'none';"
+    />
     <meta name="description" content="Browser-based Mirage CA baseline deployer: create missing Conditional Access policies — most Report-only; eight IDs default Off (CA111 CA202 CA204 CA302 CA303 CA603 CA606 CAA01)." />
     <meta name="color-scheme" content="dark light" />
     <meta property="og:type" content="website" />
@@ -18,6 +23,7 @@
     <script
       src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.28.0/lib/msal-browser.min.js"
       crossorigin="anonymous"
+      integrity="sha384-f9JdajCjfym6jIjyKQGYima+IG1CFgtHqeEmrhcjksQ9wEyc/lnN+jau47TfBD/p"
     ></script>
   </head>
   <body>
@@ -51,6 +57,7 @@
         <p>
           You sign in with <strong>your administrator account</strong> to <strong>your</strong> Microsoft Entra tenant (delegated sign-in, not a shared credential). The Mirage CA Baseline Deployer app is a multi-tenant,
           public client with <strong>no client secret</strong>. The first administrator to use it in your tenant sees the standard Microsoft consent screen for the requested Graph permissions.
+          Sign-in state lives in memory for this tab only: reloading or closing the page clears it (no token cache in session storage).
         </p>
         <div class="actions">
           <button id="btn-signin" class="primary">Sign in &amp; consent</button>
@@ -403,12 +410,8 @@
 
     <!--
       Baseline JSON: the deploy workflow copies ../baseline → docs/baseline so the SPA reads same-origin first.
-      Fallback: raw.githubusercontent.com/<owner>/<repo>/<ref>/baseline — set window.MIRAGE_BASELINE_REF / MIRAGE_BASELINE_URL if needed.
+      Fallback: raw.githubusercontent.com/<owner>/<repo>/<ref>/baseline — set window.MIRAGE_BASELINE_REF / MIRAGE_BASELINE_URL in the console before load if needed (forks), or fork and edit docs/config.js.
     -->
-    <script>
-      // window.MIRAGE_BASELINE_REF = "master";
-      // window.MIRAGE_BASELINE_URL = "https://raw.githubusercontent.com/YOU/YourRepo/main/baseline";
-    </script>
     <script type="module" src="deploy.js?v=ca-policy-index"></script>
   </body>
 </html>
