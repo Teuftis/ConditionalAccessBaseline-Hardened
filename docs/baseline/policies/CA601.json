@@ -1,6 +1,6 @@
 {
   "id": "CA601",
-  "displayName": "CA601 — Phishing-Resistant MFA for Admins",
+  "displayName": "CA601 - Phishing-Resistant MFA for Admins",
   "description": "Privileged role assignments (Azure AD Directory Roles, Delegated Administrative Partners, cloud-only role-backed accounts) must use phishing-resistant MFA (FIDO2, Windows Hello for Business with attestation, or federated certificate-based authentication where applicable).",
   "metadata": {
     "criticality": "Critical",

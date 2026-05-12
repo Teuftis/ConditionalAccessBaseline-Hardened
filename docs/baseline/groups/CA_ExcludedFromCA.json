@@ -1,6 +1,6 @@
 {
   "displayName": "CA_ExcludedFromCA",
-  "description": "Catch-all exclusion for identities that must never be evaluated by user-facing CA (for example certain directory sync or legacy integration principals your vendor documents as CA-exempt). Treat membership as highly privileged—every account here bypasses most workforce controls.",
+  "description": "Catch-all exclusion for identities that must never be evaluated by user-facing CA (for example certain directory sync or legacy integration principals your vendor documents as CA-exempt). Treat membership as highly privileged-every account here bypasses most workforce controls.",
   "mailNickname": "ca-excludedfromca",
   "tier": "required"
 }

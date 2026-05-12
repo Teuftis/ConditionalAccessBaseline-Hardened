@@ -42,7 +42,7 @@ async function rawFetch(token, method, url, body, attempt = 0) {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
       // Evolvable enums (e.g. continuousAccessEvaluationMode.strictLocation) are
-      // only accepted on write when clients opt in — otherwise CA policies 1007.
+      // only accepted on write when clients opt in - otherwise CA policies 1007.
       Prefer: "include-unknown-enum-members",
       ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
     },

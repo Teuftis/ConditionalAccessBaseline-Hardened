@@ -1,6 +1,6 @@
 {
   "id": "CA106",
-  "displayName": "CA106 — Block Outside Trusted Countries",
+  "displayName": "CA106 - Block Outside Trusted Countries",
   "description": "Geolocation control using the TRUSTED_COUNTRIES named location. Sign-ins originating outside trusted regions are blocked unless the user is exempted via CA_TravelException (time-bounded travel). Excludes the travel exception group from the country condition so legitimate trips still work.",
   "metadata": {
     "criticality": "Critical",

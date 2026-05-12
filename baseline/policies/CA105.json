@@ -1,6 +1,6 @@
 {
   "id": "CA105",
-  "displayName": "CA105 — Block Unknown Platforms",
+  "displayName": "CA105 - Block Unknown Platforms",
   "description": "Device-platform allow list: denies access when the client is not Windows, macOS, iOS, Android, or Linux. Mitigates access from unmanaged or unexpected operating systems across all workloads in scope.",
   "metadata": {
     "criticality": "Recommended",

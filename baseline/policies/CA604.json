@@ -1,6 +1,6 @@
 {
   "id": "CA604",
-  "displayName": "CA604 — Admin Block High User Risk",
+  "displayName": "CA604 - Admin Block High User Risk",
   "description": "Break-glass for risky operators: denies admin role holders when Entra Identity Protection marks the user risky at high severity. Keeps admins from deepening compromise while investigative controls run.",
   "metadata": {
     "criticality": "Critical",

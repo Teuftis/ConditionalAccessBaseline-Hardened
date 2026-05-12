@@ -1,4 +1,4 @@
-# Mirage Conditional Access Baseline — release notes (template)
+# Mirage Conditional Access Baseline - release notes (template)
 
 > **Git tags:** This repository had **no tags** at the time these notes were drafted. To use GitHub’s **Generate release notes** with a “previous tag,” create a baseline tag first, then tag each release.
 
@@ -15,10 +15,10 @@
 
 ### Highlights
 
-- **Baseline-as-code:** Conditional Access (40 policies), Entra groups, and named locations as **intent JSON** under `baseline/`, with a **deploy SPA** under `docs/` that resolves names to Graph IDs and creates policies mostly in **Report-only**; **eight** rules default **Off** (**CA111**, **CA202**, **CA204**, **CA302**, **CA303**, **CA603**, **CA606**, **CAA01**) — **`CA112`** (User actions) defaults **Report-only** like the rest. Optional `deploymentState` / `deployState` in intent JSON sets Report-only vs Off **only on first CREATE** (POST), never for existing tenant policies.
+- **Baseline-as-code:** Conditional Access (40 policies), Entra groups, and named locations as **intent JSON** under `baseline/`, with a **deploy SPA** under `docs/` that resolves names to Graph IDs and creates policies mostly in **Report-only**; **eight** rules default **Off** (**CA111**, **CA202**, **CA204**, **CA302**, **CA303**, **CA603**, **CA606**, **CAA01**) - **`CA112`** (User actions) defaults **Report-only** like the rest. Optional `deploymentState` / `deployState` in intent JSON sets Report-only vs Off **only on first CREATE** (POST), never for existing tenant policies.
 - **Deploy safety:** No silent overwrites of existing CA policies (name-based match / skip); **dry run**; clarified **skipped** vs **unchanged** behavior; improvements to policy existence checks and display-name matching to reduce accidental **CREATE** churn.
 - **Graph / API alignment:** Translator and payload fixes for **CAE-only** session policies, **Prefer evolvable** enums, **workload / agent** policies, optional **first-party app** skips, and related **conditionalAccessConditionSet** shape fixes (e.g. **CAA01**, **CA111**).
-- **CA111 (Continuous Access Evaluation — Standard):** Intent and deploy path aligned with Graph limitations (guest / external exclusion omitted where the API rejects that combination for CAE-session-only rules); comments and policy descriptions updated accordingly.
+- **CA111 (Continuous Access Evaluation - Standard):** Intent and deploy path aligned with Graph limitations (guest / external exclusion omitted where the API rejects that combination for CAE-session-only rules); comments and policy descriptions updated accordingly.
 - **Repository hygiene:** **MIT License**, **SECURITY.md**, **`.gitignore`** hardening for Python artifacts; reference workbook handling documented in README.
 
 ### Documentation & UX
@@ -35,10 +35,10 @@
 
 ### Acknowledgments
 
-- Built with Microsoft **Conditional Access** and **Microsoft Graph**; **not** a Microsoft product — see README and **SECURITY.md** for reporting issues.
+- Built with Microsoft **Conditional Access** and **Microsoft Graph**; **not** a Microsoft product - see README and **SECURITY.md** for reporting issues.
 
 ---
 
 ### Shorter body (for the GitHub release description field)
 
-**v2026.1.0** — Mirage CA Baseline: intent JSON + Pages deploy SPA; guarded writes (no silent CA PATCH), deploy/Graph fixes (CAE, agent policies, CA111/CAA01), README and generated policy catalog, LICENSE and SECURITY hygiene. See `RELEASE_NOTES.md` for detail.
+**v2026.1.0** - Mirage CA Baseline: intent JSON + Pages deploy SPA; guarded writes (no silent CA PATCH), deploy/Graph fixes (CAE, agent policies, CA111/CAA01), README and generated policy catalog, LICENSE and SECURITY hygiene. See `RELEASE_NOTES.md` for detail.

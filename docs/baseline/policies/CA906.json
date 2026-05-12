@@ -1,6 +1,6 @@
 {
   "id": "CA906",
-  "displayName": "CA906 — Guest - Terms of Use",
+  "displayName": "CA906 - Guest - Terms of Use",
   "description": "Guest-visible Terms-of-Use acknowledgement for contractual or jurisdictional onboarding before accessing shared resources.",
   "metadata": {
     "criticality": "Optional",

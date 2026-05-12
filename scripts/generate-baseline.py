@@ -189,7 +189,7 @@ POLICIES: list[dict] = [
     {
         "id": "CA111",
         "displayName": "Continuous Access Evaluation - Standard",
-        "description": "Continuous Access Evaluation baseline for workforce (standard breadth, all cloud apps): deploy resolves intent to Graph sessionControls.continuousAccessEvaluation.mode disabled (matches Entra's non-strict CAE session setting—do not confuse with policy State Off). Pair with CA603 (strict CAE / strict location). Unlike other workforce policies, guest/external exclusion cannot be applied on this CAE-session-only rule in Graph—the baseline omits guest/external exclusion here only; other policies continue to exclude guests where supported.",
+        "description": "Continuous Access Evaluation baseline for workforce (standard breadth, all cloud apps): deploy resolves intent to Graph sessionControls.continuousAccessEvaluation.mode disabled (matches Entra's non-strict CAE session setting-do not confuse with policy State Off). Pair with CA603 (strict CAE / strict location). Unlike other workforce policies, guest/external exclusion cannot be applied on this CAE-session-only rule in Graph-the baseline omits guest/external exclusion here only; other policies continue to exclude guests where supported.",
         "metadata": {"criticality": "Recommended", "v2Status": "NEW", "persona": "All users", "j0eyvEquivalent": "CA209"},
         "include": {"users": "all"},
         "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"]},
@@ -547,9 +547,9 @@ POLICIES: list[dict] = [
 ]
 
 
-# Microsoft Entra policy display name: "{id} — {shortTitle}" (composed when writing
+# Microsoft Entra policy display name: "{id} - {shortTitle}" (composed when writing
 # baseline JSON; the id appears once in the portal title, not embedded twice).
-_PORTAL_POLICY_TITLE_SEP = " — "
+_PORTAL_POLICY_TITLE_SEP = " - "
 
 
 def _portal_policy_display_name(policy_id: str, short_title: str) -> str:
@@ -593,7 +593,7 @@ GROUPS: list[dict] = [
         "description": (
             "Catch-all exclusion for identities that must never be evaluated by user-facing CA (for example certain "
             "directory sync or legacy integration principals your vendor documents as CA-exempt). Treat membership as "
-            "highly privileged—every account here bypasses most workforce controls."
+            "highly privileged-every account here bypasses most workforce controls."
         ),
         "mailNickname": "ca-excludedfromca",
         "tier": "required",
@@ -783,7 +783,7 @@ def write_manifest(groups, named_locations, policies) -> None:
     _write_json(os.path.join(OUT_BASELINE, "manifest.json"), manifest)
 
 def write_policy_inventory(policy_filenames: list[str]) -> None:
-    """Write POLICY_INVENTORY.md — readable catalog of every CA policy intent."""
+    """Write POLICY_INVENTORY.md - readable catalog of every CA policy intent."""
 
     def esc(cell: object) -> str:
         s = "" if cell is None else str(cell)
@@ -861,7 +861,7 @@ def _load_policy_inventory_rows(policy_filenames: list[str]) -> list[tuple[str, 
 
 
 def write_policy_inventory_html(policy_filenames: list[str]) -> None:
-    """Write docs/inventory.html — styled catalog grouped by persona."""
+    """Write docs/inventory.html - styled catalog grouped by persona."""
 
     rows = _load_policy_inventory_rows(policy_filenames)
     by_persona: dict[str, list[tuple[str, str, str, str, str]]] = {}
@@ -940,7 +940,7 @@ def write_policy_inventory_html(policy_filenames: list[str]) -> None:
     content="default-src 'self'; base-uri 'self'; script-src 'none'; style-src 'self'; img-src 'self' data:; font-src 'self';"
   />
   <meta name="color-scheme" content="dark light" />
-  <meta name="description" content="Mirage CA Baseline v2026 — full Conditional Access policy catalog with personas and criticality." />
+  <meta name="description" content="Mirage CA Baseline v2026 - full Conditional Access policy catalog with personas and criticality." />
   <title>Mirage CA policy catalog</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="inventory.css" />
@@ -992,7 +992,7 @@ def _readme_table_cell(value: object) -> str:
 
 
 def _readme_criticality_badge(criticality: str) -> str:
-    """Shields badge — GitHub Markdown has no native colored table cells."""
+    """Shields badge - GitHub Markdown has no native colored table cells."""
     key = (criticality or "").strip().lower()
     if key == "critical":
         msg, color = "Critical", "c62828"

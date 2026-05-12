@@ -1,6 +1,6 @@
 {
   "id": "CA701",
-  "displayName": "CA701 — App - FortiClient - MFA",
+  "displayName": "CA701 - App - FortiClient - MFA",
   "description": "Zero Trust gate for perimeter VPN integrations (Fortinet FortiClient in template form): MFA before granting network tunnel access aligned with phishing-resistant MFA investments elsewhere.",
   "metadata": {
     "criticality": "Optional",

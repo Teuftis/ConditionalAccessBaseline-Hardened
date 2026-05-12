@@ -1,6 +1,6 @@
 {
   "id": "CA802",
-  "displayName": "CA802 — Service - Block Outside Trusted IPs",
+  "displayName": "CA802 - Service - Block Outside Trusted IPs",
   "description": "Network perimeter for unattended automation: restricts allowed sign-ins for centralized service principals to the corporate or partner IP ranges modeled in SVC_TRUSTED_IPS, blocking roaming or hostile networks.",
   "metadata": {
     "criticality": "Critical",

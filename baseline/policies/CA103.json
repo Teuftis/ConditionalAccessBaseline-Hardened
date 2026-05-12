@@ -1,6 +1,6 @@
 {
   "id": "CA103",
-  "displayName": "CA103 — Sign-In Risk - Require MFA",
+  "displayName": "CA103 - Sign-In Risk - Require MFA",
   "description": "Identity Protection challenge for risky sign-ins (medium or high): requires MFA to continue the session when Entra evaluates elevated sign-in risk. Requires Entra ID P2. Excludes universal exclusions and separates guest traffic via policy construction.",
   "metadata": {
     "criticality": "Critical",

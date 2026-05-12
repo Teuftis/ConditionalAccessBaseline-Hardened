@@ -1,6 +1,6 @@
 {
   "id": "CA304",
-  "displayName": "CA304 — Require Compliant Linux",
+  "displayName": "CA304 - Require Compliant Linux",
   "description": "Closes the Linux User-Agent spoof gap left by the platform-scoped CA301/CA302/CA204 compliance gates. The CA platform condition is parsed from the (self-reported) User-Agent string; without CA304, an attacker holding stolen credentials can present User-Agent: Linux, satisfy CA101 MFA, and skip every device-compliance requirement (CA606 still covers admins). CA304 forces compliantDevice for any UA claiming Linux. No domainJoinedDevice grant: Entra hybrid join is Windows-only. Pre-requisite: Intune for Linux compliance policies on Ubuntu / RHEL desktops; if you do not run managed Linux endpoints, prefer dropping linux from CA105's exclude list to block the platform outright.",
   "metadata": {
     "criticality": "Critical",
