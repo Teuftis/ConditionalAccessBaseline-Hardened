@@ -124,7 +124,7 @@ function describeFatalGraphError(err) {
 
 function logGraphFailure(context, err) {
   if (err instanceof GraphError) {
-    let msg = `${context}: ${err.code} ${err.status} — ${err.message}`;
+    let msg = `${context}: ${err.code} ${err.status} - ${err.message}`;
     if (err.body) {
       try {
         msg += ` | ${JSON.stringify(err.body)}`;
@@ -295,7 +295,7 @@ async function indexFirstPartyAppIds(token, policyIntents) {
   for (const appId of wanted) {
     if (!present.has(appId)) {
       logLine(
-        `First-party app appId=${appId} has no service principal in this tenant — policies that target only named Microsoft apps will be skipped.`,
+        `First-party app appId=${appId} has no service principal in this tenant - policies that target only named Microsoft apps will be skipped.`,
         "warn",
       );
     }
@@ -304,7 +304,7 @@ async function indexFirstPartyAppIds(token, policyIntents) {
 }
 
 // Conditional Access existence: Graph $filter displayName can miss policies; listing is canonical.
-/** Collapse hyphen variants + whitespace so tenant `CA101 - Foo` matches intent `CA101 — Foo`. */
+/** Collapse hyphen variants + whitespace so tenant `CA101 - Foo` matches intent `CA101 - Foo`. */
 function normalizeCAPolicyLookupKey(displayName) {
   if (displayName == null || typeof displayName !== "string") return "";
   return (
@@ -377,9 +377,9 @@ async function ensurePolicy(token, intent, ctx, dryRun) {
   if (hit) {
     const existing = hit.policy;
     logLine(
-      `policy [${intent.displayName}] already exists (${dryRun ? "dry run — " : ""}` +
+      `policy [${intent.displayName}] already exists (${dryRun ? "dry run - " : ""}` +
         `${hit.match === "normalized" ? "matched tenant name '" + existing.displayName + "'; " : ""}` +
-        `id=${existing.id}, tenant state=${existing.state}) — not modifying to avoid overwriting live settings.`,
+        `id=${existing.id}, tenant state=${existing.state}) - not modifying to avoid overwriting live settings.`,
       dryRun ? "warn" : "info",
     );
     return {
@@ -446,7 +446,7 @@ async function deploy() {
   } catch (err) {
     const message = err && err.message ? err.message : String(err);
     let friendly = "Could not load baseline manifest.";
-    // loadJson throws "Failed to fetch <url>: 404" — check status before generic "Failed to fetch".
+    // loadJson throws "Failed to fetch <url>: 404" - check status before generic "Failed to fetch".
     if (/: 404\b|\b404\b/.test(message)) {
       friendly =
         "Baseline manifest returned 404 from every URL we tried. On GitHub Pages, the deploy workflow must copy baseline/ into the site (Actions → Deploy GitHub Pages). " +
@@ -520,14 +520,14 @@ async function deploy() {
   logLine(`Indexed ${caIdx.total} Conditional Access policies in tenant (exact + normalized-name match).`, "info");
   for (const col of caIdx.normalizedCollisions) {
     logLine(
-      `Normalized name clash '${col.prev.displayName}' vs '${col.nextDisplay}' — using '${col.prev.displayName}' for lookups.`,
+      `Normalized name clash '${col.prev.displayName}' vs '${col.nextDisplay}' - using '${col.prev.displayName}' for lookups.`,
       "warn",
     );
   }
 
   // Phase 3 - Policies.
   setStatus(
-    `Phase 3/3: Conditional Access policies — create missing per baseline defaults (translate.js); skip existing (${policyIntents.length} in manifest)...`,
+    `Phase 3/3: Conditional Access policies - create missing per baseline defaults (translate.js); skip existing (${policyIntents.length} in manifest)...`,
     "info",
   );
   const results = [];

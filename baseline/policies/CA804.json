@@ -1,6 +1,6 @@
 {
   "id": "CA804",
-  "displayName": "CA804 — Service - Block Non-M365 Apps",
+  "displayName": "CA804 - Service - Block Non-M365 Apps",
   "description": "Least-privilege SaaS stance for robotic identities: confines service credentials to approved Microsoft 365 applications while denying access to tertiary SaaS and consumer OAuth clients.",
   "metadata": {
     "criticality": "Recommended",

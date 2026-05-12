@@ -1,6 +1,6 @@
 {
   "id": "CA110",
-  "displayName": "CA110 — Block Malicious IPs",
+  "displayName": "CA110 - Block Malicious IPs",
   "description": "Threat-intelligence egress control: denies sign-ins that map to indicators in the MALICIOUS_IPS named location (populate with SOC or feed-driven ranges before enforcement). Complements geo and risk policies.",
   "metadata": {
     "criticality": "Optional",

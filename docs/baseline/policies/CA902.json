@@ -1,6 +1,6 @@
 {
   "id": "CA902",
-  "displayName": "CA902 — Guest - Block High Sign-In Risk",
+  "displayName": "CA902 - Guest - Block High Sign-In Risk",
   "description": "Guest risk remediation: denies high sign-in-risk events even when the guest’s home tenant is lenient (defense against cross-tenant token theft).",
   "metadata": {
     "criticality": "Recommended",

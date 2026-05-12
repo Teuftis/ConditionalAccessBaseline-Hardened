@@ -1,6 +1,6 @@
 {
   "id": "CA803",
-  "displayName": "CA803 — Service - Block Legacy Auth",
+  "displayName": "CA803 - Service - Block Legacy Auth",
   "description": "Defense-in-depth block on legacy protocols for workloads using service principals: reinforces CA104 baseline by narrowly scoping SMTP AUTH/similar exposures that often slip through scripted automation identities.",
   "metadata": {
     "criticality": "Recommended",

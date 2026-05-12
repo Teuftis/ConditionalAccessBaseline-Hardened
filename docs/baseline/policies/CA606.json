@@ -1,6 +1,6 @@
 {
   "id": "CA606",
-  "displayName": "CA606 — Admin Require Compliant or Joined Device",
+  "displayName": "CA606 - Admin Require Compliant or Joined Device",
   "description": "Device trust bar for admins: privileged changes may only originate from Hybrid Entra Joined workstations or devices reporting compliant posture to Intune, preventing lateral movement from unmanaged kit.",
   "metadata": {
     "criticality": "Critical",

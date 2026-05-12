@@ -1,6 +1,6 @@
 {
   "id": "CA603",
-  "displayName": "CA603 — Admin CAE - Strict",
+  "displayName": "CA603 - Admin CAE - Strict",
   "description": "Strict Continuous Access Evaluation for privileged identities paired with Conditional Access Strict Location evaluation: reacts immediately to IP deltas and high-sensitivity revocation signals suitable for Tier-0 workloads. Evaluate change windows carefully given Real Time CAE telemetry requirements.",
   "metadata": {
     "criticality": "Critical",

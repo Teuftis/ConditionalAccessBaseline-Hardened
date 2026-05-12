@@ -1,6 +1,6 @@
 {
   "id": "CA901",
-  "displayName": "CA901 — Guest - Require MFA",
+  "displayName": "CA901 - Guest - Require MFA",
   "description": "Guest/B2B collaboration MFA: ensures every federated partner user proves MFA freshness in your tenant, closing the reliance on weaker home-tenant MFA states alone.",
   "metadata": {
     "criticality": "Critical",

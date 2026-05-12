@@ -18,7 +18,7 @@ If you cannot use GitHub (for example you are not a GitHub user), open an issue 
 
 ## Scope
 
-In scope: issues in this repo that could affect **confidentiality**, **integrity**, or **availability** when using the generate script, static deploy app, or published GitHub Pages artifacts (for example unsafe handling of tokens, unsafe inclusion of third-party scripts, unexpected **overwrite** behavior, or unintended **writes** to Microsoft Graph—including **creating** Conditional Access policies the operator did not intend).
+In scope: issues in this repo that could affect **confidentiality**, **integrity**, or **availability** when using the generate script, static deploy app, or published GitHub Pages artifacts (for example unsafe handling of tokens, unsafe inclusion of third-party scripts, unexpected **overwrite** behavior, or unintended **writes** to Microsoft Graph-including **creating** Conditional Access policies the operator did not intend).
 
 Out of scope by default: purely operational or configuration choices in your own Entra tenant after you deploy policies.
 
@@ -28,7 +28,7 @@ The deploy SPA builds UI text with **`textContent`** only (never `innerHTML`) so
 
 Defense in depth shipped in [`docs/index.html`](docs/index.html):
 
-- **Content-Security-Policy** (meta tag — Pages sites cannot emit security headers unless you front them with a proxy or CDN you control). The policy limits script to same-origin modules plus the pinned MSAL CDN host, restricts `connect-src` to Graph / Microsoft login endpoints and **`raw.githubusercontent.com`** baseline fallback, and sets `frame-src` for hidden auth iframes. **National clouds** may use other hosts — if sign-in breaks, extend [`docs/index.html`](docs/index.html) accordingly or drop the meta tag temporarily and report an issue.
+- **Content-Security-Policy** (meta tag - Pages sites cannot emit security headers unless you front them with a proxy or CDN you control). The policy limits script to same-origin modules plus the pinned MSAL CDN host, restricts `connect-src` to Graph / Microsoft login endpoints and **`raw.githubusercontent.com`** baseline fallback, and sets `frame-src` for hidden auth iframes. **National clouds** may use other hosts - if sign-in breaks, extend [`docs/index.html`](docs/index.html) accordingly or drop the meta tag temporarily and report an issue.
 
 - [**Subresource Integrity**](https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity) on the [`@azure/msal-browser`](https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.28.0/lib/msal-browser.min.js) script (`integrity="sha384-…"`). You must bump the hash when upgrading the pinned MSAL version.
 

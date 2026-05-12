@@ -9,7 +9,7 @@
     content="default-src 'self'; base-uri 'self'; script-src 'none'; style-src 'self'; img-src 'self' data:; font-src 'self';"
   />
   <meta name="color-scheme" content="dark light" />
-  <meta name="description" content="Mirage CA Baseline v2026 — full Conditional Access policy catalog with personas and criticality." />
+  <meta name="description" content="Mirage CA Baseline v2026 - full Conditional Access policy catalog with personas and criticality." />
   <title>Mirage CA policy catalog</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="inventory.css" />
@@ -122,7 +122,7 @@
     <span class="pill pill--recommended">Recommended</span>
   </div>
   <h3 class="policy-title">Continuous Access Evaluation - Standard</h3>
-  <p class="policy-desc">Continuous Access Evaluation baseline for workforce (standard breadth, all cloud apps): deploy resolves intent to Graph sessionControls.continuousAccessEvaluation.mode disabled (matches Entra&#x27;s non-strict CAE session setting—do not confuse with policy State Off). Pair with CA603 (strict CAE / strict location). Unlike other workforce policies, guest/external exclusion cannot be applied on this CAE-session-only rule in Graph—the baseline omits guest/external exclusion here only; other policies continue to exclude guests where supported.</p>
+  <p class="policy-desc">Continuous Access Evaluation baseline for workforce (standard breadth, all cloud apps): deploy resolves intent to Graph sessionControls.continuousAccessEvaluation.mode disabled (matches Entra&#x27;s non-strict CAE session setting-do not confuse with policy State Off). Pair with CA603 (strict CAE / strict location). Unlike other workforce policies, guest/external exclusion cannot be applied on this CAE-session-only rule in Graph-the baseline omits guest/external exclusion here only; other policies continue to exclude guests where supported.</p>
 </article>
 <article class="policy-card" id="CA112">
   <div class="policy-card__head">
@@ -138,7 +138,7 @@
     <span class="pill pill--optional">Optional</span>
   </div>
   <h3 class="policy-title">Require Token Protection (Pilot)</h3>
-  <p class="policy-desc">Pilot control binding primary refresh tokens more tightly on supported Windows workloads (token protection). Limits token replay when adversaries steal session material via phishing proxies. Applies only to the CA_TokenProtection_Pilot group—expand deliberately after telemetry review.</p>
+  <p class="policy-desc">Pilot control binding primary refresh tokens more tightly on supported Windows workloads (token protection). Limits token replay when adversaries steal session material via phishing proxies. Applies only to the CA_TokenProtection_Pilot group-expand deliberately after telemetry review.</p>
 </article>
 <article class="policy-card" id="CA114">
   <div class="policy-card__head">
@@ -220,7 +220,7 @@
     <span class="pill pill--critical">Critical</span>
   </div>
   <h3 class="policy-title">Admin Session Controls</h3>
-  <p class="policy-desc">Admin session containment: repeats the tighter session controls applied to privileged accounts—maximum four-hour recurring authentication and disallow persistent browser sessions—for every identity holding directory or workload admin roles included in Privileged Administrators.</p>
+  <p class="policy-desc">Admin session containment: repeats the tighter session controls applied to privileged accounts-maximum four-hour recurring authentication and disallow persistent browser sessions-for every identity holding directory or workload admin roles included in Privileged Administrators.</p>
 </article>
 <article class="policy-card" id="CA603">
   <div class="policy-card__head">
@@ -362,7 +362,7 @@
     <span class="pill pill--recommended">Recommended</span>
   </div>
   <h3 class="policy-title">Guest - Session Controls</h3>
-  <p class="policy-desc">Session hygiene for collaborators: aligns guest browser sessions with the twelve-hour MFA refresh posture so stolen guest tokens degrade quickly—mirroring CA107 protections for internals.</p>
+  <p class="policy-desc">Session hygiene for collaborators: aligns guest browser sessions with the twelve-hour MFA refresh posture so stolen guest tokens degrade quickly-mirroring CA107 protections for internals.</p>
 </article>
 </div></section>
 <section class="persona-block"><h2 class="persona-heading">Agent</h2><div class="policy-grid">

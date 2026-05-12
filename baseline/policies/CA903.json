@@ -1,6 +1,6 @@
 {
   "id": "CA903",
-  "displayName": "CA903 — Guest - Block Legacy Auth",
+  "displayName": "CA903 - Guest - Block Legacy Auth",
   "description": "Prevents scripted or legacy-protocol abuse for guest personas; layered with CA901 to mandate modern apps and interactive controls.",
   "metadata": {
     "criticality": "Recommended",

@@ -1,6 +1,6 @@
 {
   "id": "CA108",
-  "displayName": "CA108 — Block Cross-Device Auth Flows",
+  "displayName": "CA108 - Block Cross-Device Auth Flows",
   "description": "Blocks high-abuse OAuth flows tied to phishing: denies device-code authentication and OAuth authentication transfer where supported. Exempts freshly approved enterprise device registrations that still need onboarding.",
   "metadata": {
     "criticality": "Critical",

@@ -1,6 +1,6 @@
 {
   "id": "CA702",
-  "displayName": "CA702 — App - Salesforce - MFA",
+  "displayName": "CA702 - App - Salesforce - MFA",
   "description": "SaaS control for Salesforce: interactive users must satisfy MFA whenever accessing Salesforce through Entra  SSO. Requires a valid enterprise application / service principal in the tenant reflecting production URLs.",
   "metadata": {
     "criticality": "Optional",

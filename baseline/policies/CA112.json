@@ -1,6 +1,6 @@
 {
   "id": "CA112",
-  "displayName": "CA112 — MFA on Device Register or Join",
+  "displayName": "CA112 - MFA on Device Register or Join",
   "description": "Strengthens Entra device registration and join endpoints: MFA is required anytime a user completes device registration or Workplace Join/Azure AD join workflows, reducing unauthorized device onboarding.",
   "metadata": {
     "criticality": "Critical",

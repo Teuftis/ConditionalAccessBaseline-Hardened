@@ -70,7 +70,7 @@ function resolveApps(intent, ctx) {
     result.includeUserActions = apps.userActions.slice();
     return result;
   }
-  // Omit includeUserActions when unused — Graph rejects empty collections on CA payloads.
+  // Omit includeUserActions when unused - Graph rejects empty collections on CA payloads.
 
   if (apps.include === "all") {
     result.includeApplications = ["All"];
@@ -250,12 +250,12 @@ function resolveSession(intent) {
   if (s.continuousAccessEvaluation) {
     const raw = s.continuousAccessEvaluation;
     // Standard workforce CAE (CA111): Entra session control "Disabled" (not strict location)
-    // maps to Graph `disabled`. Never send `strictEnforcement` — API returns 1138 (rolled back).
+    // maps to Graph `disabled`. Never send `strictEnforcement` - API returns 1138 (rolled back).
     if (raw === "standard" || raw === "strictEnforcement") {
       out.continuousAccessEvaluation = { mode: "disabled" };
     } else {
       // Intent uses shorthand; Graph only accepts continuousAccessEvaluationMode.
-      // strictLocation is evolvable — send Prefer: include-unknown-enum-members (graph.js).
+      // strictLocation is evolvable - send Prefer: include-unknown-enum-members (graph.js).
       const CAE_TO_GRAPH_MODE = {
         strict: "strictLocation",
         strictLocation: "strictLocation",
@@ -276,7 +276,7 @@ function resolveSession(intent) {
 
 /**
  * Skip policies that target native first-party apps (resolved from KNOWN_APPS)
- * when no service principal exists for that appId — common without Intune/MDM.
+ * when no service principal exists for that appId - common without Intune/MDM.
  */
 export function evaluateFirstPartyAppSkip(intent, ctx) {
   const present = ctx.appIdInTenant;
@@ -406,7 +406,7 @@ export const POLICY_IDS_DEPLOY_DISABLED_BY_DEFAULT = new Set([
 
 function resolvePolicyDeployState(intent) {
   // Optional per-policy intent field `deploymentState` / `deployState` selects Report-only vs Off
-  // only on first POST — existing tenant policies are never modified (deploy skips same display name).
+  // only on first POST - existing tenant policies are never modified (deploy skips same display name).
   // Default is report-only except POLICY_IDS_DEPLOY_DISABLED_BY_DEFAULT. User-actions (e.g. CA112)
   // follow the same path. If Graph rejects report-only at POST time, add `deploymentState: "disabled"`
   // to that intent JSON for your fork.

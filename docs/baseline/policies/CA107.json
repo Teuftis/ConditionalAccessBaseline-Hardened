@@ -1,6 +1,6 @@
 {
   "id": "CA107",
-  "displayName": "CA107 — Session Controls",
+  "displayName": "CA107 - Session Controls",
   "description": "Session tightening for standard users: enforces recurring reauthentication (twelve-hour sign-in frequency) and disallows persistent browser sessions. Applies a device filter so compliant or hybrid Entra joined devices can be handled according to organizational exception rules.",
   "metadata": {
     "criticality": "Recommended",
