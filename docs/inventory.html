@@ -22,7 +22,7 @@
       <span class="logo" aria-hidden="true">CA</span>
       <div>
         <h1>Mirage CA policy catalog</h1>
-        <p class="subtitle">v2026 · 41 Conditional Access policies · Groups by persona · New deploys: mostly <strong>Report-only</strong>; including device registration MFA (<strong>CA112</strong>) in <strong>Report-only</strong>. <strong>CA111</strong>, <strong>CA202</strong>, <strong>CA204</strong>, <strong>CA302</strong>, <strong>CA303</strong>, <strong>CA603</strong>, <strong>CA606</strong>, <strong>CAA01</strong> default to <strong>Off</strong>; optional intent <code>deploymentState</code> for <strong>first POST only</strong> (never PATCH existing); turn <strong>On</strong> in Entra when ready</p>
+        <p class="subtitle">v2026 · 45 Conditional Access policies · Groups by persona · New deploys: mostly <strong>Report-only</strong>; including device registration MFA (<strong>CA112</strong>) in <strong>Report-only</strong>. <strong>CA111</strong>, <strong>CA202</strong>, <strong>CA204</strong>, <strong>CA302</strong>, <strong>CA303</strong>, <strong>CA603</strong>, <strong>CA606</strong>, <strong>CAA01</strong> default to <strong>Off</strong>; optional intent <code>deploymentState</code> for <strong>first POST only</strong> (never PATCH existing); turn <strong>On</strong> in Entra when ready</p>
         <p class="catalog-nav">
           <a href="index.html">Deploy app</a>
           <span aria-hidden="true">·</span>
@@ -59,6 +59,14 @@
   </div>
   <h3 class="policy-title">Sign-In Risk - Require MFA</h3>
   <p class="policy-desc">Identity Protection challenge for risky sign-ins (medium or high): requires MFA to continue the session when Entra evaluates elevated sign-in risk. Requires Entra ID P2. Excludes universal exclusions and separates guest traffic via policy construction.</p>
+</article>
+<article class="policy-card" id="CA103b">
+  <div class="policy-card__head">
+    <span class="policy-id">CA103b</span>
+    <span class="pill pill--critical">Critical</span>
+  </div>
+  <h3 class="policy-title">Block High Sign-In Risk</h3>
+  <p class="policy-desc">Blocks workforce user sign-ins classified as high risk by Identity Protection. Medium-risk sign-ins are challenged with MFA via CA103. This policy ensures high-risk sign-ins are outright denied, matching the admin (CA605) and guest (CA902) pattern.</p>
 </article>
 <article class="policy-card" id="CA104">
   <div class="policy-card__head">
@@ -138,7 +146,7 @@
     <span class="pill pill--optional">Optional</span>
   </div>
   <h3 class="policy-title">Require Token Protection (Pilot)</h3>
-  <p class="policy-desc">Pilot control binding primary refresh tokens more tightly on supported Windows workloads (token protection). Limits token replay when adversaries steal session material via phishing proxies. Applies only to the CA_TokenProtection_Pilot group-expand deliberately after telemetry review.</p>
+  <p class="policy-desc">Pilot control binding primary refresh tokens more tightly on supported Windows workloads (token protection). Limits token replay when adversaries steal session material via phishing proxies. Applies only to the CA_TokenProtection_Pilot group—expand deliberately after telemetry review.</p>
 </article>
 <article class="policy-card" id="CA114">
   <div class="policy-card__head">
@@ -147,6 +155,30 @@
   </div>
   <h3 class="policy-title">Terms of Use</h3>
   <p class="policy-desc">Regulatory / policy attestation workflow: prompts users for Microsoft Entra Terms of Use before access. Organizations must provision a tenant-specific Terms of Use object and inject its GUID at deployment time (see deploy SPA configuration).</p>
+</article>
+<article class="policy-card" id="CA115">
+  <div class="policy-card__head">
+    <span class="policy-id">CA115</span>
+    <span class="pill pill--recommended">Recommended</span>
+  </div>
+  <h3 class="policy-title">Step-up MFA for Sensitive Resources (Pilot)</h3>
+  <p class="policy-desc">Pilot pattern for authentication context: privileged actions tagged in target resources (SharePoint sites, Defender for Cloud Apps session controls, Purview labels, custom apps) with the authentication context value c1 are stepped up to phishing-resistant MFA before access is granted. Authentication context references (c1..c25) must be created in the Entra portal under Protection &gt; Conditional Access &gt; Authentication contexts before this policy binds them to a grant. Pair with downstream tagging in SPO/MDA/Purview to make the step-up meaningful.</p>
+</article>
+<article class="policy-card" id="CA116">
+  <div class="policy-card__head">
+    <span class="policy-id">CA116</span>
+    <span class="pill pill--optional">Optional</span>
+  </div>
+  <h3 class="policy-title">Require Compliant Network for SaaS (Pilot)</h3>
+  <p class="policy-desc">Pilot control requiring sign-ins to originate from a Microsoft Entra Internet Access / Private Access compliant network (Global Secure Access). Skip this policy if your tenant does not have Global Secure Access or the Entra Suite licensed and deployed to client devices. Recommended to pilot in report-only against a small population (and validate GSA client health) before broadening. Blocks any sign-in NOT coming through the compliant network tunnel.</p>
+</article>
+<article class="policy-card" id="CA117">
+  <div class="policy-card__head">
+    <span class="policy-id">CA117</span>
+    <span class="pill pill--recommended">Recommended</span>
+  </div>
+  <h3 class="policy-title">Block High Insider Risk</h3>
+  <p class="policy-desc">Consumes the Microsoft Purview Insider Risk Management adaptive protection signal exposed to Conditional Access. Blocks sign-ins from workforce users currently elevated to the high adaptive insider risk tier (e.g., users exfiltrating large volumes after a triggering HR event). Requires Microsoft Purview Insider Risk Management configured with adaptive protection enabled, plus Entra ID P2 (and the Purview licensing prerequisites) on the in-scope users. Pair with CA103b (high sign-in risk) and CA102 (high user risk) for a layered identity + insider risk response.</p>
 </article>
 <article class="policy-card" id="CA201">
   <div class="policy-card__head">
@@ -220,7 +252,7 @@
     <span class="pill pill--critical">Critical</span>
   </div>
   <h3 class="policy-title">Admin Session Controls</h3>
-  <p class="policy-desc">Admin session containment: repeats the tighter session controls applied to privileged accounts-maximum four-hour recurring authentication and disallow persistent browser sessions-for every identity holding directory or workload admin roles included in Privileged Administrators.</p>
+  <p class="policy-desc">Admin session containment: repeats the tighter session controls applied to privileged accounts—maximum four-hour recurring authentication and disallow persistent browser sessions—for every identity holding directory or workload admin roles included in Privileged Administrators.</p>
 </article>
 <article class="policy-card" id="CA603">
   <div class="policy-card__head">
@@ -362,7 +394,7 @@
     <span class="pill pill--recommended">Recommended</span>
   </div>
   <h3 class="policy-title">Guest - Session Controls</h3>
-  <p class="policy-desc">Session hygiene for collaborators: aligns guest browser sessions with the twelve-hour MFA refresh posture so stolen guest tokens degrade quickly-mirroring CA107 protections for internals.</p>
+  <p class="policy-desc">Session hygiene for collaborators: aligns guest browser sessions with the twelve-hour MFA refresh posture so stolen guest tokens degrade quickly—mirroring CA107 protections for internals.</p>
 </article>
 </div></section>
 <section class="persona-block"><h2 class="persona-heading">Agent</h2><div class="policy-grid">

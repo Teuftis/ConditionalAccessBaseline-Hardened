@@ -1,0 +1,44 @@
+{
+  "id": "CA116",
+  "displayName": "CA116 - Require Compliant Network for SaaS (Pilot)",
+  "description": "Pilot control requiring sign-ins to originate from a Microsoft Entra Internet Access / Private Access compliant network (Global Secure Access). Skip this policy if your tenant does not have Global Secure Access or the Entra Suite licensed and deployed to client devices. Recommended to pilot in report-only against a small population (and validate GSA client health) before broadening. Blocks any sign-in NOT coming through the compliant network tunnel.",
+  "metadata": {
+    "criticality": "Optional",
+    "v2Status": "NEW",
+    "persona": "All users",
+    "j0eyvEquivalent": ""
+  },
+  "include": {
+    "users": "all"
+  },
+  "exclude": {
+    "groups": [
+      "CA_ExcludedFromCA",
+      "BG_BreakGlass",
+      "CA_ServiceAccount"
+    ],
+    "guestsAndExternals": true
+  },
+  "applications": {
+    "include": "all"
+  },
+  "conditions": {
+    "locations": {
+      "include": [
+        "All"
+      ],
+      "exclude": [
+        "AllCompliantNetwork"
+      ]
+    },
+    "clientAppTypes": [
+      "all"
+    ]
+  },
+  "grant": {
+    "operator": "OR",
+    "builtInControls": [
+      "block"
+    ]
+  }
+}

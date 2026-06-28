@@ -1,0 +1,39 @@
+{
+  "id": "CA103b",
+  "displayName": "CA103b - Block High Sign-In Risk",
+  "description": "Blocks workforce user sign-ins classified as high risk by Identity Protection. Medium-risk sign-ins are challenged with MFA via CA103. This policy ensures high-risk sign-ins are outright denied, matching the admin (CA605) and guest (CA902) pattern.",
+  "metadata": {
+    "criticality": "Critical",
+    "v2Status": "NEW",
+    "persona": "All users",
+    "j0eyvEquivalent": ""
+  },
+  "include": {
+    "users": "all"
+  },
+  "exclude": {
+    "groups": [
+      "CA_ExcludedFromCA",
+      "BG_BreakGlass",
+      "CA_ServiceAccount"
+    ],
+    "guestsAndExternals": true
+  },
+  "applications": {
+    "include": "all"
+  },
+  "conditions": {
+    "signInRiskLevels": [
+      "high"
+    ],
+    "clientAppTypes": [
+      "all"
+    ]
+  },
+  "grant": {
+    "operator": "OR",
+    "builtInControls": [
+      "block"
+    ]
+  }
+}

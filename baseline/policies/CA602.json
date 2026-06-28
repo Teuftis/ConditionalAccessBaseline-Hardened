@@ -1,7 +1,7 @@
 {
   "id": "CA602",
   "displayName": "CA602 - Admin Session Controls",
-  "description": "Admin session containment: repeats the tighter session controls applied to privileged accounts-maximum four-hour recurring authentication and disallow persistent browser sessions-for every identity holding directory or workload admin roles included in Privileged Administrators.",
+  "description": "Admin session containment: repeats the tighter session controls applied to privileged accounts—maximum four-hour recurring authentication and disallow persistent browser sessions—for every identity holding directory or workload admin roles included in Privileged Administrators.",
   "metadata": {
     "criticality": "Critical",
     "v2Status": "Updated",

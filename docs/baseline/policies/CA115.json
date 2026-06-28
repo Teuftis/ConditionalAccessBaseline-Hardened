@@ -1,0 +1,37 @@
+{
+  "id": "CA115",
+  "displayName": "CA115 - Step-up MFA for Sensitive Resources (Pilot)",
+  "description": "Pilot pattern for authentication context: privileged actions tagged in target resources (SharePoint sites, Defender for Cloud Apps session controls, Purview labels, custom apps) with the authentication context value c1 are stepped up to phishing-resistant MFA before access is granted. Authentication context references (c1..c25) must be created in the Entra portal under Protection > Conditional Access > Authentication contexts before this policy binds them to a grant. Pair with downstream tagging in SPO/MDA/Purview to make the step-up meaningful.",
+  "metadata": {
+    "criticality": "Recommended",
+    "v2Status": "NEW",
+    "persona": "All users",
+    "j0eyvEquivalent": ""
+  },
+  "include": {
+    "users": "all"
+  },
+  "exclude": {
+    "groups": [
+      "CA_ExcludedFromCA",
+      "BG_BreakGlass",
+      "CA_ServiceAccount"
+    ],
+    "guestsAndExternals": true
+  },
+  "applications": {
+    "include": "none"
+  },
+  "conditions": {
+    "authenticationContextClassReferences": [
+      "c1"
+    ],
+    "clientAppTypes": [
+      "all"
+    ]
+  },
+  "grant": {
+    "operator": "OR",
+    "authenticationStrength": "phishingResistantMfa"
+  }
+}

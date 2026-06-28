@@ -74,6 +74,8 @@ function resolveApps(intent, ctx) {
 
   if (apps.include === "all") {
     result.includeApplications = ["All"];
+  } else if (apps.include === "none") {
+    result.includeApplications = [];
   } else if (typeof apps.include === "string") {
     result.includeApplications = [resolveAppToken(apps.include, apps.lookup, ctx)];
   } else if (Array.isArray(apps.include)) {
@@ -90,6 +92,11 @@ function resolveApps(intent, ctx) {
         .map((token) => resolveAppToken(token, apps.lookup, ctx))
         .filter((v) => v !== null);
     }
+  }
+
+  const acrs = intent.conditions?.authenticationContextClassReferences;
+  if (Array.isArray(acrs) && acrs.length) {
+    result.includeAuthenticationContextClassReferences = acrs.slice();
   }
 
   return result;
@@ -178,7 +185,7 @@ function resolveLocations(locations, ctx) {
 }
 
 function resolveLocationToken(token, ctx) {
-  if (token === "All" || token === "AllTrusted") return token;
+  if (token === "All" || token === "AllTrusted" || token === "AllCompliantNetwork") return token;
   const id = ctx.namedLocationIdsByDisplayName.get(token);
   if (!id) {
     ctx.missing.push(`namedLocation:${token}`);
@@ -449,6 +456,10 @@ export function buildPolicyBody(intent, ctx) {
 
   if (Array.isArray(intent.conditions?.agentIdRiskLevels) && intent.conditions.agentIdRiskLevels.length) {
     body.conditions.agentIdRiskLevels = intent.conditions.agentIdRiskLevels;
+  }
+
+  if (Array.isArray(intent.conditions?.insiderRiskLevels) && intent.conditions.insiderRiskLevels.length) {
+    body.conditions.insiderRiskLevels = intent.conditions.insiderRiskLevels;
   }
 
   const grant = resolveGrant(intent, ctx);

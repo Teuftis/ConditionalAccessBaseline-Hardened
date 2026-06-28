@@ -1,0 +1,39 @@
+{
+  "id": "CA117",
+  "displayName": "CA117 - Block High Insider Risk",
+  "description": "Consumes the Microsoft Purview Insider Risk Management adaptive protection signal exposed to Conditional Access. Blocks sign-ins from workforce users currently elevated to the high adaptive insider risk tier (e.g., users exfiltrating large volumes after a triggering HR event). Requires Microsoft Purview Insider Risk Management configured with adaptive protection enabled, plus Entra ID P2 (and the Purview licensing prerequisites) on the in-scope users. Pair with CA103b (high sign-in risk) and CA102 (high user risk) for a layered identity + insider risk response.",
+  "metadata": {
+    "criticality": "Recommended",
+    "v2Status": "NEW",
+    "persona": "All users",
+    "j0eyvEquivalent": ""
+  },
+  "include": {
+    "users": "all"
+  },
+  "exclude": {
+    "groups": [
+      "CA_ExcludedFromCA",
+      "BG_BreakGlass",
+      "CA_ServiceAccount"
+    ],
+    "guestsAndExternals": true
+  },
+  "applications": {
+    "include": "all"
+  },
+  "conditions": {
+    "insiderRiskLevels": [
+      "elevated"
+    ],
+    "clientAppTypes": [
+      "all"
+    ]
+  },
+  "grant": {
+    "operator": "OR",
+    "builtInControls": [
+      "block"
+    ]
+  }
+}

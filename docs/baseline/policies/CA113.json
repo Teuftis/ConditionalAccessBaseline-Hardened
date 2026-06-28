@@ -1,7 +1,7 @@
 {
   "id": "CA113",
   "displayName": "CA113 - Require Token Protection (Pilot)",
-  "description": "Pilot control binding primary refresh tokens more tightly on supported Windows workloads (token protection). Limits token replay when adversaries steal session material via phishing proxies. Applies only to the CA_TokenProtection_Pilot group-expand deliberately after telemetry review.",
+  "description": "Pilot control binding primary refresh tokens more tightly on supported Windows workloads (token protection). Limits token replay when adversaries steal session material via phishing proxies. Applies only to the CA_TokenProtection_Pilot group—expand deliberately after telemetry review.",
   "metadata": {
     "criticality": "Optional",
     "v2Status": "NEW",
