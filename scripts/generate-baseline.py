@@ -1101,7 +1101,7 @@ def write_readme_group_catalog() -> None:
         tier = tier_display.get(str(g.get("tier", "")), _readme_catalog_text(g.get("tier", "")))
         nick = _readme_catalog_text(g.get("mailNickname", ""))
         desc = _readme_catalog_text(g.get("description", ""))
-        lines.append(f"- **{dn}** \u2014 {tier} \u2014 mailNickname `{nick}`")
+        lines.append(f"- **{dn}** - {tier} - mailNickname `{nick}`")
         if desc:
             lines.append(f"  {desc}")
     block = "\n".join(lines) + "\n"

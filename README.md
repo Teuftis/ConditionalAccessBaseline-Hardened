@@ -12,13 +12,7 @@ Quick links: [deployer](https://teuftis.github.io/ConditionalAccessBaseline-Hard
 
 ## What gets created
 
-45 Conditional Access policies, 11 groups, and 4 named locations. Stored as intent JSON under [`baseline/`](./baseline/), not as raw Graph exports - the deployer in [`docs/`](./docs/) resolves display names to object IDs at write time.
-
-The policy catalog and group descriptions are at the bottom of this README. Full per-policy detail lives in [`baseline/policies/`](./baseline/policies/).
-
-### Why CA304 - Require Compliant Linux
-
-Added to close the Linux User-Agent spoof gap: the CA platform condition is self-reported (from User-Agent), so without CA304, an attacker can present `User-Agent: Linux` and skip the Windows/macOS/mobile compliance gates. CA304 requires compliant Linux devices, completing the platform coverage. If you don't run managed Linux endpoints, drop `linux` from CA105's exclude list to block it outright instead.
+Intent JSON under [`baseline/`](./baseline/) - policies, groups, and named locations - not raw Graph exports. The deployer in [`docs/`](./docs/) resolves display names to object IDs at write time. Catalog and group descriptions are at the bottom of this README; full per-policy detail lives in [`baseline/policies/`](./baseline/policies/).
 
 ## What state policies deploy in
 
@@ -32,7 +26,7 @@ You can override the default state per-policy in a fork by adding `deploymentSta
 
 You need one of: Conditional Access Administrator, Security Administrator, Groups Administrator, or Global Admin. The first three combined cover all the writes the deployer makes; Global covers everything if you'd rather not split roles.
 
-The deploy [`docs/deploy.js`](docs/deploy.js) uses MSAL **in-memory** token cache (`cacheLocation: "memory"`): refreshing or closing the tab drops sign-in until you authenticate again.
+[`docs/deploy.js`](docs/deploy.js) uses MSAL **in-memory** token cache (`cacheLocation: "memory"`): refreshing or closing the tab drops sign-in until you authenticate again. Tokens are not written to `sessionStorage` or `localStorage`.
 
 1. Open the deployer.
 2. Sign in. Accept the delegated Graph scopes.
@@ -49,37 +43,25 @@ After deploy, in the Entra admin center:
 
 The Microsoft Sentinel queries at the bottom of this README are what I use to triage Report-only and hard-failure outcomes.
 
-## Auth model
-
-Whatever lands on `main` and gets published to GitHub Pages is what runs in the admin's browser. Delegated tokens are cached in-memory by MSAL for the lifetime of that tab session, not in `sessionStorage` or `localStorage`. Branch protection on `main` and code review on anything under [`docs/`](./docs/) or [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml) are the controls that count. Treat them as such if you fork.
-
 ## Forking it for your own MSP
 
-You'll want your own multitenant SPA registration and your own GitHub Pages site so customers see your branding, not mine.
+You'll want your own multitenant SPA registration and your own GitHub Pages site so customers see your branding, not mine. Whatever lands on `main` and gets published to Pages is what runs in the admin's browser - protect `main` and review changes under [`docs/`](./docs/) and [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml).
 
 1. Register a multitenant single-page application in your tenant. Add `https://<your-org>.github.io/<repo>/` as a redirect URI. No secret. Delegated scopes: `Policy.ReadWrite.ConditionalAccess`, `Policy.Read.All`, `Group.ReadWrite.All`, `Directory.Read.All`, `Application.Read.All`, `User.Read`.
 2. Fork this repo. Edit [`docs/config.js`](docs/config.js): replace `clientId` and the redirect URI list. `GRAPH_SCOPES` is in the same file.
-3. Settings → Pages → GitHub Actions. The included [`deploy-pages.yml`](.github/workflows/deploy-pages.yml) builds and publishes on push to `main`.
+3. Settings → Pages → GitHub Actions. The included [`deploy-pages.yml`](.github/workflows/deploy-pages.yml) rebuilds from [`docs/`](./docs/) on every push to `main` (older "publish from branch `/docs`" works too). The workflow copies `baseline/` into `docs/baseline/` so `fetch("./baseline/manifest.json")` stays same-origin; `generate-baseline.py` does the same locally. If the deployer loads blank or 404s on the manifest, wait for Actions then hard refresh. Older forks without that copy step can set `window.MIRAGE_BASELINE_URL` or fall back to raw.githubusercontent.com (CORS applies).
 4. Put your own deploy badge in your README.
 
 To change the actual policies, edit the `POLICIES` and `GROUPS` dicts in [`scripts/generate-baseline.py`](scripts/generate-baseline.py), then run `python scripts/generate-baseline.py`. The generator rewrites everything under `baseline/`, mirrors it to `docs/baseline/` for same-origin fetch from the SPA, and regenerates `POLICY_INVENTORY.md` plus the appendix tables in this README. Commit all of those together.
 
 For local hacking: `python -m http.server` from the repo root, open `/docs/`, and add a localhost redirect URI alongside your production one on the SPA registration.
 
-## GitHub Pages
-
-The browser bundle lives under [`docs/`](./docs/) and rebuilds via [`deploy-pages.yml`](.github/workflows/deploy-pages.yml) on every push to `main`. Configure Pages once under Settings → Pages → GitHub Actions (older "publish from branch `/docs`" works too).
-
-The workflow runs `rm -rf docs/baseline && cp -r baseline docs/baseline` so `fetch("./baseline/manifest.json")` stays same-origin with the SPA. `generate-baseline.py` does the same locally. If you fork an older copy that lacks this step, set `window.MIRAGE_BASELINE_URL` or fall back to raw.githubusercontent.com URLs (subject to CORS).
-
-If the deployer loads blank or 404s on the manifest, the Pages workflow probably hasn't completed yet. Check Actions, then hard refresh.
-
 ## Caveats
 
 - Not a Microsoft product. Nothing here is supported by them.
 - Risk-based policies need Entra ID P2.
 - Graph and CA schemas drift. If a POST returns 400, the schema probably moved - open an issue with the response body.
-- Policy **display names** look like `CA101 - Require MFA` (intent JSON may use a Unicode em dash or ASCII hyphen). The deployer normalizes those variants when matching, but policies you've already created with a different convention won't be touched.
+- Policy **display names** look like `CA101 - Require MFA` (ASCII hyphen). The deployer still normalizes legacy em-dash variants when matching existing tenant policies; names that use a different convention won't be touched.
 - Terms of Use objects are tenant-owned by Microsoft's design. The deployer can't create them.
 - Use a non-prod tenant for first runs if you have one, and confirm at least one break-glass account is excluded from everything before flipping any policy to On.
 
@@ -163,27 +145,27 @@ Each group below has a JSON file under [`baseline/groups/`](./baseline/groups/).
 `tier` values: **Required** is foundation, **Service track** is the automation split that lets CA801 hit interactive service logons without breaking unattended ones, **Exception** is short-lived allowances, **Pilot** is narrow experiments.
 
 <!-- group-catalog:start -->
-- **BG_BreakGlass** — Required — mailNickname `bg-breakglass`
+- **BG_BreakGlass** - Required - mailNickname `bg-breakglass`
   Break-glass and other emergency administrator accounts that must remain reachable if Conditional Access misconfiguration locks out normal admins. Keep membership empty until accounts exist; remove members when not actively needed. Excluded from nearly all CA policies so use only for documented recovery procedures.
-- **CA_ExcludedFromCA** — Required — mailNickname `ca-excludedfromca`
+- **CA_ExcludedFromCA** - Required - mailNickname `ca-excludedfromca`
   Catch-all exclusion for identities that must never be evaluated by user-facing CA (for example certain directory sync or legacy integration principals your vendor documents as CA-exempt). Treat membership as highly privileged-every account here bypasses most workforce controls.
-- **CA_ServiceAccount** — Required — mailNickname `ca-serviceaccount`
+- **CA_ServiceAccount** - Required - mailNickname `ca-serviceaccount`
   Parent group for non-human and automation accounts. Policies that target all users exclude this group so background jobs are not forced through interactive MFA. Nest members into the interactive vs non-interactive child groups so CA801 can target only human-driven service logons.
-- **CA_ServiceAccount_Interactive** — Service track — mailNickname `ca-serviceaccount-interactive`
+- **CA_ServiceAccount_Interactive** - Service track - mailNickname `ca-serviceaccount-interactive`
   Service principals or managed identities that sometimes sign in through a browser or device-code style flow. CA801 requires MFA for this population while leaving pure client-credential automation in the non-interactive sibling group.
-- **CA_ServiceAccount_NonInteractive** — Service track — mailNickname `ca-serviceaccount-noninteractive`
+- **CA_ServiceAccount_NonInteractive** - Service track - mailNickname `ca-serviceaccount-noninteractive`
   Automation identities that only use client credentials, managed identity, or other non-interactive OAuth flows. Excluded from CA801 so scheduled jobs are not blocked; pair with CA802-CA804 for network and app restrictions.
-- **CA_TravelException** — Exception — mailNickname `ca-travelexception`
+- **CA_TravelException** - Exception - mailNickname `ca-travelexception`
   Short-lived membership for employees who must sign in from outside TRUSTED_COUNTRIES during approved travel. CA106 excludes this group from the country condition so the geofence still applies to everyone else; expire memberships when the trip ends.
-- **CA_DeviceCodeApproved** — Exception — mailNickname `ca-devicecodeapproved`
+- **CA_DeviceCodeApproved** - Exception - mailNickname `ca-devicecodeapproved`
   Rare allowance for CA108's block on device-code and authentication-transfer flows (for example controlled kiosk or DevOps scenarios). Add only fully trusted principals; every member is a phishing surface.
-- **CA_TokenProtection_Pilot** — Pilot — mailNickname `ca-tokenprotection-pilot`
+- **CA_TokenProtection_Pilot** - Pilot - mailNickname `ca-tokenprotection-pilot`
   Users or devices included in the CA113 Windows token-protection pilot. Start with a small population, collect sign-in and help-desk telemetry, then expand membership as your estate supports the feature.
-- **CA_ExcludedAgents** — Exception — mailNickname `ca-excludedagents`
+- **CA_ExcludedAgents** - Exception - mailNickname `ca-excludedagents`
   Workload agent or service principal objects that must not be blocked by CAA01 when Identity Protection flags them high risk (for example monitored automation with known false positives). Keep the group tiny and review quarterly.
-- **CA_MSP_PartnerUsers** — Exception — mailNickname `ca-msp-partnerusers`
+- **CA_MSP_PartnerUsers** - Exception - mailNickname `ca-msp-partnerusers`
   Delegated administrator or partner accounts that need access to Microsoft 365 admin experiences blocked for standard guests in CA905. Requires explicit lifecycle: remove access when the engagement ends.
-- **AUTOPILOT_DevicePrep** — Exception — mailNickname `autopilot-deviceprep`
+- **AUTOPILOT_DevicePrep** - Exception - mailNickname `autopilot-deviceprep`
   Device objects undergoing Windows Autopilot pre-provisioning so they can complete join/enrollment without triggering CA112 MFA-on-join or CA201 enrollment MFA prematurely. Clean up stale device members after deployment finishes.
 <!-- group-catalog:end -->
 
@@ -338,5 +320,3 @@ MIT. See [LICENSE](./LICENSE).
 ## Security
 
 See [SECURITY.md](./SECURITY.md). For vulnerability reports, prefer GitHub Security → Report a vulnerability over public issues.
-
-The `reference/` spreadsheets are authoring companions, not read by the deployer. If you edit them, keep group display names and `mailNickname` strings aligned with [`baseline/groups/`](./baseline/groups/) (`CA_` prefix on display names, `ca-` on nicknames), then regenerate via `scripts/generate-baseline.py`.
