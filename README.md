@@ -79,7 +79,7 @@ reference/                 authoring spreadsheets, not read at runtime
 .github/workflows/         deploy-pages.yml publishes Pages on main
 POLICY_INVENTORY.md        markdown mirror of the policy table below
 SECURITY.md                prefer GitHub Security → Report a vulnerability
-LICENSE                    MIT
+LICENSE                    AGPL-3.0
 ```
 
 ---
@@ -315,7 +315,7 @@ union isfuzzy=true
 
 ## License
 
-MIT. See [LICENSE](./LICENSE).
+GNU Affero General Public License v3.0 (AGPL-3.0). See [LICENSE](./LICENSE).
 
 ## Security
 
