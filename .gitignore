@@ -5,3 +5,9 @@
 __pycache__/
 *.py[cod]
 *.pyc
+
+# Local editor/agent scaffolding - keep off the public repo and Pages (docs/ only).
+.cursor/
+CLAUDE.md
+AGENTS.md
+DECISIONS.md
