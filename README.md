@@ -8,7 +8,9 @@ Click the badge, sign in as a CA admin, deploy. The deployer is a single-page ap
 
 [![Open deploy app](https://img.shields.io/badge/Open-deploy%20app-0078D4?logo=microsoftazure&logoColor=white&style=for-the-badge&logoWidth=28)](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/)
 
-Quick links: [deployer](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/) · [policy catalog (filterable)](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/inventory.html) · [POLICY_INVENTORY.md](./POLICY_INVENTORY.md) · [SECURITY.md](./SECURITY.md)
+Quick links: [deployer](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/) · [policy catalog (filterable)](https://teuftis.github.io/ConditionalAccessBaseline-Hardened/inventory.html) · [POLICY_INVENTORY.md](./POLICY_INVENTORY.md) · [release notes](./RELEASE_NOTES.md) · [SECURITY.md](./SECURITY.md)
+
+**Latest (v2026.2):** hybrid join removed (compliant device only), CA102 moves to *Require risk remediation*, CA113 token protection adds managed iOS/macOS, and three new Optional agent policies (CAA02-CAA04). Details in [RELEASE_NOTES.md](./RELEASE_NOTES.md).
 
 ## What gets created
 
@@ -18,7 +20,7 @@ Intent JSON under [`baseline/`](./baseline/) - policies, groups, and named locat
 
 Most land in **Report-only**. Eleven specific policies deploy **disabled** because Report-only either doesn't apply to them cleanly or misrepresents what they'd do once enforced - those are `CA111`, `CA202`, `CA204`, `CA302`, `CA303`, `CA603`, `CA606`, `CAA01`, `CAA02`, `CAA03`, `CAA04`. The list lives in `POLICY_IDS_DEPLOY_DISABLED_BY_DEFAULT` in [`docs/translate.js`](docs/translate.js) and `ALLOWED_DEPLOY_STATES` in [`docs/config.js`](docs/config.js) blocks the SPA from creating anything in the On state regardless of intent. You enable manually from the Entra admin center after reviewing telemetry.
 
-If a policy with the same display name already exists in the tenant, deploy leaves it alone. There is no PATCH path. Same for groups and named locations: created if missing, never overwritten.
+If a policy with the same display name, or the same baseline ID prefix (for example `CA102 - `, so a renamed baseline policy is never duplicated), already exists in the tenant, deploy leaves it alone. There is no PATCH path. Same for groups and named locations: created if missing, never overwritten.
 
 You can override the default state per-policy in a fork by adding `deploymentState` (or `deployState`) to a policy intent file. That only affects the first POST when no policy with that name exists yet - it doesn't unlock PATCH.
 
@@ -32,7 +34,7 @@ You need one of: Conditional Access Administrator, Security Administrator, Group
 2. Sign in. Accept the delegated Graph scopes.
 3. Run with **Dry run** enabled the first time. No writes happen, but you'll see exactly what would.
 4. Clear Dry run and run again to actually deploy.
-5. Read the activity log. Outcomes are `created`, `unchanged` (display name already matches), `skipped` (missing prerequisite - usually a third-party service principal that doesn't exist in your tenant yet), or `error`.
+5. Read the activity log. Outcomes are `created`, `unchanged` (display name or baseline ID already matches), `skipped` (missing prerequisite - usually a third-party service principal that doesn't exist in your tenant yet), or `error`.
 
 After deploy, in the Entra admin center:
 
@@ -60,6 +62,8 @@ For local hacking: `python -m http.server` from the repo root, open `/docs/`, an
 
 - Not a Microsoft product. Nothing here is supported by them.
 - Risk-based policies need Entra ID P2.
+- Agent policies (CAA01-CAA04) need Microsoft Agent 365 (with Entra P1 / M365 E3) or Microsoft 365 E7; without it Graph returns error 1267 and the policy is not created. Groups cannot include or exclude agents - exclude individual agent identities or blueprints in the portal, or use a custom security attribute.
+- The baseline assumes no Entra hybrid joined devices: device controls require Intune compliance only.
 - Graph and CA schemas drift. If a POST returns 400, the schema probably moved - open an issue with the response body.
 - Policy **display names** look like `CA101 - Require MFA` (ASCII hyphen). The deployer still normalizes legacy em-dash variants when matching existing tenant policies; names that use a different convention won't be touched.
 - Terms of Use objects are tenant-owned by Microsoft's design. The deployer can't create them.
