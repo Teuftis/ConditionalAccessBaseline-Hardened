@@ -134,13 +134,14 @@ function resolveUsers(intent, ctx) {
     users.includeGroups = include.groups.map((g) => resolveGroup(g, ctx)).filter(Boolean);
   } else if (include.roles === "privilegedAdmins") {
     users.includeRoles = PRIVILEGED_ROLE_TEMPLATE_IDS.slice();
-  } else if (include.agentIds === "all") {
+  } else if (include.agentIds === "all" || include.agentUsers === "all") {
     users.includeUsers = ["None"];
   }
 
-  // Workload / agent-scope policies scope identities via conditions.clientApplications, not users.
-  // User-level excludeGroups with includeUsers: None violates the CA schema (1007).
-  const workloadAgentAllAgents = include.agentIds === "all";
+  // Agent policies scope identities via conditions.clientApplications (agent identities) or
+  // conditions.agents (agent users), not users. User-level excludeGroups with includeUsers: None
+  // violates the CA schema (1007), and groups cannot include or exclude agents anyway.
+  const workloadAgentAllAgents = isAgentPolicy(intent);
   if (Array.isArray(exclude.groups) && !workloadAgentAllAgents) {
     users.excludeGroups = exclude.groups.map((g) => resolveGroup(g, ctx)).filter(Boolean);
   }
@@ -241,7 +242,14 @@ function resolveSession(intent) {
   const s = intent.session;
   if (!s) return null;
   const out = {};
-  if (s.signInFrequency) {
+  if (s.signInFrequency?.everyTime) {
+    // Mandatory companion of the riskRemediation grant (CA102).
+    out.signInFrequency = {
+      isEnabled: true,
+      frequencyInterval: "everyTime",
+      authenticationType: "primaryAndSecondaryAuthentication",
+    };
+  } else if (s.signInFrequency) {
     // Omit authenticationType for time-based frequency; Graph documents it as
     // optional and some validators reject the combination incorrectly.
     out.signInFrequency = {
@@ -354,20 +362,29 @@ function stripEmptyGraphCollections(value) {
   return value;
 }
 
-// Workload identities (Agent-ID scoped) CA policies validate against a fuller
-// conditionalAccessConditionSet shape on create than intent + strip-empty leaves.
+// Agent identities (include.agentIds) and agent users (include.agentUsers).
+function isAgentPolicy(intent) {
+  const include = intent.include || {};
+  return include.agentIds === "all" || include.agentUsers === "all";
+}
+
+// Agent CA policies validate against a fuller conditionalAccessConditionSet shape on
+// create than intent + strip-empty leaves.
 // See Graph beta POST example 7: conditionalaccessroot-post-policies (block high-risk agents).
+// Agent identities: conditions.clientApplications.includeAgentIdServicePrincipals.
+// Agent users: conditions.agents.includeAgentUsers (+ optional conditions.agentContext).
+// agentIdRiskLevels is a flags string ("medium,high"), not a collection.
 function finalizeWorkloadAgentPolicyBody(body, intent) {
-  if ((intent.include || {}).agentIds !== "all") return body;
+  if (!isAgentPolicy(intent)) return body;
 
   const prev = body.conditions || {};
   const apps = prev.applications || {};
   const levels = intent.conditions?.agentIdRiskLevels;
+  const agentUsers = (intent.include || {}).agentUsers === "all";
 
   const conditions = {
     ...prev,
-    agentIdRiskLevels:
-      Array.isArray(levels) && levels.length === 1 ? levels[0] : prev.agentIdRiskLevels,
+    agentIdRiskLevels: Array.isArray(levels) && levels.length ? levels.join(",") : undefined,
     applications: {
       includeApplications: apps.includeApplications || ["All"],
       excludeApplications: apps.excludeApplications || [],
@@ -385,14 +402,31 @@ function finalizeWorkloadAgentPolicyBody(body, intent) {
       includeGuestsOrExternalUsers: null,
       excludeGuestsOrExternalUsers: null,
     },
-    clientApplications: {
+  };
+  if (conditions.agentIdRiskLevels === undefined) delete conditions.agentIdRiskLevels;
+
+  if (agentUsers) {
+    conditions.agents = {
+      includeAgentUsers: ["All"],
+      excludeAgentUsers: [],
+      agentFilter: null,
+    };
+    const contexts = intent.conditions?.agentContexts;
+    if (Array.isArray(contexts) && contexts.length) {
+      conditions.agentContext = {
+        includeAgentContexts: contexts,
+        excludeAgentContexts: [],
+      };
+    }
+  } else {
+    conditions.clientApplications = {
       includeServicePrincipals: [],
       includeAgentIdServicePrincipals: ["All"],
       excludeServicePrincipals: [],
       excludeAgentIdServicePrincipals: [],
       agentIdServicePrincipalFilter: null,
-    },
-  };
+    };
+  }
 
   return { ...body, conditions };
 }
@@ -408,7 +442,10 @@ export const POLICY_IDS_DEPLOY_DISABLED_BY_DEFAULT = new Set([
   "CA303",
   "CA603",
   "CA606",
-  "CAA01", // Agent / workload persona
+  "CAA01", // Agent persona (Agent 365 / M365 E7 licence-gated)
+  "CAA02",
+  "CAA03",
+  "CAA04",
 ]);
 
 function resolvePolicyDeployState(intent) {
@@ -469,7 +506,7 @@ export function buildPolicyBody(intent, ctx) {
   if (session) body.sessionControls = session;
 
   let out = stripEmptyGraphCollections(body);
-  if ((intent.include || {}).agentIds === "all") {
+  if (isAgentPolicy(intent)) {
     out = finalizeWorkloadAgentPolicyBody(out, intent);
   }
   return out;

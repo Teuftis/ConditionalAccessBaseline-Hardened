@@ -1,7 +1,7 @@
 {
   "id": "CA301",
   "displayName": "CA301 - Require Compliant Windows",
-  "description": "Corporate Windows laptops and desktops must be Entra hybrid joined or marked Intune-compliant before granting access to Microsoft 365 and related cloud apps.",
+  "description": "Corporate Windows laptops and desktops must be marked Intune-compliant before granting access to Microsoft 365 and related cloud apps.",
   "metadata": {
     "criticality": "Critical",
     "v2Status": "Updated",
@@ -35,8 +35,7 @@
   "grant": {
     "operator": "OR",
     "builtInControls": [
-      "compliantDevice",
-      "domainJoinedDevice"
+      "compliantDevice"
     ]
   }
 }

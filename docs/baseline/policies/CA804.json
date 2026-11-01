@@ -1,7 +1,7 @@
 {
   "id": "CA804",
   "displayName": "CA804 - Service - Block Non-M365 Apps",
-  "description": "Least-privilege SaaS stance for robotic identities: confines service credentials to approved Microsoft 365 applications while denying access to tertiary SaaS and consumer OAuth clients.",
+  "description": "Least-privilege SaaS stance for robotic identities: confines service credentials to approved Microsoft 365 applications while denying access to tertiary SaaS and consumer OAuth clients. Since the June 2026 enforcement change for All resources policies with resource exclusions, the block also applies to apps that request only baseline scopes (openid, profile, email, User.Read), such as Azure CLI or Visual Studio Code sign-in. Review report-only hits before turning it On.",
   "metadata": {
     "criticality": "Recommended",
     "v2Status": "Retained",

@@ -21,7 +21,6 @@
     "CA_TravelException.json",
     "CA_DeviceCodeApproved.json",
     "CA_TokenProtection_Pilot.json",
-    "CA_ExcludedAgents.json",
     "CA_MSP_PartnerUsers.json",
     "AUTOPILOT_DevicePrep.json"
   ],
@@ -76,6 +75,9 @@
     "CA905.json",
     "CA906.json",
     "CA907.json",
-    "CAA01.json"
+    "CAA01.json",
+    "CAA02.json",
+    "CAA03.json",
+    "CAA04.json"
   ]
 }

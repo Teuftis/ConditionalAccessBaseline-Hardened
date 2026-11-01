@@ -1,0 +1,31 @@
+{
+  "id": "CAA04",
+  "displayName": "CAA04 - Agent - Require Compliant Device (Agent Users)",
+  "description": "Computer-using agents with their own user account must run on an Intune-compliant endpoint (today: Windows 365 Cloud PC for Agents). Scoped with the Agent execution environments condition to sessions initiated from endpoints, so cloud-hosted agents with no device are not evaluated and not blocked. Agent user targeting is in preview. Requires Agent 365 or Microsoft 365 E7. Deploys Off.",
+  "metadata": {
+    "criticality": "Optional",
+    "v2Status": "NEW",
+    "persona": "Agent",
+    "j0eyvEquivalent": "CA503"
+  },
+  "include": {
+    "agentUsers": "all"
+  },
+  "applications": {
+    "include": "all"
+  },
+  "conditions": {
+    "agentContexts": [
+      "agentUserSessionsInitiatedFromEndpoints"
+    ],
+    "clientAppTypes": [
+      "all"
+    ]
+  },
+  "grant": {
+    "operator": "OR",
+    "builtInControls": [
+      "compliantDevice"
+    ]
+  }
+}

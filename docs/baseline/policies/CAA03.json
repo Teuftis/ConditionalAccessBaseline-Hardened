@@ -1,0 +1,32 @@
+{
+  "id": "CAA03",
+  "displayName": "CAA03 - Agent - Block Risky Agent Users",
+  "description": "Agent user accounts (agents that act as users, with their own mailbox or Teams presence) are blocked from all resources when ID Protection rates the agent medium or high risk. Policies that target all users do not include agent users, so CA1xx controls do not cover them. Agent user targeting is in preview. Requires Agent 365 or Microsoft 365 E7. Deploys Off.",
+  "metadata": {
+    "criticality": "Optional",
+    "v2Status": "NEW",
+    "persona": "Agent",
+    "j0eyvEquivalent": "CA504"
+  },
+  "include": {
+    "agentUsers": "all"
+  },
+  "applications": {
+    "include": "all"
+  },
+  "conditions": {
+    "agentIdRiskLevels": [
+      "medium",
+      "high"
+    ],
+    "clientAppTypes": [
+      "all"
+    ]
+  },
+  "grant": {
+    "operator": "OR",
+    "builtInControls": [
+      "block"
+    ]
+  }
+}

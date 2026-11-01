@@ -1,0 +1,28 @@
+{
+  "id": "CAA02",
+  "displayName": "CAA02 - Agent - Block Unapproved Agent Identities",
+  "description": "Allow-list for agent identities: blocks token issuance to every agent identity that is not explicitly approved. Before turning it On, exclude approved agent identities or blueprints in the Entra admin center, or by a custom security attribute (for example AgentAttributes / AgentApprovalStatus). Groups cannot exclude agents. Does not apply to an agent's user account (see CAA03 / CAA04). Requires Agent 365 or Microsoft 365 E7. Deploys Off.",
+  "metadata": {
+    "criticality": "Optional",
+    "v2Status": "NEW",
+    "persona": "Agent",
+    "j0eyvEquivalent": "CA502"
+  },
+  "include": {
+    "agentIds": "all"
+  },
+  "applications": {
+    "include": "all"
+  },
+  "conditions": {
+    "clientAppTypes": [
+      "all"
+    ]
+  },
+  "grant": {
+    "operator": "OR",
+    "builtInControls": [
+      "block"
+    ]
+  }
+}

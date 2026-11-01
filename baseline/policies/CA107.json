@@ -1,7 +1,7 @@
 {
   "id": "CA107",
   "displayName": "CA107 - Session Controls",
-  "description": "Session tightening for standard users: enforces recurring reauthentication (twelve-hour sign-in frequency) and disallows persistent browser sessions. Applies a device filter so compliant or hybrid Entra joined devices can be handled according to organizational exception rules.",
+  "description": "Session tightening for standard users: enforces recurring reauthentication (thirty-day sign-in frequency) and disallows persistent browser sessions. Applies a device filter so Intune-compliant devices can be handled according to organizational exception rules.",
   "metadata": {
     "criticality": "Recommended",
     "v2Status": "Updated",
@@ -25,7 +25,7 @@
   "conditions": {
     "deviceFilter": {
       "mode": "exclude",
-      "rule": "device.trustType -eq \"ServerAD\" -or device.isCompliant -eq True"
+      "rule": "device.isCompliant -eq True"
     },
     "clientAppTypes": [
       "all"
@@ -33,8 +33,8 @@
   },
   "session": {
     "signInFrequency": {
-      "value": 12,
-      "type": "hours"
+      "value": 30,
+      "type": "days"
     },
     "persistentBrowser": "never"
   }

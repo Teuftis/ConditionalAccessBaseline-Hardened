@@ -1,7 +1,7 @@
 {
   "id": "CA905",
   "displayName": "CA905 - Guest - Block Non-Collaboration Apps",
-  "description": "Data-exfiltration control for guests collaborating in Microsoft Teams/Groups: confines Office 365 workloads while blocking ancillary SaaS (except explicitly excluded apps such as delegated admin workloads).",
+  "description": "Data-exfiltration control for guests collaborating in Microsoft Teams/Groups: confines Office 365 workloads while blocking ancillary SaaS (except explicitly excluded apps such as delegated admin workloads). Since the June 2026 enforcement change for All resources policies with resource exclusions, guests are also blocked on apps that request only baseline scopes (openid, profile, email, User.Read). Review report-only hits before turning it On.",
   "metadata": {
     "criticality": "Critical",
     "v2Status": "Retained",

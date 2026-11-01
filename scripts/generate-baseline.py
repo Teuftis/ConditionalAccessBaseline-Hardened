@@ -80,14 +80,15 @@ POLICIES: list[dict] = [
     },
     {
         "id": "CA102",
-        "displayName": "User Risk - Require MFA + Password Change",
-        "description": "Identity Protection remediation for elevated user risk (medium or high): requires MFA and a secure password change during the session. Depends on Entra ID P2 (user risk evaluations). Honors standard exclusions including guests and externals disabled for this persona.",
+        "displayName": "User Risk - Require Risk Remediation",
+        "description": "Identity Protection remediation for elevated user risk (medium or high) using the Require risk remediation grant: password users complete a secure password change after MFA, passwordless users have their sessions revoked and sign in again. Authentication strength (Multifactor authentication) and sign-in frequency every time are mandatory with this grant. Requires Entra ID P2. Guests and externals are excluded because risk remediation does not support them. Replaces the older MFA + password change grant, which left passwordless users without a remediation path.",
         "metadata": {"criticality": "Critical", "v2Status": "Updated", "persona": "All users", "j0eyvEquivalent": "CA201"},
         "include": {"users": "all"},
         "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"], "guestsAndExternals": True},
         "applications": {"include": "all"},
         "conditions": {"userRiskLevels": ["medium", "high"], "clientAppTypes": ["all"]},
-        "grant": {"operator": "AND", "builtInControls": ["mfa", "passwordChange"]},
+        "grant": {"operator": "AND", "builtInControls": ["riskRemediation"], "authenticationStrength": "mfa"},
+        "session": {"signInFrequency": {"everyTime": True}},
     },
     {
         "id": "CA103",
@@ -150,7 +151,7 @@ POLICIES: list[dict] = [
     {
         "id": "CA107",
         "displayName": "Session Controls",
-        "description": "Session tightening for standard users: enforces recurring reauthentication (twelve-hour sign-in frequency) and disallows persistent browser sessions. Applies a device filter so compliant or hybrid Entra joined devices can be handled according to organizational exception rules.",
+        "description": "Session tightening for standard users: enforces recurring reauthentication (thirty-day sign-in frequency) and disallows persistent browser sessions. Applies a device filter so Intune-compliant devices can be handled according to organizational exception rules.",
         "metadata": {"criticality": "Recommended", "v2Status": "Updated", "persona": "All users", "j0eyvEquivalent": "CA202 / CA206"},
         "include": {"users": "all"},
         "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"], "guestsAndExternals": True},
@@ -158,11 +159,11 @@ POLICIES: list[dict] = [
         "conditions": {
             "deviceFilter": {
                 "mode": "exclude",
-                "rule": "device.trustType -eq \"ServerAD\" -or device.isCompliant -eq True",
+                "rule": "device.isCompliant -eq True",
             },
             "clientAppTypes": ["all"],
         },
-        "session": {"signInFrequency": {"value": 12, "type": "hours"}, "persistentBrowser": "never"},
+        "session": {"signInFrequency": {"value": 30, "type": "days"}, "persistentBrowser": "never"},
     },
     {
         "id": "CA108",
@@ -222,12 +223,12 @@ POLICIES: list[dict] = [
     {
         "id": "CA113",
         "displayName": "Require Token Protection (Pilot)",
-        "description": "Pilot control binding primary refresh tokens more tightly on supported Windows workloads (token protection). Limits token replay when adversaries steal session material via phishing proxies. Applies only to the CA_TokenProtection_Pilot group\u2014expand deliberately after telemetry review.",
+        "description": "Pilot token protection: Exchange Online, SharePoint Online and Teams only accept device-bound sign-in session tokens from native apps, which limits token replay after session theft through phishing proxies. Covers Windows plus MDM-managed iOS/iPadOS 16+ and macOS 14+ (Microsoft Enterprise SSO plug-in or Platform SSO required). Apple's native Mail and Calendar apps are blocked once enforced. Browser is deliberately not targeted (MSAL.js apps such as Teams web would break). Applies only to the CA_TokenProtection_Pilot group; expand after reviewing sign-in log status codes.",
         "metadata": {"criticality": "Optional", "v2Status": "NEW", "persona": "All users"},
         "include": {"groups": ["CA_TokenProtection_Pilot"]},
         "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass"]},
         "applications": {"include": ["exchangeOnline", "sharePointOnline", "teams"]},
-        "conditions": {"platforms": {"include": ["windows"]}, "clientAppTypes": ["browser", "mobileAppsAndDesktopClients"]},
+        "conditions": {"platforms": {"include": ["windows", "iOS", "macOS"]}, "clientAppTypes": ["mobileAppsAndDesktopClients"]},
         "session": {"tokenProtectionEnforced": True},
     },
     {
@@ -293,11 +294,11 @@ POLICIES: list[dict] = [
     {
         "id": "CA202",
         "displayName": "Require App Protection (Mobile)",
-        "description": "Mobile application protection posture for Microsoft 365: requires Intune App Protection Policies on iOS and Android M365 workloads. Matches Microsoft\u2019s APP enforcement model (replaces fragile approved-client-app keyword matching).",
+        "description": "Mobile application protection posture: requires Intune App Protection Policies on iOS and Android for all cloud apps (not Office 365 only). Matches Microsoft's app protection grant (replaces the retired approved-client-app grant). Phone apps that cannot satisfy app protection fail.",
         "metadata": {"criticality": "Critical", "v2Status": "Updated", "persona": "All users", "j0eyvEquivalent": "CA005 / CA006"},
         "include": {"users": "all"},
         "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"], "guestsAndExternals": True},
-        "applications": {"include": ["office365"]},
+        "applications": {"include": "all"},
         "conditions": {"platforms": {"include": ["iOS", "android"]}, "clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "builtInControls": ["compliantApplication"]},
     },
@@ -315,13 +316,13 @@ POLICIES: list[dict] = [
     {
         "id": "CA301",
         "displayName": "Require Compliant Windows",
-        "description": "Corporate Windows laptops and desktops must be Entra hybrid joined or marked Intune-compliant before granting access to Microsoft 365 and related cloud apps.",
+        "description": "Corporate Windows laptops and desktops must be marked Intune-compliant before granting access to Microsoft 365 and related cloud apps.",
         "metadata": {"criticality": "Critical", "v2Status": "Updated", "persona": "All users", "j0eyvEquivalent": "CA205"},
         "include": {"users": "all"},
         "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"], "guestsAndExternals": True},
         "applications": {"include": "all"},
         "conditions": {"platforms": {"include": ["windows"]}, "clientAppTypes": ["all"]},
-        "grant": {"operator": "OR", "builtInControls": ["compliantDevice", "domainJoinedDevice"]},
+        "grant": {"operator": "OR", "builtInControls": ["compliantDevice"]},
     },
     {
         "id": "CA302",
@@ -346,7 +347,7 @@ POLICIES: list[dict] = [
             "clientAppTypes": ["browser"],
             "deviceFilter": {
                 "mode": "exclude",
-                "rule": "device.trustType -eq \"ServerAD\" -or device.isCompliant -eq True",
+                "rule": "device.isCompliant -eq True",
             },
         },
         "session": {"applicationEnforcedRestrictions": True},
@@ -354,7 +355,7 @@ POLICIES: list[dict] = [
     {
         "id": "CA304",
         "displayName": "Require Compliant Linux",
-        "description": "Closes the Linux User-Agent spoof gap left by the platform-scoped CA301/CA302/CA204 compliance gates. The CA platform condition is parsed from the (self-reported) User-Agent string; without CA304, an attacker holding stolen credentials can present User-Agent: Linux, satisfy CA101 MFA, and skip every device-compliance requirement (CA606 still covers admins). CA304 forces compliantDevice for any UA claiming Linux. No domainJoinedDevice grant: Entra hybrid join is Windows-only. Pre-requisite: Intune for Linux compliance policies on Ubuntu / RHEL desktops; if you do not run managed Linux endpoints, prefer dropping linux from CA105's exclude list to block the platform outright.",
+        "description": "Closes the Linux User-Agent spoof gap left by the platform-scoped CA301/CA302/CA204 compliance gates. The CA platform condition is parsed from the (self-reported) User-Agent string; without CA304, an attacker holding stolen credentials can present User-Agent: Linux, satisfy CA101 MFA, and skip every device-compliance requirement (CA606 still covers admins). CA304 forces compliantDevice for any UA claiming Linux. Pre-requisite: Intune for Linux compliance policies on Ubuntu / RHEL desktops; if you do not run managed Linux endpoints, prefer dropping linux from CA105's exclude list to block the platform outright.",
         "metadata": {"criticality": "Critical", "v2Status": "NEW", "persona": "All users"},
         "include": {"users": "all"},
         "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"], "guestsAndExternals": True},
@@ -377,7 +378,7 @@ POLICIES: list[dict] = [
     {
         "id": "CA602",
         "displayName": "Admin Session Controls",
-        "description": "Admin session containment: repeats the tighter session controls applied to privileged accounts\u2014maximum four-hour recurring authentication and disallow persistent browser sessions\u2014for every identity holding directory or workload admin roles included in Privileged Administrators.",
+        "description": "Admin session containment: repeats the tighter session controls applied to privileged accounts (maximum four-hour recurring authentication, no persistent browser sessions) for every identity holding directory or workload admin roles included in Privileged Administrators.",
         "metadata": {"criticality": "Critical", "v2Status": "Updated", "persona": "Admins", "j0eyvEquivalent": "CA102 / CA103"},
         "include": {"roles": "privilegedAdmins"},
         "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"]},
@@ -421,13 +422,13 @@ POLICIES: list[dict] = [
     {
         "id": "CA606",
         "displayName": "Admin Require Compliant or Joined Device",
-        "description": "Device trust bar for admins: privileged changes may only originate from Hybrid Entra Joined workstations or devices reporting compliant posture to Intune, preventing lateral movement from unmanaged kit.",
+        "description": "Device trust bar for admins: privileged changes may only originate from devices reporting compliant posture to Intune, preventing lateral movement from unmanaged kit.",
         "metadata": {"criticality": "Critical", "v2Status": "NEW", "persona": "Admins"},
         "include": {"roles": "privilegedAdmins"},
         "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_ServiceAccount"]},
         "applications": {"include": "all"},
         "conditions": {"clientAppTypes": ["all"]},
-        "grant": {"operator": "OR", "builtInControls": ["compliantDevice", "domainJoinedDevice"]},
+        "grant": {"operator": "OR", "builtInControls": ["compliantDevice"]},
     },
     # ----- Persona: Application (CA7xx) --------------------------------
     {
@@ -492,7 +493,7 @@ POLICIES: list[dict] = [
     {
         "id": "CA804",
         "displayName": "Service - Block Non-M365 Apps",
-        "description": "Least-privilege SaaS stance for robotic identities: confines service credentials to approved Microsoft 365 applications while denying access to tertiary SaaS and consumer OAuth clients.",
+        "description": "Least-privilege SaaS stance for robotic identities: confines service credentials to approved Microsoft 365 applications while denying access to tertiary SaaS and consumer OAuth clients. Since the June 2026 enforcement change for All resources policies with resource exclusions, the block also applies to apps that request only baseline scopes (openid, profile, email, User.Read), such as Azure CLI or Visual Studio Code sign-in. Review report-only hits before turning it On.",
         "metadata": {"criticality": "Recommended", "v2Status": "Retained", "persona": "Service"},
         "include": {"groups": ["CA_ServiceAccount"]},
         "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass"]},
@@ -548,7 +549,7 @@ POLICIES: list[dict] = [
     {
         "id": "CA905",
         "displayName": "Guest - Block Non-Collaboration Apps",
-        "description": "Data-exfiltration control for guests collaborating in Microsoft Teams/Groups: confines Office 365 workloads while blocking ancillary SaaS (except explicitly excluded apps such as delegated admin workloads).",
+        "description": "Data-exfiltration control for guests collaborating in Microsoft Teams/Groups: confines Office 365 workloads while blocking ancillary SaaS (except explicitly excluded apps such as delegated admin workloads). Since the June 2026 enforcement change for All resources policies with resource exclusions, guests are also blocked on apps that request only baseline scopes (openid, profile, email, User.Read). Review report-only hits before turning it On.",
         "metadata": {"criticality": "Critical", "v2Status": "Retained", "persona": "Guest", "j0eyvEquivalent": "CA401"},
         "include": {"users": "guestsAndExternals"},
         "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass", "CA_MSP_PartnerUsers"]},
@@ -571,7 +572,7 @@ POLICIES: list[dict] = [
     {
         "id": "CA907",
         "displayName": "Guest - Session Controls",
-        "description": "Session hygiene for collaborators: aligns guest browser sessions with the twelve-hour MFA refresh posture so stolen guest tokens degrade quickly\u2014mirroring CA107 protections for internals.",
+        "description": "Session hygiene for collaborators: twelve-hour sign-in frequency and no persistent browser sessions for guests, so stolen guest tokens degrade quickly. Deliberately stricter than CA107 (thirty days for internal users on non-compliant devices).",
         "metadata": {"criticality": "Recommended", "v2Status": "NEW", "persona": "Guest", "j0eyvEquivalent": "CA402 / CA403"},
         "include": {"users": "guestsAndExternals"},
         "exclude": {"groups": ["CA_ExcludedFromCA", "BG_BreakGlass"]},
@@ -579,17 +580,50 @@ POLICIES: list[dict] = [
         "conditions": {"clientAppTypes": ["all"]},
         "session": {"signInFrequency": {"value": 12, "type": "hours"}, "persistentBrowser": "never"},
     },
-    # ----- Persona: Agent (CAA01) ---------------------------------------
+    # ----- Persona: Agent (CAAxx) ---------------------------------------
+    # Agent policies need Microsoft Agent 365 (with Entra P1 / M365 E3) or Microsoft 365 E7;
+    # Graph returns error 1267 on unlicensed tenants. Groups cannot include or exclude agents:
+    # exclusions are individual agent identities / blueprints or custom security attributes,
+    # set per tenant in the Entra admin center.
     {
         "id": "CAA01",
         "displayName": "Agent - Block High Risk",
-        "description": "Workload identities (service principals using agent delegation) flagged high risk by Identity Protection lose access immediately across cloud apps targeted by the workload persona until risk clears.",
+        "description": "Agent identities flagged high risk by ID Protection lose access to all resources until the risk clears. To exempt a known false positive, exclude that agent identity or its blueprint in the Entra admin center (groups cannot exclude agents). Requires Agent 365 or Microsoft 365 E7.",
         "metadata": {"criticality": "Recommended", "v2Status": "NEW", "persona": "Agent", "j0eyvEquivalent": "CA501"},
         "include": {"agentIds": "all"},
-        "exclude": {"groups": ["CA_ExcludedFromCA", "CA_ExcludedAgents"]},
         "applications": {"include": "all"},
         "conditions": {"agentIdRiskLevels": ["high"], "clientAppTypes": ["all"]},
         "grant": {"operator": "OR", "builtInControls": ["block"]},
+    },
+    {
+        "id": "CAA02",
+        "displayName": "Agent - Block Unapproved Agent Identities",
+        "description": "Allow-list for agent identities: blocks token issuance to every agent identity that is not explicitly approved. Before turning it On, exclude approved agent identities or blueprints in the Entra admin center, or by a custom security attribute (for example AgentAttributes / AgentApprovalStatus). Groups cannot exclude agents. Does not apply to an agent's user account (see CAA03 / CAA04). Requires Agent 365 or Microsoft 365 E7. Deploys Off.",
+        "metadata": {"criticality": "Optional", "v2Status": "NEW", "persona": "Agent", "j0eyvEquivalent": "CA502"},
+        "include": {"agentIds": "all"},
+        "applications": {"include": "all"},
+        "conditions": {"clientAppTypes": ["all"]},
+        "grant": {"operator": "OR", "builtInControls": ["block"]},
+    },
+    {
+        "id": "CAA03",
+        "displayName": "Agent - Block Risky Agent Users",
+        "description": "Agent user accounts (agents that act as users, with their own mailbox or Teams presence) are blocked from all resources when ID Protection rates the agent medium or high risk. Policies that target all users do not include agent users, so CA1xx controls do not cover them. Agent user targeting is in preview. Requires Agent 365 or Microsoft 365 E7. Deploys Off.",
+        "metadata": {"criticality": "Optional", "v2Status": "NEW", "persona": "Agent", "j0eyvEquivalent": "CA504"},
+        "include": {"agentUsers": "all"},
+        "applications": {"include": "all"},
+        "conditions": {"agentIdRiskLevels": ["medium", "high"], "clientAppTypes": ["all"]},
+        "grant": {"operator": "OR", "builtInControls": ["block"]},
+    },
+    {
+        "id": "CAA04",
+        "displayName": "Agent - Require Compliant Device (Agent Users)",
+        "description": "Computer-using agents with their own user account must run on an Intune-compliant endpoint (today: Windows 365 Cloud PC for Agents). Scoped with the Agent execution environments condition to sessions initiated from endpoints, so cloud-hosted agents with no device are not evaluated and not blocked. Agent user targeting is in preview. Requires Agent 365 or Microsoft 365 E7. Deploys Off.",
+        "metadata": {"criticality": "Optional", "v2Status": "NEW", "persona": "Agent", "j0eyvEquivalent": "CA503"},
+        "include": {"agentUsers": "all"},
+        "applications": {"include": "all"},
+        "conditions": {"agentContexts": ["agentUserSessionsInitiatedFromEndpoints"], "clientAppTypes": ["all"]},
+        "grant": {"operator": "OR", "builtInControls": ["compliantDevice"]},
     },
 ]
 
@@ -702,16 +736,6 @@ GROUPS: list[dict] = [
         ),
         "mailNickname": "ca-tokenprotection-pilot",
         "tier": "pilot",
-    },
-    {
-        "displayName": "CA_ExcludedAgents",
-        "description": (
-            "Workload agent or service principal objects that must not be blocked by CAA01 when Identity Protection "
-            "flags them high risk (for example monitored automation with known false positives). Keep the group tiny "
-            "and review quarterly."
-        ),
-        "mailNickname": "ca-excludedagents",
-        "tier": "exception",
     },
     {
         "displayName": "CA_MSP_PartnerUsers",
@@ -1000,7 +1024,7 @@ def write_policy_inventory_html(policy_filenames: list[str]) -> None:
       <span class="logo" aria-hidden="true">CA</span>
       <div>
         <h1>Mirage CA policy catalog</h1>
-        <p class="subtitle">v2026 · {len(rows)} Conditional Access policies · Groups by persona · New deploys: mostly <strong>Report-only</strong>; including device registration MFA (<strong>CA112</strong>) in <strong>Report-only</strong>. <strong>CA111</strong>, <strong>CA202</strong>, <strong>CA204</strong>, <strong>CA302</strong>, <strong>CA303</strong>, <strong>CA603</strong>, <strong>CA606</strong>, <strong>CAA01</strong> default to <strong>Off</strong>; optional intent <code>deploymentState</code> for <strong>first POST only</strong> (never PATCH existing); turn <strong>On</strong> in Entra when ready</p>
+        <p class="subtitle">v2026 · {len(rows)} Conditional Access policies · Groups by persona · New deploys: mostly <strong>Report-only</strong>; including device registration MFA (<strong>CA112</strong>) in <strong>Report-only</strong>. <strong>CA111</strong>, <strong>CA202</strong>, <strong>CA204</strong>, <strong>CA302</strong>, <strong>CA303</strong>, <strong>CA603</strong>, <strong>CA606</strong>, <strong>CAA01</strong>, <strong>CAA02</strong>, <strong>CAA03</strong>, <strong>CAA04</strong> default to <strong>Off</strong>; optional intent <code>deploymentState</code> for <strong>first POST only</strong> (never PATCH existing); turn <strong>On</strong> in Entra when ready</p>
         <p class="catalog-nav">
           <a href="index.html">Deploy app</a>
           <span aria-hidden="true">·</span>
@@ -1012,7 +1036,7 @@ def write_policy_inventory_html(policy_filenames: list[str]) -> None:
     </div>
   </header>
   <main id="main-content" class="catalog-main">
-    <p class="catalog-lede">New policies deploy in <strong>Report-only</strong> (<code>enabledForReportingButNotEnforced</code>) except these default to <strong>Off</strong> (<code>disabled</code>): <strong>CA111</strong>, <strong>CA202</strong>, <strong>CA204</strong>, <strong>CA302</strong>, <strong>CA303</strong>, <strong>CA603</strong>, <strong>CA606</strong>, <strong>CAA01</strong> (<strong>CA112</strong> User actions defaults <strong>Report-only</strong> like the rest). Optional <code>deploymentState</code> / <code>deployState</code> in intent JSON picks Report-only vs Off <strong>only when the policy is first created</strong> (POST); existing tenant policies are never updated in place. This page is generated by <code>python scripts/generate-baseline.py</code>.</p>
+    <p class="catalog-lede">New policies deploy in <strong>Report-only</strong> (<code>enabledForReportingButNotEnforced</code>) except these default to <strong>Off</strong> (<code>disabled</code>): <strong>CA111</strong>, <strong>CA202</strong>, <strong>CA204</strong>, <strong>CA302</strong>, <strong>CA303</strong>, <strong>CA603</strong>, <strong>CA606</strong>, <strong>CAA01</strong>, <strong>CAA02</strong>, <strong>CAA03</strong>, <strong>CAA04</strong> (<strong>CA112</strong> User actions defaults <strong>Report-only</strong> like the rest). Optional <code>deploymentState</code> / <code>deployState</code> in intent JSON picks Report-only vs Off <strong>only when the policy is first created</strong> (POST); existing tenant policies are never updated in place. This page is generated by <code>python scripts/generate-baseline.py</code>.</p>
     {body_inner}
   </main>
   <footer class="catalog-footer">
