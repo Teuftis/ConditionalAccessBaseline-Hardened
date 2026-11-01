@@ -1,6 +1,6 @@
 # Mirage CA Baseline
 
-A Conditional Access baseline for Microsoft 365 plus a browser-based deployer. 45 policies covering users, admins, applications, service accounts, guests, and workload identities, with 11 supporting groups and 4 named locations.
+A Conditional Access baseline for Microsoft 365 plus a browser-based deployer. 48 policies covering users, admins, applications, service accounts, guests, and agents, with 10 supporting groups and 4 named locations.
 
 Deployer: https://teuftis.github.io/ConditionalAccessBaseline-Hardened/
 
@@ -16,7 +16,7 @@ Intent JSON under [`baseline/`](./baseline/) - policies, groups, and named locat
 
 ## What state policies deploy in
 
-Most land in **Report-only**. Eight specific policies deploy **disabled** because Report-only either doesn't apply to them cleanly or misrepresents what they'd do once enforced - those are `CA111`, `CA202`, `CA204`, `CA302`, `CA303`, `CA603`, `CA606`, `CAA01`. The list lives in `POLICY_IDS_DEPLOY_DISABLED_BY_DEFAULT` in [`docs/translate.js`](docs/translate.js) and `ALLOWED_DEPLOY_STATES` in [`docs/config.js`](docs/config.js) blocks the SPA from creating anything in the On state regardless of intent. You enable manually from the Entra admin center after reviewing telemetry.
+Most land in **Report-only**. Eleven specific policies deploy **disabled** because Report-only either doesn't apply to them cleanly or misrepresents what they'd do once enforced - those are `CA111`, `CA202`, `CA204`, `CA302`, `CA303`, `CA603`, `CA606`, `CAA01`, `CAA02`, `CAA03`, `CAA04`. The list lives in `POLICY_IDS_DEPLOY_DISABLED_BY_DEFAULT` in [`docs/translate.js`](docs/translate.js) and `ALLOWED_DEPLOY_STATES` in [`docs/config.js`](docs/config.js) blocks the SPA from creating anything in the On state regardless of intent. You enable manually from the Entra admin center after reviewing telemetry.
 
 If a policy with the same display name already exists in the tenant, deploy leaves it alone. There is no PATCH path. Same for groups and named locations: created if missing, never overwritten.
 
@@ -92,7 +92,7 @@ Auto-generated from [`baseline/policies/`](./baseline/policies/) via `python scr
 | ID | Policy | Persona | Criticality |
 | --- | --- | --- | --- |
 | CA101 | Require MFA | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
-| CA102 | User Risk - Require MFA + Password Change | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
+| CA102 | User Risk - Require Risk Remediation | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
 | CA103 | Sign-In Risk - Require MFA | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
 | CA103b | Block High Sign-In Risk | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
 | CA104 | Block Legacy Authentication | All users | ![Critical](https://img.shields.io/static/v1?label=&message=Critical&color=c62828&style=flat-square) |
@@ -136,6 +136,9 @@ Auto-generated from [`baseline/policies/`](./baseline/policies/) via `python scr
 | CA906 | Guest - Terms of Use | Guest | ![Optional](https://img.shields.io/static/v1?label=&message=Optional&color=757575&style=flat-square) |
 | CA907 | Guest - Session Controls | Guest | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
 | CAA01 | Agent - Block High Risk | Agent | ![Recommended](https://img.shields.io/static/v1?label=&message=Recommended&color=1565c0&style=flat-square) |
+| CAA02 | Agent - Block Unapproved Agent Identities | Agent | ![Optional](https://img.shields.io/static/v1?label=&message=Optional&color=757575&style=flat-square) |
+| CAA03 | Agent - Block Risky Agent Users | Agent | ![Optional](https://img.shields.io/static/v1?label=&message=Optional&color=757575&style=flat-square) |
+| CAA04 | Agent - Require Compliant Device (Agent Users) | Agent | ![Optional](https://img.shields.io/static/v1?label=&message=Optional&color=757575&style=flat-square) |
 <!-- policy-catalog:end -->
 
 ## Groups
@@ -161,8 +164,6 @@ Each group below has a JSON file under [`baseline/groups/`](./baseline/groups/).
   Rare allowance for CA108's block on device-code and authentication-transfer flows (for example controlled kiosk or DevOps scenarios). Add only fully trusted principals; every member is a phishing surface.
 - **CA_TokenProtection_Pilot** - Pilot - mailNickname `ca-tokenprotection-pilot`
   Users or devices included in the CA113 Windows token-protection pilot. Start with a small population, collect sign-in and help-desk telemetry, then expand membership as your estate supports the feature.
-- **CA_ExcludedAgents** - Exception - mailNickname `ca-excludedagents`
-  Workload agent or service principal objects that must not be blocked by CAA01 when Identity Protection flags them high risk (for example monitored automation with known false positives). Keep the group tiny and review quarterly.
 - **CA_MSP_PartnerUsers** - Exception - mailNickname `ca-msp-partnerusers`
   Delegated administrator or partner accounts that need access to Microsoft 365 admin experiences blocked for standard guests in CA905. Requires explicit lifecycle: remove access when the engagement ends.
 - **AUTOPILOT_DevicePrep** - Exception - mailNickname `autopilot-deviceprep`

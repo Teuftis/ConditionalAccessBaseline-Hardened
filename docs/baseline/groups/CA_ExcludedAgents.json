@@ -1,6 +1,0 @@
-{
-  "displayName": "CA_ExcludedAgents",
-  "description": "Workload agent or service principal objects that must not be blocked by CAA01 when Identity Protection flags them high risk (for example monitored automation with known false positives). Keep the group tiny and review quarterly.",
-  "mailNickname": "ca-excludedagents",
-  "tier": "exception"
-}

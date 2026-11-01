@@ -11,6 +11,22 @@
 
 ---
 
+## v2026.2.0 (draft)
+
+### Changes
+
+- **Hybrid join removed** (no hybrid-joined devices in the Mirage estate): CA301 and CA606 grant `compliantDevice` only; CA107 and CA303 device filter is `device.isCompliant -eq True`; CA304 wording updated.
+- **CA107** sign-in frequency 30 days for internal users on non-compliant devices (matches the live estate). **CA907** guest sessions stay at 12 hours; its description no longer claims to mirror CA107.
+- **CA202** app protection now targets **All resources** on iOS/Android (was Office 365 only).
+- **CA102** uses **Require risk remediation** (Microsoft's recommended user-risk control) with the Multifactor authentication strength and sign-in frequency every time, replacing MFA + password change. Display name is now `CA102 - User Risk - Require Risk Remediation`.
+- **CA113** token protection pilot covers Windows plus MDM-managed iOS/iPadOS and macOS; client apps limited to mobile apps and desktop clients (browser targeting breaks MSAL.js apps such as Teams web). Apple native Mail and Calendar are blocked when enforced.
+- **CA804 / CA905** descriptions note the June 2026 enforcement change: All resources policies with resource exclusions now also block apps that request only baseline scopes.
+- **Agents:** CAA01 no longer references the `CA_ExcludedAgents` group, which never applied (the deployer dropped it and groups cannot exclude agents); the group is removed from the baseline. New Optional policies, deployed Off and licence-gated (Agent 365 or Microsoft 365 E7): **CAA02** block unapproved agent identities, **CAA03** block medium/high-risk agent users, **CAA04** compliant device for agent users on endpoints (Agent execution environments condition).
+- **Deployer:** agent-user policies (`conditions.agents`, `agentContext`), multi-level `agentIdRiskLevels` sent as a flags string, sign-in frequency every time, and an existing tenant policy with the same baseline ID prefix now counts as existing so renamed policies are never duplicated.
+- Descriptions use ASCII punctuation (no em dashes).
+
+---
+
 ## v2026.1.0 (draft)
 
 ### Highlights

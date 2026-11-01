@@ -355,6 +355,18 @@ function resolveExistingTenantCAPolicy(intent, ctx) {
     policy = nk ? ctx.caPoliciesByNormalizedName?.get(nk) : null;
     if (policy) match = "normalized";
   }
+  // Baseline renames (e.g. CA102 grant change) keep the "{id} - " prefix: treat a tenant
+  // policy with the same baseline id as existing so a re-run never creates a duplicate.
+  if (!policy && typeof intent.id === "string" && intent.id && ctx.caPoliciesByNormalizedName) {
+    const idPrefix = `${intent.id.toLowerCase()} - `;
+    for (const [key, p] of ctx.caPoliciesByNormalizedName) {
+      if (key.startsWith(idPrefix)) {
+        policy = p;
+        match = "baselineId";
+        break;
+      }
+    }
+  }
 
   return policy ? { policy, match } : null;
 }
@@ -378,7 +390,7 @@ async function ensurePolicy(token, intent, ctx, dryRun) {
     const existing = hit.policy;
     logLine(
       `policy [${intent.displayName}] already exists (${dryRun ? "dry run - " : ""}` +
-        `${hit.match === "normalized" ? "matched tenant name '" + existing.displayName + "'; " : ""}` +
+        `${hit.match !== "exact" ? "matched tenant name '" + existing.displayName + "'; " : ""}` +
         `id=${existing.id}, tenant state=${existing.state}) - not modifying to avoid overwriting live settings.`,
       dryRun ? "warn" : "info",
     );

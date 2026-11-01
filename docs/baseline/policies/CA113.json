@@ -1,7 +1,7 @@
 {
   "id": "CA113",
   "displayName": "CA113 - Require Token Protection (Pilot)",
-  "description": "Pilot control binding primary refresh tokens more tightly on supported Windows workloads (token protection). Limits token replay when adversaries steal session material via phishing proxies. Applies only to the CA_TokenProtection_Pilot group—expand deliberately after telemetry review.",
+  "description": "Pilot token protection: Exchange Online, SharePoint Online and Teams only accept device-bound sign-in session tokens from native apps, which limits token replay after session theft through phishing proxies. Covers Windows plus MDM-managed iOS/iPadOS 16+ and macOS 14+ (Microsoft Enterprise SSO plug-in or Platform SSO required). Apple's native Mail and Calendar apps are blocked once enforced. Browser is deliberately not targeted (MSAL.js apps such as Teams web would break). Applies only to the CA_TokenProtection_Pilot group; expand after reviewing sign-in log status codes.",
   "metadata": {
     "criticality": "Optional",
     "v2Status": "NEW",
@@ -28,11 +28,12 @@
   "conditions": {
     "platforms": {
       "include": [
-        "windows"
+        "windows",
+        "iOS",
+        "macOS"
       ]
     },
     "clientAppTypes": [
-      "browser",
       "mobileAppsAndDesktopClients"
     ]
   },

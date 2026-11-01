@@ -29,7 +29,7 @@
     ],
     "deviceFilter": {
       "mode": "exclude",
-      "rule": "device.trustType -eq \"ServerAD\" -or device.isCompliant -eq True"
+      "rule": "device.isCompliant -eq True"
     }
   },
   "session": {
