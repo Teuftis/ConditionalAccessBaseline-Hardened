@@ -1,17 +1,10 @@
-# Mirage Conditional Access Baseline - release notes (template)
+# Mirage Conditional Access Baseline - release notes
 
-> **Git tags:** This repository had **no tags** at the time these notes were drafted. To use GitHub’s **Generate release notes** with a “previous tag,” create a baseline tag first, then tag each release.
-
-### Suggested tagging (for future automated notes)
-
-1. Tag the first baseline import on commit `8f7022c`, e.g. **`v2026.0.0`**  
-   `git tag v2026.0.0 8f7022c` then `git push origin v2026.0.0`
-2. Tag this release on **`main`** (e.g. current HEAD when you publish), e.g. **`v2026.1.0`**
-3. On **GitHub → Releases → Draft a new release**, set **Previous tag** to `v2026.0.0` and the **target** to `v2026.1.0`, then click **Generate release notes**
+Each release is a `vYYYY.N.P` tag on `main` with a matching GitHub release. The deploy site always serves the current `main`.
 
 ---
 
-## v2026.2.0 (draft)
+## v2026.2.0 (2026-11-01)
 
 ### Changes
 
@@ -24,10 +17,11 @@
 - **Agents:** CAA01 no longer references the `CA_ExcludedAgents` group, which never applied (the deployer dropped it and groups cannot exclude agents); the group is removed from the baseline. New Optional policies, deployed Off and licence-gated (Agent 365 or Microsoft 365 E7): **CAA02** block unapproved agent identities, **CAA03** block medium/high-risk agent users, **CAA04** compliant device for agent users on endpoints (Agent execution environments condition).
 - **Deployer:** agent-user policies (`conditions.agents`, `agentContext`), multi-level `agentIdRiskLevels` sent as a flags string, sign-in frequency every time, and an existing tenant policy with the same baseline ID prefix now counts as existing so renamed policies are never duplicated.
 - Descriptions use ASCII punctuation (no em dashes).
+- **Repository:** the generator now deletes stale group and named-location files (not only policies) and refreshes the `docs/baseline` mirror in place instead of deleting and recopying it; the Pages workflow redeploys on every push to `main`.
 
 ---
 
-## v2026.1.0 (draft)
+## v2026.1.0 (2026-05-06)
 
 ### Highlights
 
