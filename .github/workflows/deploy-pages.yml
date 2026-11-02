@@ -1,8 +1,9 @@
 # Publishes /docs to GitHub Pages (same URL pattern as branch-based Pages:
 # https://<owner>.github.io/<repo>/).
 #
-# One-time repo setup: Settings → Pages → Build and deployment → Source: GitHub Actions.
-# After that, every push to main redeploys the SPA.
+# One-time repo setup: Settings > Pages > Build and deployment > Source: GitHub Actions.
+# After that, every push to main (including a merged pull request) redeploys the SPA;
+# workflow_dispatch is only for a manual redeploy of the current main.
 
 name: Deploy GitHub Pages
 

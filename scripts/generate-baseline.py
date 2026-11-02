@@ -806,12 +806,21 @@ def _write_json(path: str, data) -> None:
         f.write("\n")
 
 
+def _prune_stale_json(directory: str, wanted: list[str]) -> None:
+    """Delete *.json files the generator no longer produces (renamed or retired objects)."""
+    keep = set(wanted)
+    for name in os.listdir(directory):
+        if name.endswith(".json") and name not in keep:
+            os.remove(os.path.join(directory, name))
+
+
 def write_groups() -> list[str]:
     written = []
     for g in GROUPS:
         path = os.path.join(OUT_GROUPS, g["displayName"] + ".json")
         _write_json(path, g)
         written.append(os.path.basename(path))
+    _prune_stale_json(OUT_GROUPS, written)
     return written
 
 
@@ -821,6 +830,7 @@ def write_named_locations() -> list[str]:
         path = os.path.join(OUT_NAMED_LOCATIONS, n["displayName"] + ".json")
         _write_json(path, n)
         written.append(os.path.basename(path))
+    _prune_stale_json(OUT_NAMED_LOCATIONS, written)
     return written
 
 
@@ -830,10 +840,7 @@ def write_policies() -> list[str]:
         path = os.path.join(OUT_POLICIES, p["id"] + ".json")
         _write_json(path, _policy_intent_for_disk(p))
         written.append(os.path.basename(path))
-    wanted = set(written)
-    for name in os.listdir(OUT_POLICIES):
-        if name.endswith(".json") and name not in wanted:
-            os.remove(os.path.join(OUT_POLICIES, name))
+    _prune_stale_json(OUT_POLICIES, written)
     return written
 
 
@@ -1200,10 +1207,33 @@ def write_index_html_policy_catalog_table(policy_filenames: list[str]) -> None:
     Path(index_path).write_text(new_text, encoding="utf-8", newline="\n")
 
 def sync_baseline_to_docs_site() -> None:
-    """Copy baseline/ to docs/baseline so GitHub Pages can serve manifest.json same-origin."""
-    if os.path.isdir(DOCS_BASELINE):
-        shutil.rmtree(DOCS_BASELINE)
-    shutil.copytree(OUT_BASELINE, DOCS_BASELINE)
+    """Mirror baseline/ into docs/baseline so GitHub Pages can serve manifest.json same-origin.
+
+    Copies changed files and deletes stale ones in place. Never removes the tree itself:
+    rmtree can fail part-way on Windows (WinError 5 on a directory) and leave the mirror empty.
+    """
+    src_root = Path(OUT_BASELINE)
+    dst_root = Path(DOCS_BASELINE)
+    wanted = set()
+    for src in src_root.rglob("*"):
+        if not src.is_file():
+            continue
+        rel = src.relative_to(src_root)
+        wanted.add(rel)
+        dst = dst_root / rel
+        if dst.is_file() and dst.read_bytes() == src.read_bytes():
+            continue
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(src, dst)
+    if dst_root.is_dir():
+        for dst in sorted(dst_root.rglob("*"), reverse=True):
+            if dst.is_file() and dst.relative_to(dst_root) not in wanted:
+                dst.unlink()
+            elif dst.is_dir() and not any(dst.iterdir()):
+                try:
+                    dst.rmdir()
+                except OSError:
+                    pass  # an empty leftover directory is harmless; git ignores it
 
 
 def main() -> int:
